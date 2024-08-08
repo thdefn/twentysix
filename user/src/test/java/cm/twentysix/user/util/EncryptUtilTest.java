@@ -1,25 +1,18 @@
 package cm.twentysix.user.util;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@SpringBootTest
+@SpringBootTest(properties = "encrypt.key=abcdefghijklmnopqrstuvwxyzabcdef")
 class EncryptUtilTest {
 
-    private EncryptUtil encryptUtil = new EncryptUtil("abcdefghijklmnopqrstuvwxyzabcdef");
-
-    EncryptUtilTest() throws Exception {
-    }
-
-    @BeforeEach
-    void init() {
-
-    }
+    @Autowired
+    private EncryptUtil encryptUtil;
 
     @Test
     @DisplayName("양방향 암호화 성공")

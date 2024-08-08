@@ -18,7 +18,7 @@ import static cm.twentysix.user.exception.Error.*;
 
 @RequiredArgsConstructor
 @Service
-public class AuthService {
+public class EmailAuthService {
     @Value("${server.url}")
     private String serverUrl;
     private final MailgunClient mailgunClient;
@@ -42,7 +42,7 @@ public class AuthService {
 
     private String getAuthLink(String email, String code) {
         StringBuilder sb = new StringBuilder(serverUrl);
-        sb.append("/auth/email/verify")
+        sb.append("/email-auths/verify")
                 .append("?email=").append(email)
                 .append("&code=").append(code);
         return sb.toString();

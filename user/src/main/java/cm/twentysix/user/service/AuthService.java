@@ -3,7 +3,7 @@ package cm.twentysix.user.service;
 import cm.twentysix.user.client.MailgunClient;
 import cm.twentysix.user.client.dto.SendMailForm;
 import cm.twentysix.user.constant.MailContent;
-import cm.twentysix.user.constant.Sender;
+import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-import static cm.twentysix.user.exception.Error.EMAIL_VERIFY_CODE_UNMATCHED;
-import static cm.twentysix.user.exception.Error.NOT_VALID_EMAIL;
+import static cm.twentysix.user.exception.Error.*;
 
 @RequiredArgsConstructor
 @Service
@@ -33,7 +32,7 @@ public class AuthService {
 
         emailAuthRepository.save(EmailAuth.of(form.email(), code));
 
-        mailgunClient.sendEmail(SendMailForm.of(Sender.AUTH, form.email(), MailContent.EMAIL_VERIFY.title, emailBody));
+        mailgunClient.sendEmail(SendMailForm.of(MailSender.AUTH, form.email(), MailContent.EMAIL_VERIFY.title, emailBody));
     }
 
     private String getEmailBody(String link) {
@@ -58,6 +57,8 @@ public class AuthService {
                 .orElseThrow(() -> new AuthException(NOT_VALID_EMAIL));
         if (!emailAuth.getCode().equals(code))
             throw new AuthException(EMAIL_VERIFY_CODE_UNMATCHED);
+        if (emailAuth.isVerified())
+            throw new AuthException(ALREADY_VERIFIED);
 
         emailAuth.verify();
         emailAuthRepository.save(emailAuth);

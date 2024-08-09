@@ -5,6 +5,7 @@ import cm.twentysix.user.client.dto.SendMailForm;
 import cm.twentysix.user.constant.MailContent;
 import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
+import cm.twentysix.user.controller.dto.SendAuthEmailResponse;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;
@@ -29,7 +30,7 @@ public class EmailAuthService {
     private final UserRepository userRepository;
     private final CipherManager cipherManager;
 
-    public void sendAuthEmail(SendAuthEmailForm form) {
+    public SendAuthEmailResponse sendAuthEmail(SendAuthEmailForm form) {
         String encryptedEmail = cipherManager.encrypt(form.email());
         if (userRepository.existsByEmail(encryptedEmail))
             throw new UserException(ALREADY_REGISTER_EMAIL);
@@ -38,9 +39,10 @@ public class EmailAuthService {
         String authenticationLink = getAuthLink(form.email(), code);
         String emailBody = getEmailBody(authenticationLink);
 
-        emailAuthRepository.save(EmailAuth.of(form.email(), code));
+        EmailAuth emailAuth = emailAuthRepository.save(EmailAuth.of(form.email(), code));
 
         mailgunClient.sendEmail(SendMailForm.of(MailSender.AUTH, form.email(), MailContent.EMAIL_VERIFY.title, emailBody));
+        return new SendAuthEmailResponse(emailAuth.getSessionId());
     }
 
     private String getEmailBody(String link) {

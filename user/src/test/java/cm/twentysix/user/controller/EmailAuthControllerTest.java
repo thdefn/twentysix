@@ -33,7 +33,7 @@ class EmailAuthControllerTest {
     @DisplayName("인증 메일 발송_성공")
     void sendAuthEmail_success() throws Exception {
         SendAuthEmailForm form = new SendAuthEmailForm("abcde@naver.com");
-
+        emailAuthService.sendAuthEmail(form);
         mockMvc.perform(post("/users/email-auths")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(form)
@@ -45,6 +45,7 @@ class EmailAuthControllerTest {
     @Test
     @DisplayName("메일 인증_성공")
     void verifyEmail_success() throws Exception {
+        emailAuthService.verifyEmail("abcde@naver.com", "veryverylonglongcode");
         mockMvc.perform(get("/users/email-auths/verify")
                         .contentType(MediaType.APPLICATION_JSON)
                         .queryParam("email", "abcde@naver.com")

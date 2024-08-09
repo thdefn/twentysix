@@ -7,8 +7,11 @@ import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
+import cm.twentysix.user.domain.repository.UserRepository;
 import cm.twentysix.user.exception.EmailAuthException;
 import cm.twentysix.user.exception.Error;
+import cm.twentysix.user.exception.UserException;
+import cm.twentysix.user.util.CipherManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,12 +37,16 @@ class EmailAuthServiceTest {
     private MailgunClient mailgunClient;
     @Mock
     private EmailAuthRedisRepository emailAuthRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private CipherManager cipherManager;
     @InjectMocks
     private EmailAuthService emailAuthService;
 
     @BeforeEach
     void init() {
-        ReflectionTestUtils.setField(emailAuthService, "key", "http://26cm.com");
+        ReflectionTestUtils.setField(emailAuthService, "serverUrl", "http://26cm.com");
     }
 
     @Test
@@ -47,6 +54,8 @@ class EmailAuthServiceTest {
     void sendAuthEmail_success() {
         //given
         SendAuthEmailForm form = new SendAuthEmailForm("abcde@gmail.com");
+        given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypted");
+        given(userRepository.existsByEmail(anyString())).willReturn(false);
         //when
         emailAuthService.sendAuthEmail(form);
         //then
@@ -63,6 +72,19 @@ class EmailAuthServiceTest {
         assertEquals(sentMail.getFrom(), MailSender.AUTH.getEmailFrom());
         assertEquals(sentMail.getTo(), form.email());
         assertEquals(sentMail.getSubject(), MailContent.EMAIL_VERIFY.title);
+    }
+
+    @Test
+    @DisplayName("인증 메일 발송 실패_ALREADY_REGISTER_EMAIL")
+    void sendAuthEmail_fail_ALREADY_REGISTER_EMAIL() {
+        //given
+        SendAuthEmailForm form = new SendAuthEmailForm("abcde@gmail.com");
+        given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypted");
+        given(userRepository.existsByEmail(anyString())).willReturn(true);
+        //when
+        UserException e = assertThrows(UserException.class, () -> emailAuthService.sendAuthEmail(form));
+        //then
+        assertEquals(e.getError(), Error.ALREADY_REGISTER_EMAIL);
     }
 
 

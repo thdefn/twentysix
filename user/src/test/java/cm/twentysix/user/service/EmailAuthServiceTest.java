@@ -7,7 +7,7 @@ import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
-import cm.twentysix.user.exception.AuthException;
+import cm.twentysix.user.exception.EmailAuthException;
 import cm.twentysix.user.exception.Error;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -95,7 +95,7 @@ class EmailAuthServiceTest {
         given(emailAuthRepository.findById(anyString()))
                 .willReturn(Optional.empty());
         //when
-        AuthException e = assertThrows(AuthException.class, () -> emailAuthService.verifyEmail(email, code));
+        EmailAuthException e = assertThrows(EmailAuthException.class, () -> emailAuthService.verifyEmail(email, code));
         //then
         assertEquals(e.getError(), Error.NOT_VALID_EMAIL);
     }
@@ -114,7 +114,7 @@ class EmailAuthServiceTest {
         given(emailAuthRepository.findById(anyString()))
                 .willReturn(Optional.of(emailAuth));
         //when
-        AuthException e = assertThrows(AuthException.class, () -> emailAuthService.verifyEmail(email, code));
+        EmailAuthException e = assertThrows(EmailAuthException.class, () -> emailAuthService.verifyEmail(email, code));
         //then
         assertEquals(e.getError(), Error.EMAIL_VERIFY_CODE_UNMATCHED);
     }
@@ -133,7 +133,7 @@ class EmailAuthServiceTest {
         given(emailAuthRepository.findById(anyString()))
                 .willReturn(Optional.of(emailAuth));
         //when
-        AuthException e = assertThrows(AuthException.class, () -> emailAuthService.verifyEmail(email, code));
+        EmailAuthException e = assertThrows(EmailAuthException.class, () -> emailAuthService.verifyEmail(email, code));
         //then
         assertEquals(e.getError(), Error.ALREADY_VERIFIED);
     }

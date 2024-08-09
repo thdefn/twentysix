@@ -9,20 +9,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @SpringBootTest(properties = "encrypt.key=abcdefghijklmnopqrstuvwxyzabcdef")
-class EncryptUtilTest {
+class CypherManagerTest {
 
     @Autowired
-    private EncryptUtil encryptUtil;
+    private CypherManager cypherManager;
 
     @Test
     @DisplayName("양방향 암호화 성공")
-    void twoWayEncrypt_success() throws Exception {
+    void twoWayEncrypt_success() {
         //given
         String plain = "김보영은 인간의 경험에 대해 장르를 바꾸는 시각을 제공한다.";
         //when
-        String cipher = encryptUtil.encrypt(plain);
+        String cipher = cypherManager.encrypt(plain);
         //then
-        String decrypted = encryptUtil.decrypt(cipher);
+        String decrypted = cypherManager.decrypt(cipher);
         assertNotEquals(plain, cipher);
         assertEquals(decrypted, plain);
     }

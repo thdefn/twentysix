@@ -7,7 +7,7 @@ import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
-import cm.twentysix.user.exception.AuthException;
+import cm.twentysix.user.exception.EmailAuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -54,11 +54,11 @@ public class EmailAuthService {
 
     public void verifyEmail(String email, String code) {
         EmailAuth emailAuth = emailAuthRepository.findById(email)
-                .orElseThrow(() -> new AuthException(NOT_VALID_EMAIL));
+                .orElseThrow(() -> new EmailAuthException(NOT_VALID_EMAIL));
         if (!emailAuth.getCode().equals(code))
-            throw new AuthException(EMAIL_VERIFY_CODE_UNMATCHED);
+            throw new EmailAuthException(EMAIL_VERIFY_CODE_UNMATCHED);
         if (emailAuth.isVerified())
-            throw new AuthException(ALREADY_VERIFIED);
+            throw new EmailAuthException(ALREADY_VERIFIED);
 
         emailAuth.verify();
         emailAuthRepository.save(emailAuth);

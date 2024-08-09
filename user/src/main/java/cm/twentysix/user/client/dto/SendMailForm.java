@@ -1,6 +1,6 @@
 package cm.twentysix.user.client.dto;
 
-import cm.twentysix.user.constant.Sender;
+import cm.twentysix.user.constant.MailSender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,9 +17,9 @@ public class SendMailForm {
     private String subject;
     private String text;
 
-    public static SendMailForm of(Sender sender, String to, String subject, String text) {
+    public static SendMailForm of(MailSender mailSender, String to, String subject, String text) {
         return SendMailForm.builder()
-                .from(sender.getEmailFrom())
+                .from(mailSender.getEmailFrom())
                 .to(to)
                 .subject(subject)
                 .text(text)

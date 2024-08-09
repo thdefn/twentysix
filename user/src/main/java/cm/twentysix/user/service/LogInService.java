@@ -2,9 +2,7 @@ package cm.twentysix.user.service;
 
 import cm.twentysix.user.controller.dto.LogInForm;
 import cm.twentysix.user.controller.dto.TokenResponse;
-import cm.twentysix.user.domain.model.RefreshToken;
 import cm.twentysix.user.domain.model.User;
-import cm.twentysix.user.domain.repository.RefreshTokenRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;
 import cm.twentysix.user.exception.UserException;
 import cm.twentysix.user.util.CipherManager;
@@ -23,7 +21,6 @@ public class LogInService {
     private final UserRepository userRepository;
     private final CipherManager cipherManager;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     public TokenResponse login(LogInForm form) {
         String encryptedEmail = cipherManager.encrypt(form.email());
@@ -33,9 +30,8 @@ public class LogInService {
             throw new UserException(WRONG_PASSWORD);
 
         String accessToken = jwtTokenManager.makeAccessToken(user.getId());
-        String refreshToken = jwtTokenManager.makeRefreshToken(user.getId());
+        String refreshToken = jwtTokenManager.makeRefreshTokenAndSave(user.getId());
 
-        refreshTokenRedisRepository.save(RefreshToken.of(refreshToken, user.getId()));
         return TokenResponse.of(accessToken, refreshToken);
     }
 }

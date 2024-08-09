@@ -16,6 +16,7 @@ public record TokenResponse(
                 .build();
     }
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getRefreshTokenCookie() {
         return CookieUtil.makeCookie("refreshToken", refreshToken);
     }

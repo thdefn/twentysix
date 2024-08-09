@@ -8,23 +8,20 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.util.Base64;
 
 @Component
-public class CypherManager {
+public class CipherManager {
 
     private final static String algorithm = "AES/CBC/PKCS5Padding";
     private final SecretKey secretKey;
     private final Cipher cipher;
     private final IvParameterSpec ivParameterSpec;
 
-    public CypherManager(@Value("${encrypt.key}") String key) throws Exception {
+    public CipherManager(@Value("${encrypt.key}") String key) throws Exception {
         secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
         cipher = Cipher.getInstance(algorithm);
-        byte[] initialVector = new byte[16];
-        new SecureRandom().nextBytes(initialVector);
-        ivParameterSpec = new IvParameterSpec(initialVector);
+        ivParameterSpec = new IvParameterSpec(key.substring(0, 16).getBytes(StandardCharsets.UTF_8));
     }
 
     public String encrypt(String plain) {

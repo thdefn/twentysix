@@ -1,10 +1,9 @@
 package cm.twentysix.user.domain.repository;
 
-import cm.twentysix.user.domain.model.User;
+import cm.twentysix.user.domain.model.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    boolean existsByEmail(String email);
+public interface AddressRepository extends JpaRepository<Address, Long> {
 }

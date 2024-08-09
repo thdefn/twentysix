@@ -7,7 +7,10 @@ import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
+import cm.twentysix.user.domain.repository.UserRepository;
 import cm.twentysix.user.exception.EmailAuthException;
+import cm.twentysix.user.exception.UserException;
+import cm.twentysix.user.util.CipherManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,9 +26,14 @@ public class EmailAuthService {
     private String serverUrl;
     private final MailgunClient mailgunClient;
     private final EmailAuthRedisRepository emailAuthRepository;
+    private final UserRepository userRepository;
+    private final CipherManager cipherManager;
 
     public void sendAuthEmail(SendAuthEmailForm form) {
-        // TODO: 해당 이메일이 이미 가입되었는지 체크
+        String encryptedEmail = cipherManager.encrypt(form.email());
+        if (userRepository.existsByEmail(encryptedEmail))
+            throw new UserException(ALREADY_REGISTER_EMAIL);
+
         String code = generateRandomCode();
         String authenticationLink = getAuthLink(form.email(), code);
         String emailBody = getEmailBody(authenticationLink);

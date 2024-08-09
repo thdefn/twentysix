@@ -12,15 +12,15 @@ import java.util.Optional;
 public class RedisClient {
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void setValues(String key, String data, Duration duration) {
+    public void setValue(String key, String data, Duration duration) {
         redisTemplate.opsForValue().set(key, data, duration);
     }
 
-    public Optional<String> getValues(String key) {
+    public Optional<String> getValue(String key) {
         return Optional.ofNullable(redisTemplate.opsForValue().get(key));
     }
 
-    public void deleteValues(String key) {
+    public void deleteValue(String key) {
         redisTemplate.delete(key);
     }
 

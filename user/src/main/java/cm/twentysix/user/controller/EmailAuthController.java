@@ -1,7 +1,10 @@
 package cm.twentysix.user.controller;
 
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
+import cm.twentysix.user.controller.dto.SendAuthEmailResponse;
 import cm.twentysix.user.service.EmailAuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +17,10 @@ public class EmailAuthController {
     private final EmailAuthService emailAuthService;
 
     @PostMapping
-    public ResponseEntity<Void> sendAuthEmail(@RequestBody @Valid SendAuthEmailForm form) {
-        emailAuthService.sendAuthEmail(form);
+    public ResponseEntity<Void> sendAuthEmail(@RequestBody @Valid SendAuthEmailForm form, HttpServletRequest request) {
+        SendAuthEmailResponse response = emailAuthService.sendAuthEmail(form);
+        HttpSession httpSession = request.getSession();
+        httpSession.setAttribute("SESSION_ID", response.sessionId());
         return ResponseEntity.ok().build();
     }
 

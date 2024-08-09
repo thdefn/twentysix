@@ -14,8 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static cm.twentysix.user.exception.Error.ALREADY_REGISTER_EMAIL;
-import static cm.twentysix.user.exception.Error.NOT_VERIFIED_EMAIL;
+import java.util.Optional;
+
+import static cm.twentysix.user.exception.Error.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,12 +28,16 @@ public class SignUpService {
     private final AddressService addressService;
 
     @Transactional
-    public void signUp(SignUpForm form) {
+    public void signUp(SignUpForm form, Optional<String> maybeSessionId) {
+        if (maybeSessionId.isEmpty())
+            throw new EmailAuthException(NOT_VALID_EMAIL);
         String encryptedEmail = cipherManager.encrypt(form.email());
         if (userRepository.existsByEmail(encryptedEmail))
             throw new UserException(ALREADY_REGISTER_EMAIL);
         emailAuthRepository.findById(form.email()).stream()
-                .filter(EmailAuth::isVerified).findFirst()
+                .filter(EmailAuth::isVerified)
+                .filter(emailAuth -> emailAuth.getSessionId().equals(maybeSessionId.get()))
+                .findFirst()
                 .orElseThrow(() -> new EmailAuthException(NOT_VERIFIED_EMAIL));
 
         String encryptedName = cipherManager.encrypt(form.name());

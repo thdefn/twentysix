@@ -61,11 +61,12 @@ class SignUpServiceTest {
         given(emailAuthRedisRepository.findById(anyString()))
                 .willReturn(Optional.of(EmailAuth.builder()
                         .email("abcde@gmail.com")
+                        .sessionId("anysessionId")
                         .code("longlongcode").isVerified(true).build()));
         given(passwordEncoder.encode(anyString())).willReturn("passwordEncoderEncrypt");
         given(userRepository.save(any())).willReturn(mockUser);
         //when
-        signUpService.signUp(form);
+        signUpService.signUp(form, Optional.of("anysessionId"));
         //then
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userCaptor.capture());
@@ -91,7 +92,7 @@ class SignUpServiceTest {
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypt");
         given(userRepository.existsByEmail(anyString())).willReturn(true);
         //when
-        UserException e = assertThrows(UserException.class, () -> signUpService.signUp(form));
+        UserException e = assertThrows(UserException.class, () -> signUpService.signUp(form, Optional.of("anysessionId")));
         //then
         assertEquals(Error.ALREADY_REGISTER_EMAIL, e.getError());
     }
@@ -106,9 +107,10 @@ class SignUpServiceTest {
         given(emailAuthRedisRepository.findById(anyString()))
                 .willReturn(Optional.of(EmailAuth.builder()
                         .email("abcde@gmail.com")
+                        .sessionId("anysessionId")
                         .code("longlongcode").isVerified(false).build()));
         //when
-        EmailAuthException e = assertThrows(EmailAuthException.class, () -> signUpService.signUp(form));
+        EmailAuthException e = assertThrows(EmailAuthException.class, () -> signUpService.signUp(form, Optional.of("anysessionId")));
         //then
         assertEquals(Error.NOT_VERIFIED_EMAIL, e.getError());
     }
@@ -123,7 +125,7 @@ class SignUpServiceTest {
         given(emailAuthRedisRepository.findById(anyString()))
                 .willReturn(Optional.empty());
         //when
-        EmailAuthException e = assertThrows(EmailAuthException.class, () -> signUpService.signUp(form));
+        EmailAuthException e = assertThrows(EmailAuthException.class, () -> signUpService.signUp(form, Optional.of("anysessionId")));
         //then
         assertEquals(Error.NOT_VERIFIED_EMAIL, e.getError());
     }

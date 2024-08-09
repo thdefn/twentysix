@@ -5,6 +5,7 @@ import cm.twentysix.user.client.dto.SendMailForm;
 import cm.twentysix.user.constant.MailContent;
 import cm.twentysix.user.constant.MailSender;
 import cm.twentysix.user.controller.dto.SendAuthEmailForm;
+import cm.twentysix.user.controller.dto.SendAuthEmailResponse;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;
@@ -56,8 +57,12 @@ class EmailAuthServiceTest {
         SendAuthEmailForm form = new SendAuthEmailForm("abcde@gmail.com");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypted");
         given(userRepository.existsByEmail(anyString())).willReturn(false);
+        given(emailAuthRepository.save(any())).willReturn(EmailAuth.builder()
+                .email("abcde@gmail.com")
+                .sessionId("sessionId")
+                .build());
         //when
-        emailAuthService.sendAuthEmail(form);
+        SendAuthEmailResponse response = emailAuthService.sendAuthEmail(form);
         //then
         ArgumentCaptor<EmailAuth> authCaptor = ArgumentCaptor.forClass(EmailAuth.class);
         verify(emailAuthRepository, times(1)).save(authCaptor.capture());
@@ -72,6 +77,8 @@ class EmailAuthServiceTest {
         assertEquals(sentMail.getFrom(), MailSender.AUTH.getEmailFrom());
         assertEquals(sentMail.getTo(), form.email());
         assertEquals(sentMail.getSubject(), MailContent.EMAIL_VERIFY.title);
+
+        assertEquals(response.sessionId(), "sessionId");
     }
 
     @Test

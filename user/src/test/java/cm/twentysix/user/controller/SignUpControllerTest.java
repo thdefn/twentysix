@@ -2,7 +2,6 @@ package cm.twentysix.user.controller;
 
 import cm.twentysix.user.controller.dto.SignUpForm;
 import cm.twentysix.user.service.SignUpService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,10 +35,10 @@ class SignUpControllerTest {
         //given
         SignUpForm form = new SignUpForm("abcde@gmail.com", "Qwerty!@1", "010-1111-1111", "송송", "서울 특별시 성북구 보문로 23", "11111");
         //when
-        signUpService.signUp(form);
         //then
         mockMvc.perform(post("/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .sessionAttr("SESSION_ID", "hihihiih")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
@@ -52,9 +51,9 @@ class SignUpControllerTest {
         //given
         SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234");
         //when
-        signUpService.signUp(form);
         //then
         mockMvc.perform(post("/users/signup")
+                        .sessionAttr("SESSION_ID", "hihihiih")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))

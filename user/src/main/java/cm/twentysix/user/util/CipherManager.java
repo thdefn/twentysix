@@ -13,7 +13,7 @@ import java.util.Base64;
 @Component
 public class CipherManager {
 
-    private final static String algorithm = "AES/CBC/PKCS5Padding";
+    private static final String algorithm = "AES/CBC/PKCS5Padding";
     private final SecretKey secretKey;
     private final Cipher cipher;
     private final IvParameterSpec ivParameterSpec;

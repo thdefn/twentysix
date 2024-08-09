@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "addresses", indexes = {@Index(name = "idx_user_id_is_default", columnList = "user_id, is_default desc")}
-)
+@Table(name = "addresses",
+        indexes = {@Index(name = "idx_user_id_is_default", columnList = "user_id, is_default desc")})
 public class Address extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

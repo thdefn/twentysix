@@ -2,19 +2,21 @@ package cm.twentysix.user.security;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.List;
+import java.util.Collection;
 
 @Getter
 public class UserPrincipal implements UserDetails {
     private final Long userId;
-    private final List<GrantedAuthority> authorities;
 
     public UserPrincipal(Long userId) {
         this.userId = userId;
-        authorities = List.of(new SimpleGrantedAuthority("USER"));
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
     @Override

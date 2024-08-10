@@ -27,20 +27,26 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, length = 8)
+    @Enumerated(value = EnumType.STRING)
+    private UserType type;
+
     @Builder
-    public User(String email, String phone, String name, String password) {
+    public User(String email, String phone, String name, String password, UserType type) {
         this.email = email;
         this.phone = phone;
         this.name = name;
         this.password = password;
+        this.type = type;
     }
 
-    public static User of(String email, String phone, String name, String password) {
+    public static User of(String email, String phone, String name, String password, UserType type) {
         return User.builder()
                 .phone(phone)
                 .email(email)
                 .name(name)
                 .password(password)
+                .type(type)
                 .build();
     }
 }

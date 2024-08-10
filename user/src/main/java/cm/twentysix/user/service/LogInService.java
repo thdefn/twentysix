@@ -29,8 +29,8 @@ public class LogInService {
         if (!passwordEncoder.matches(form.password(), user.getPassword()))
             throw new UserException(WRONG_PASSWORD);
 
-        String accessToken = jwtTokenManager.makeAccessToken(user.getId());
-        String refreshToken = jwtTokenManager.makeRefreshTokenAndSave(user.getId());
+        String accessToken = jwtTokenManager.makeAccessToken(user.getId(), user.getType().name());
+        String refreshToken = jwtTokenManager.makeRefreshTokenAndSave(user.getId(), user.getType().name());
 
         return TokenResponse.of(accessToken, refreshToken);
     }

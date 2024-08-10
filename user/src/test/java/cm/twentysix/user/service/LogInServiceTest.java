@@ -3,6 +3,7 @@ package cm.twentysix.user.service;
 import cm.twentysix.user.controller.dto.LogInForm;
 import cm.twentysix.user.controller.dto.TokenResponse;
 import cm.twentysix.user.domain.model.User;
+import cm.twentysix.user.domain.model.UserType;
 import cm.twentysix.user.domain.repository.UserRepository;
 import cm.twentysix.user.exception.Error;
 import cm.twentysix.user.exception.UserException;
@@ -44,6 +45,7 @@ class LogInServiceTest {
     @BeforeAll
     static void init() {
         given(mockUser.getId()).willReturn(1L);
+        given(mockUser.getType()).willReturn(UserType.CUSTOMER);
         given(mockUser.getPassword()).willReturn("password");
     }
 
@@ -56,8 +58,8 @@ class LogInServiceTest {
         given(userRepository.findByEmail(anyString()))
                 .willReturn(Optional.of(mockUser));
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
-        given(jwtTokenManager.makeAccessToken(anyLong())).willReturn("accesstoken");
-        given(jwtTokenManager.makeRefreshTokenAndSave(anyLong())).willReturn("refreshtoken");
+        given(jwtTokenManager.makeAccessToken(anyLong(), anyString())).willReturn("accesstoken");
+        given(jwtTokenManager.makeRefreshTokenAndSave(anyLong(), anyString())).willReturn("refreshtoken");
         //when
         TokenResponse tokenResponse = logInService.login(form);
         //then

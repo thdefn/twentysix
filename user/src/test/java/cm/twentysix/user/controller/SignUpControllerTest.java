@@ -33,7 +33,7 @@ class SignUpControllerTest {
     @DisplayName("회원가입_성공")
     void signUp_success() throws Exception {
         //given
-        SignUpForm form = new SignUpForm("abcde@gmail.com", "Qwerty!@1", "010-1111-1111", "송송", "서울 특별시 성북구 보문로 23", "11111");
+        SignUpForm form = new SignUpForm("abcde@gmail.com", "Qwerty!@1", "010-1111-1111", "송송", "서울 특별시 성북구 보문로 23", "11111", "SELLER");
         //when
         //then
         mockMvc.perform(post("/users/signup")
@@ -49,7 +49,7 @@ class SignUpControllerTest {
     @DisplayName("회원가입_실패_REQUEST_ARGUMENT_NOT_VALID")
     void signUp_fail() throws Exception {
         //given
-        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234");
+        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234", "USER");
         //when
         //then
         mockMvc.perform(post("/users/signup")

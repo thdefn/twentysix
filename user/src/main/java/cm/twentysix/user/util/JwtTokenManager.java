@@ -27,17 +27,19 @@ public class JwtTokenManager {
         this.redisClient = redisClient;
     }
 
-    public String makeAccessToken(Long userId) {
+    public String makeAccessToken(Long userId, String type) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("role", type)
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_ALLOWANCE_TIME))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String makeRefreshTokenAndSave(Long userId) {
+    public String makeRefreshTokenAndSave(Long userId, String type) {
         String refreshToken = Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("role", type)
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_ALLOWANCE_TIME))
                 .signWith(secretKey)
                 .compact();
@@ -84,5 +86,9 @@ public class JwtTokenManager {
 
     public Long parseId(String token) {
         return Long.parseLong(getClaims(token).getSubject());
+    }
+
+    public String parseType(String token) {
+        return getClaims(token).get("role", String.class);
     }
 }

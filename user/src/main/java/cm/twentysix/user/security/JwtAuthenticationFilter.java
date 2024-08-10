@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -60,8 +62,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwtTokenManager.deleteRefreshToken(refreshToken);
         Long userId = jwtTokenManager.parseId(refreshToken);
-        String newAccessToken = jwtTokenManager.makeAccessToken(userId);
-        String newRefreshToken = jwtTokenManager.makeRefreshTokenAndSave(userId);
+        String userRole = jwtTokenManager.parseType(refreshToken);
+        String newAccessToken = jwtTokenManager.makeAccessToken(userId, userRole);
+        String newRefreshToken = jwtTokenManager.makeRefreshTokenAndSave(userId, userRole);
 
         response.setHeader(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + newAccessToken);
         response.setHeader(HttpHeaders.SET_COOKIE, CookieUtil.makeCookie("refreshToken", newRefreshToken));
@@ -70,8 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public void authorize(String accessToken) {
         Long userId = jwtTokenManager.parseId(accessToken);
+        String userRole = jwtTokenManager.parseType(accessToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
         SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+                .setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, List.of(new SimpleGrantedAuthority(userRole))));
     }
 }

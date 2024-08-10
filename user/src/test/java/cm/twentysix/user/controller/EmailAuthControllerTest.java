@@ -20,6 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = EmailAuthController.class)
@@ -43,6 +44,20 @@ class EmailAuthControllerTest {
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("인증 메일 발송_실패")
+    void sendAuthEmail_fail() throws Exception {
+        SendAuthEmailForm form = new SendAuthEmailForm("abcdenaver.com");
+        given(emailAuthService.sendAuthEmail(any())).willReturn(new SendAuthEmailResponse("randomuid"));
+        mockMvc.perform(post("/users/email-auths")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(form)
+                                .getBytes(StandardCharsets.UTF_8)))
+                .andDo(print())
+                .andExpectAll(status().isBadRequest(),
+                        jsonPath("$.message.email").value("이메일 형식이 아닙니다."));
     }
 
     @Test

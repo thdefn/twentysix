@@ -62,7 +62,7 @@ public class JwtTokenManager {
         Long userId = parseId(refreshToken);
         Set<String> refreshTokens = redisClient.getSet(String.valueOf(userId));
         redisClient.deleteAllKey(refreshTokens);
-        redisClient.deleteKeyToSet(String.valueOf(userId));
+        redisClient.deleteKey(String.valueOf(userId));
     }
 
     public boolean validate(String token) {

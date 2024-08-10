@@ -5,7 +5,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -14,6 +16,10 @@ public class RedisClient {
 
     public void addValue(String key, String value, Duration duration) {
         redisTemplate.opsForValue().set(key, value, duration);
+    }
+
+    public void deleteAllKey(Collection<String> key) {
+        redisTemplate.delete(key);
     }
 
     public Optional<String> getValue(String key) {
@@ -36,4 +42,11 @@ public class RedisClient {
         redisTemplate.opsForSet().add(key, value);
     }
 
+    public Set<String> getSet(String key) {
+        return redisTemplate.opsForSet().members(key);
+    }
+
+    public void deleteKeyToSet(String key) {
+        redisTemplate.opsForSet().pop(key);
+    }
 }

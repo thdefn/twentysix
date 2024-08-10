@@ -13,6 +13,7 @@ public enum Error {
     NOT_VERIFIED_EMAIL(HttpStatus.UNAUTHORIZED, "인증받지 않은 이메일입니다."),
     NOT_VALID_REQUEST(HttpStatus.UNAUTHORIZED, "인증받지 않은 접근입니다."),
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "패스워드가 다릅니다."),
+    EMPTY_REFRESH_TOKEN(HttpStatus.FORBIDDEN, "리프레쉬 토큰이 없습니다."),
     REQUEST_ARGUMENT_NOT_VALID(HttpStatus.BAD_REQUEST, "요청 데이터의 형식을 확인해주세요.");
     public final HttpStatus httpStatus;
     public final String message;

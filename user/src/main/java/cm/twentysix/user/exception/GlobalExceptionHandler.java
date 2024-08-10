@@ -1,5 +1,7 @@
 package cm.twentysix.user.exception;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static cm.twentysix.user.exception.Error.REQUEST_ARGUMENT_NOT_VALID;
@@ -16,6 +19,13 @@ import static cm.twentysix.user.exception.Error.REQUEST_ARGUMENT_NOT_VALID;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleConstraintViolationException(ConstraintViolationException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), REQUEST_ARGUMENT_NOT_VALID, REQUEST_ARGUMENT_NOT_VALID.message);
+        return ResponseEntity.status(REQUEST_ARGUMENT_NOT_VALID.httpStatus)
+                .body(new ExceptionResponse<>(REQUEST_ARGUMENT_NOT_VALID.name(), e.getMessage()));
+    }
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ExceptionResponse<String>> handleUserException(UserException e) {

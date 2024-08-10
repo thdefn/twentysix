@@ -57,9 +57,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
 
         String refreshToken = maybeValidToken.get();
-        Long userId = jwtTokenManager.parseId(refreshToken);
 
-        jwtTokenManager.deleteRefreshToken(userId, refreshToken);
+        jwtTokenManager.deleteRefreshToken(refreshToken);
+        Long userId = jwtTokenManager.parseId(refreshToken);
         String newAccessToken = jwtTokenManager.makeAccessToken(userId);
         String newRefreshToken = jwtTokenManager.makeRefreshTokenAndSave(userId);
 

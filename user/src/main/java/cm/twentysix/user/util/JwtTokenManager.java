@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Set;
 
 @Service
 public class JwtTokenManager {
@@ -46,14 +47,22 @@ public class JwtTokenManager {
     }
 
     public boolean isValidRefreshToken(String refreshToken) {
-        if(!validate(refreshToken))
+        if (!validate(refreshToken))
             return false;
         return redisClient.isKeyExist(refreshToken);
     }
 
-    public void deleteRefreshToken(Long userId, String refreshToken) {
+    public void deleteRefreshToken(String refreshToken) {
+        Long userId = parseId(refreshToken);
         redisClient.deleteKey(refreshToken);
         redisClient.deleteValueToSet(String.valueOf(userId), refreshToken);
+    }
+
+    public void deleteUsersAllRefreshToken(String refreshToken) {
+        Long userId = parseId(refreshToken);
+        Set<String> refreshTokens = redisClient.getSet(String.valueOf(userId));
+        redisClient.deleteAllKey(refreshTokens);
+        redisClient.deleteKeyToSet(String.valueOf(userId));
     }
 
     public boolean validate(String token) {

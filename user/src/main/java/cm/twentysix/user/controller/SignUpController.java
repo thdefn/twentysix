@@ -19,7 +19,7 @@ public class SignUpController {
     @PostMapping
     public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpForm form, HttpServletRequest request) {
         String sessionId = (String) request.getSession().getAttribute("SESSION_ID");
-        signUpService.signUp(form, Optional.of(sessionId));
+        signUpService.signUp(form, Optional.ofNullable(sessionId));
         return ResponseEntity.ok().build();
     }
 

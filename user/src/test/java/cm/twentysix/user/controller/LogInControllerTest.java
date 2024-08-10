@@ -40,7 +40,6 @@ class LogInControllerTest {
         given(logInService.login(any()))
                 .willReturn(TokenResponse.of("any", "any"));
         //when
-        logInService.login(form);
         //then
         mockMvc.perform(post("/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -56,7 +55,6 @@ class LogInControllerTest {
         //given
         LogInForm form = new LogInForm("abcdegmail.com", "Qwerty!@");
         //when
-        logInService.login(form);
         //then
         mockMvc.perform(post("/users/login")
                         .contentType(MediaType.APPLICATION_JSON)

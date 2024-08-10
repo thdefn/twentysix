@@ -45,8 +45,4 @@ public class RedisClient {
     public Set<String> getSet(String key) {
         return redisTemplate.opsForSet().members(key);
     }
-
-    public void deleteKeyToSet(String key) {
-        redisTemplate.opsForSet().pop(key);
-    }
 }

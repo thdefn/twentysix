@@ -4,6 +4,7 @@ import cm.twentysix.user.controller.dto.AddressSaveForm;
 import cm.twentysix.user.controller.dto.SignUpForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.model.User;
+import cm.twentysix.user.domain.model.UserType;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;
 import cm.twentysix.user.exception.EmailAuthException;
@@ -43,7 +44,7 @@ public class SignUpService {
         String encryptedName = cipherManager.encrypt(form.name());
         String encryptedPhone = cipherManager.encrypt(form.phone());
         String encryptedPassword = passwordEncoder.encode(form.password());
-        User savedUser = userRepository.save(User.of(encryptedEmail, encryptedPhone, encryptedName, encryptedPassword));
+        User savedUser = userRepository.save(User.of(encryptedEmail, encryptedPhone, encryptedName, encryptedPassword, UserType.valueOf(form.userType())));
 
         addressService.saveAddress(savedUser.getId(), AddressSaveForm.from(form));
     }

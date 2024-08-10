@@ -1,5 +1,7 @@
 package cm.twentysix.user.controller.dto;
 
+import cm.twentysix.user.domain.model.UserType;
+import cm.twentysix.user.util.validator.EnumValue;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -15,6 +17,8 @@ public record SignUpForm(
         @Size(min = 8, max = 100, message = "주소의 형식이 아닙니다.")
         String address,
         @Pattern(regexp = "^[0-9]{5}$", message = "우편번호 형식이 아닙니다.")
-        String zipCode
+        String zipCode,
+        @EnumValue(enumClass = UserType.class, message = "회원가입 타입은 CUSTOMER 이거나 SELLER 입니다.")
+        String userType
 ) {
 }

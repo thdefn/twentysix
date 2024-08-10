@@ -55,7 +55,7 @@ class SignUpServiceTest {
     @DisplayName("회원가입 성공")
     void signUp_success() {
         //given
-        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234");
+        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234", "SELLER");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypt");
         given(userRepository.existsByEmail(anyString())).willReturn(false);
         given(emailAuthRedisRepository.findById(anyString()))
@@ -88,7 +88,7 @@ class SignUpServiceTest {
     @DisplayName("회원가입 실패_ALREADY_REGISTER_EMAIL")
     void signUp_fail_ALREADY_REGISTER_EMAIL() {
         //given
-        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234");
+        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234", "SELLER");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypt");
         given(userRepository.existsByEmail(anyString())).willReturn(true);
         //when
@@ -101,7 +101,7 @@ class SignUpServiceTest {
     @DisplayName("회원가입 실패_NOT_VERIFIED_EMAIL")
     void signUp_fail_NOT_VERIFIED_EMAIL() {
         //given
-        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234");
+        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234", "CUSTOMER");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypt");
         given(userRepository.existsByEmail(anyString())).willReturn(false);
         given(emailAuthRedisRepository.findById(anyString()))
@@ -119,7 +119,7 @@ class SignUpServiceTest {
     @DisplayName("회원가입 실패_NOT_VERIFIED_EMAIL_notFound")
     void signUp_fail_NOT_VERIFIED_EMAIL_notFound() {
         //given
-        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234");
+        SignUpForm form = new SignUpForm("abcdegmail.com", "Qwerty!@", "01011111111", "송", "서울 특별시", "1234", "CUSTOMER");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypt");
         given(userRepository.existsByEmail(anyString())).willReturn(false);
         given(emailAuthRedisRepository.findById(anyString()))

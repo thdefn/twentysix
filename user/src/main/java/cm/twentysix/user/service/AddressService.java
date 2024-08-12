@@ -1,6 +1,6 @@
 package cm.twentysix.user.service;
 
-import cm.twentysix.user.controller.dto.AddressSaveForm;
+import cm.twentysix.user.dto.AddressSaveForm;
 import cm.twentysix.user.domain.model.Address;
 import cm.twentysix.user.domain.repository.AddressRepository;
 import cm.twentysix.user.util.CipherManager;

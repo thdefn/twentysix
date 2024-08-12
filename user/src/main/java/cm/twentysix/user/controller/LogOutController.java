@@ -1,6 +1,6 @@
 package cm.twentysix.user.controller;
 
-import cm.twentysix.user.controller.dto.LogOutType;
+import cm.twentysix.user.dto.LogOutType;
 import cm.twentysix.user.service.LogOutService;
 import cm.twentysix.user.util.validator.EnumValue;
 import jakarta.servlet.http.Cookie;

@@ -1,4 +1,4 @@
-package cm.twentysix.user.controller.dto;
+package cm.twentysix.user.dto;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

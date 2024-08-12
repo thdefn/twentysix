@@ -1,4 +1,4 @@
-package cm.twentysix.user.controller.dto;
+package cm.twentysix.user.dto;
 
 import cm.twentysix.user.util.CookieUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;

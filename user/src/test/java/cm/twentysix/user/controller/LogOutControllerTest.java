@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,7 +28,6 @@ class LogOutControllerTest {
 
     @Test
     @DisplayName("로그아웃 성공")
-    @WithMockUser
     void logout_success() throws Exception {
         //given
         Cookie cookie = new Cookie("refreshToken", "anytoken");
@@ -45,7 +43,6 @@ class LogOutControllerTest {
 
     @Test
     @DisplayName("로그아웃 성공-타입을 명시하지 않을 경우")
-    @WithMockUser
     void logout_success_hasNoType() throws Exception {
         //given
         Cookie cookie = new Cookie("refreshToken", "anytoken");
@@ -60,7 +57,6 @@ class LogOutControllerTest {
 
     @Test
     @DisplayName("로그아웃 실패-허용하지 않는 타입인 경우")
-    @WithMockUser
     void logout_fail() throws Exception {
         //given
         Cookie cookie = new Cookie("refreshToken", "anytoken");

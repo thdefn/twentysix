@@ -1,4 +1,4 @@
-package cm.twentysix.user.client.dto;
+package cm.twentysix.user.dto;
 
 import cm.twentysix.user.constant.MailSender;
 import lombok.AllArgsConstructor;

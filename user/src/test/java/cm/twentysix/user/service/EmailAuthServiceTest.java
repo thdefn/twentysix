@@ -1,11 +1,11 @@
 package cm.twentysix.user.service;
 
 import cm.twentysix.user.client.MailgunClient;
-import cm.twentysix.user.client.dto.SendMailForm;
+import cm.twentysix.user.dto.SendMailForm;
 import cm.twentysix.user.constant.MailContent;
 import cm.twentysix.user.constant.MailSender;
-import cm.twentysix.user.controller.dto.SendAuthEmailForm;
-import cm.twentysix.user.controller.dto.SendAuthEmailResponse;
+import cm.twentysix.user.dto.SendAuthEmailForm;
+import cm.twentysix.user.dto.SendAuthEmailResponse;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;

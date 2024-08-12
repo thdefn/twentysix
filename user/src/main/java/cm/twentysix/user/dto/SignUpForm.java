@@ -1,4 +1,4 @@
-package cm.twentysix.user.controller.dto;
+package cm.twentysix.user.dto;
 
 import cm.twentysix.user.domain.model.UserType;
 import cm.twentysix.user.util.validator.EnumValue;

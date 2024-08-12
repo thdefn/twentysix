@@ -1,7 +1,7 @@
 package cm.twentysix.user.service;
 
-import cm.twentysix.user.controller.dto.LogInForm;
-import cm.twentysix.user.controller.dto.TokenResponse;
+import cm.twentysix.user.dto.LogInForm;
+import cm.twentysix.user.dto.TokenResponse;
 import cm.twentysix.user.domain.model.User;
 import cm.twentysix.user.domain.model.UserType;
 import cm.twentysix.user.domain.repository.UserRepository;

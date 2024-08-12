@@ -1,7 +1,7 @@
 package cm.twentysix.user.controller;
 
-import cm.twentysix.user.controller.dto.LogInForm;
-import cm.twentysix.user.controller.dto.TokenResponse;
+import cm.twentysix.user.dto.LogInForm;
+import cm.twentysix.user.dto.TokenResponse;
 import cm.twentysix.user.service.LogInService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

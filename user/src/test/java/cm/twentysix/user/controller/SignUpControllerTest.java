@@ -1,6 +1,6 @@
 package cm.twentysix.user.controller;
 
-import cm.twentysix.user.controller.dto.SignUpForm;
+import cm.twentysix.user.dto.SignUpForm;
 import cm.twentysix.user.service.SignUpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

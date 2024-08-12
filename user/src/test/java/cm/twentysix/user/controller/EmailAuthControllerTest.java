@@ -1,7 +1,7 @@
 package cm.twentysix.user.controller;
 
-import cm.twentysix.user.controller.dto.SendAuthEmailForm;
-import cm.twentysix.user.controller.dto.SendAuthEmailResponse;
+import cm.twentysix.user.dto.SendAuthEmailForm;
+import cm.twentysix.user.dto.SendAuthEmailResponse;
 import cm.twentysix.user.service.EmailAuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

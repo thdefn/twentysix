@@ -1,7 +1,7 @@
 package cm.twentysix.brand.service;
 
-import cm.twentysix.brand.controller.dto.CreateBrandForm;
-import cm.twentysix.brand.controller.dto.UpdateBrandForm;
+import cm.twentysix.brand.dto.CreateBrandForm;
+import cm.twentysix.brand.dto.UpdateBrandForm;
 import cm.twentysix.brand.domain.model.Brand;
 import cm.twentysix.brand.domain.repository.BrandRepository;
 import cm.twentysix.brand.exception.BrandException;

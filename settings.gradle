@@ -1,3 +1,4 @@
 rootProject.name = 'twentysix'
 include(":user")
 include(":brand")
+include(":gateway")

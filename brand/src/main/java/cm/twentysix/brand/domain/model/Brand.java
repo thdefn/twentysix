@@ -1,7 +1,7 @@
 package cm.twentysix.brand.domain.model;
 
-import cm.twentysix.brand.controller.dto.CreateBrandForm;
-import cm.twentysix.brand.controller.dto.UpdateBrandForm;
+import cm.twentysix.brand.dto.CreateBrandForm;
+import cm.twentysix.brand.dto.UpdateBrandForm;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

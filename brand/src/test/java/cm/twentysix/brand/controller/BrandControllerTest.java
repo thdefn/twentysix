@@ -1,8 +1,7 @@
 package cm.twentysix.brand.controller;
 
-import cm.twentysix.brand.config.WithMockUser;
-import cm.twentysix.brand.controller.dto.CreateBrandForm;
-import cm.twentysix.brand.controller.dto.UpdateBrandForm;
+import cm.twentysix.brand.dto.CreateBrandForm;
+import cm.twentysix.brand.dto.UpdateBrandForm;
 import cm.twentysix.brand.service.BrandService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +34,6 @@ class BrandControllerTest {
 
     @Test
     @DisplayName("브랜드 생성 성공")
-    @WithMockUser
     void createBrand_success() throws Exception {
         //given
         CreateBrandForm form = new CreateBrandForm("아이캔더", "주식회사 캔더스", "000-00-00000", 3500, 50000, "우리와 함께 사는 반려동물이 언제 어디서든 더욱 편안하고, 안전하며, 행복하게 살도록 하는 것을 목표로 하는 브랜드입니다");
@@ -47,14 +45,14 @@ class BrandControllerTest {
                                 objectMapper.writeValueAsString(form).getBytes(StandardCharsets.UTF_8)))
                         .file(new MockMultipartFile("image", "image.jpg",
                                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header("X-USER-ID", 1L))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("브랜드 생성 실패")
-    @WithMockUser
     void createBrand_fail() throws Exception {
         //given
         CreateBrandForm form = new CreateBrandForm("", "", "000200500000", -1, 10000001,
@@ -65,7 +63,8 @@ class BrandControllerTest {
                         .file(new MockMultipartFile("form", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(form).getBytes(StandardCharsets.UTF_8)))
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header("X-USER-ID", 1L))
                 .andDo(print())
                 .andExpectAll(status().isBadRequest(),
                         jsonPath("$.message.name").value("이름은 50글자 이내, 1글자 이상입니다."),
@@ -79,7 +78,6 @@ class BrandControllerTest {
 
     @Test
     @DisplayName("브랜드 수정 성공")
-    @WithMockUser
     void updateBrand_success() throws Exception {
         //given
         UpdateBrandForm form = new UpdateBrandForm("아이캔더", "주식회사 캔더스", 3500, 50000, "우리와 함께 사는 반려동물이 언제 어디서든 더욱 편안하고, 안전하며, 행복하게 살도록 하는 것을 목표로 하는 브랜드입니다");
@@ -91,14 +89,14 @@ class BrandControllerTest {
                                 objectMapper.writeValueAsString(form).getBytes(StandardCharsets.UTF_8)))
                         .file(new MockMultipartFile("image", "image.jpg",
                                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header("X-USER-ID", 1L))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("브랜드 수정 실패")
-    @WithMockUser
     void updateBrand_fail() throws Exception {
         //given
         UpdateBrandForm form = new UpdateBrandForm("", "", -1, 10000001,
@@ -109,7 +107,8 @@ class BrandControllerTest {
                         .file(new MockMultipartFile("form", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(form).getBytes(StandardCharsets.UTF_8)))
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header("X-USER-ID", 1L))
                 .andDo(print())
                 .andExpectAll(status().isBadRequest(),
                         jsonPath("$.message.name").value("이름은 50글자 이내, 1글자 이상입니다."),

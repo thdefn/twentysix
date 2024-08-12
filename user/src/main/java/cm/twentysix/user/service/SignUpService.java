@@ -1,7 +1,7 @@
 package cm.twentysix.user.service;
 
-import cm.twentysix.user.controller.dto.AddressSaveForm;
-import cm.twentysix.user.controller.dto.SignUpForm;
+import cm.twentysix.user.dto.AddressSaveForm;
+import cm.twentysix.user.dto.SignUpForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.model.User;
 import cm.twentysix.user.domain.model.UserType;

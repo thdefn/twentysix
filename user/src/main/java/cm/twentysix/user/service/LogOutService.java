@@ -1,6 +1,6 @@
 package cm.twentysix.user.service;
 
-import cm.twentysix.user.controller.dto.LogOutType;
+import cm.twentysix.user.dto.LogOutType;
 import cm.twentysix.user.exception.UserException;
 import cm.twentysix.user.util.JwtTokenManager;
 import lombok.RequiredArgsConstructor;

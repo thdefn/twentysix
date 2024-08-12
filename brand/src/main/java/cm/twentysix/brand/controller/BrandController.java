@@ -1,13 +1,11 @@
 package cm.twentysix.brand.controller;
 
-import cm.twentysix.brand.controller.dto.CreateBrandForm;
-import cm.twentysix.brand.controller.dto.UpdateBrandForm;
-import cm.twentysix.brand.security.UserPrincipal;
+import cm.twentysix.brand.dto.CreateBrandForm;
+import cm.twentysix.brand.dto.UpdateBrandForm;
 import cm.twentysix.brand.service.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,8 +18,8 @@ public class BrandController {
     @PostMapping
     public ResponseEntity<Void> createBrand(@Valid @RequestPart CreateBrandForm form,
                                             @Valid @RequestPart(required = false) MultipartFile image,
-                                            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        brandService.createBrand(userPrincipal.getUserId(), image, form);
+                                            @RequestHeader(value = "X-USER-ID") Long userId) {
+        brandService.createBrand(userId, image, form);
         return ResponseEntity.ok().build();
     }
 
@@ -29,8 +27,8 @@ public class BrandController {
     public ResponseEntity<Void> updateBrand(@PathVariable Long brandId,
                                             @Valid @RequestPart UpdateBrandForm form,
                                             @Valid @RequestPart(required = false) MultipartFile image,
-                                            @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        brandService.updateBrand(brandId, image, form, userPrincipal.getUserId());
+                                            @RequestHeader(value = "X-USER-ID") Long userId) {
+        brandService.updateBrand(brandId, image, form, userId);
         return ResponseEntity.ok().build();
     }
 }

@@ -54,7 +54,7 @@ public class Brand extends BaseTimeEntity {
         this.userId = userId;
     }
 
-    public static Brand from(CreateBrandForm form, Long userId) {
+    public static Brand from(CreateBrandForm form, Long userId, String thumbnail) {
         return Brand.builder()
                 .name(form.name())
                 .legalName(form.legalName())
@@ -62,15 +62,17 @@ public class Brand extends BaseTimeEntity {
                 .registrationNumber(form.registrationNumber())
                 .deliveryFee(form.deliveryFee())
                 .freeDeliveryInfimum(form.freeDeliveryInfimum())
+                .thumbnail(thumbnail)
                 .userId(userId)
                 .build();
     }
 
-    public void update(UpdateBrandForm form) {
+    public void update(UpdateBrandForm form, String thumbnail) {
         this.name = form.name();
         this.legalName = form.legalName();
         this.introduction = form.introduction();
         this.deliveryFee = form.deliveryFee();
         this.freeDeliveryInfimum = form.freeDeliveryInfimum();
+        this.thumbnail = thumbnail;
     }
 }

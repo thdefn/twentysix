@@ -1,5 +1,6 @@
 package cm.twentysix.brand.service;
 
+import cm.twentysix.brand.client.FileStorageClient;
 import cm.twentysix.brand.dto.CreateBrandForm;
 import cm.twentysix.brand.dto.UpdateBrandForm;
 import cm.twentysix.brand.domain.model.Brand;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.verify;
 class BrandServiceTest {
     @Mock
     private BrandRepository brandRepository;
+    @Mock
+    private FileStorageClient fileStorageClient;
     @InjectMocks
     private BrandService brandService;
 
@@ -40,7 +43,7 @@ class BrandServiceTest {
         MultipartFile file = new MockMultipartFile("abc.jpg", "abcd".getBytes());
         given(brandRepository.countByUserId(anyLong())).willReturn(4L);
         //when
-        brandService.createBrand(1L, file, form);
+        brandService.createBrand(1L, Optional.of(file), form);
         //then
         ArgumentCaptor<Brand> brandCaptor = ArgumentCaptor.forClass(Brand.class);
         verify(brandRepository, times(1)).save(brandCaptor.capture());
@@ -61,7 +64,7 @@ class BrandServiceTest {
         MultipartFile file = new MockMultipartFile("abc.jpg", "abcd".getBytes());
         given(brandRepository.countByUserId(anyLong())).willReturn(5L);
         //when
-        BrandException e = assertThrows(BrandException.class, () -> brandService.createBrand(1L, file, form));
+        BrandException e = assertThrows(BrandException.class, () -> brandService.createBrand(1L, Optional.of(file), form));
         //then
         assertEquals(e.getError(), Error.BRAND_LIMIT_OVER);
     }
@@ -75,7 +78,7 @@ class BrandServiceTest {
         Brand brand = new Brand("송송이", "주식회사 송송이", "", "돈대신사슴고기조요", "123-12-12345", 3000, 5000000, 1L);
         given(brandRepository.findById(anyLong())).willReturn(Optional.of(brand));
         //when
-        brandService.updateBrand(1L, file, form, 1L);
+        brandService.updateBrand(1L, Optional.of(file), form, 1L);
         //then
         assertEquals(brand.getName(), form.name());
         assertEquals(brand.getLegalName(), form.legalName());
@@ -92,7 +95,7 @@ class BrandServiceTest {
         MultipartFile file = new MockMultipartFile("abc.jpg", "abcd".getBytes());
         given(brandRepository.findById(anyLong())).willReturn(Optional.empty());
         //when
-        BrandException e = assertThrows(BrandException.class, () -> brandService.updateBrand(1L, file, form, 1L));
+        BrandException e = assertThrows(BrandException.class, () -> brandService.updateBrand(1L, Optional.of(file), form, 1L));
         //then
         assertEquals(e.getError(), Error.BRAND_NOT_FOUND);
     }
@@ -106,7 +109,7 @@ class BrandServiceTest {
         Brand brand = new Brand("송송이", "주식회사 송송이", "", "돈대신사슴고기조요", "123-12-12345", 3000, 5000000, 1234L);
         given(brandRepository.findById(anyLong())).willReturn(Optional.of(brand));
         //when
-        BrandException e = assertThrows(BrandException.class, () -> brandService.updateBrand(1L, file, form, 1L));
+        BrandException e = assertThrows(BrandException.class, () -> brandService.updateBrand(1L, Optional.of(file), form, 1L));
         //then
         assertEquals(e.getError(), Error.NOT_BRAND_OWNER);
     }

@@ -4,7 +4,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.metrics.Stat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

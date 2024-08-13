@@ -6,17 +6,19 @@ import cm.twentysix.product.client.FileStorageClient;
 import cm.twentysix.product.constant.FileDomain;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.BrandResponse;
 import cm.twentysix.product.dto.CreateProductForm;
+import cm.twentysix.product.dto.ProductItem;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
 import cm.twentysix.product.service.dto.CategoryInfoDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +66,11 @@ public class ProductService {
         fileStorageClient.deleteAll(product.getFilePaths());
         product.delete();
         productRepository.save(product);
+    }
+
+    public List<ProductItem> retrieveProduct(int page, int size, Long userId){
+        return productRepository.findByOrderByIdDesc(PageRequest.of(page, size))
+                .stream().map(product -> ProductItem.from(product, userId))
+                .collect(Collectors.toList());
     }
 }

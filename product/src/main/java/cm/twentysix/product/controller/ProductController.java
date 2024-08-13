@@ -1,6 +1,7 @@
 package cm.twentysix.product.controller;
 
 import cm.twentysix.product.dto.CreateProductForm;
+import cm.twentysix.product.dto.ProductItem;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +42,13 @@ public class ProductController {
                                               @RequestHeader(value = "X-USER-ID") Long userId) {
         productService.deleteProduct(productId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductItem>> retrieveProducts(@RequestParam(required = false, defaultValue = "0") int page,
+                                                             @RequestParam(required = false, defaultValue = "26") int size,
+                                                             @RequestHeader(value = "X-USER-ID", required = false) Long userId) {
+        return ResponseEntity.ok(productService.retrieveProduct(page, size, userId));
     }
 
 }

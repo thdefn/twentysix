@@ -1,7 +1,6 @@
 package cm.twentysix.product.domain.model;
 
 import cm.twentysix.BrandProto;
-import cm.twentysix.product.dto.BrandResponse;
 import lombok.Builder;
 import lombok.Getter;
 

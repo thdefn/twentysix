@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
@@ -32,13 +33,13 @@ public class Product extends BaseTimeDocument {
     private Integer deliveryFee;
     private LocalDateTime lastModifiedAt;
     private List<CategoryInfo> categories;
-    private List<Long> likes;
+    private Set<Long> likes;
     private ProductBrand productBrand;
     private Long userId;
     private boolean isDeleted;
 
     @Builder
-    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, String information, Integer amount, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, List<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo) {
+    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer amount, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo) {
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
         this.price = price;
@@ -64,7 +65,7 @@ public class Product extends BaseTimeDocument {
                 .productInfo(ProductInfo.from(form.manufacturer(), form.countryOfManufacture(), form.contact()))
                 .deliveryFee(form.deliveryFee())
                 .lastModifiedAt(LocalDateTime.now())
-                .likes(List.of())
+                .likes(Set.of())
                 .isDeleted(false)
                 .productBrand(ProductBrand.from(brand))
                 .categories(categoryInfoDtos.stream().map(CategoryInfo::from).collect(Collectors.toList()))
@@ -99,5 +100,21 @@ public class Product extends BaseTimeDocument {
         filePaths.add(thumbnailPath);
         filePaths.add(bodyImagePath);
         return filePaths;
+    }
+
+    public boolean isFreeDelivery() {
+        return deliveryFee == 0;
+    }
+
+    public int getDiscountedPrice() {
+        return price * (100 - discount) / 100;
+    }
+
+    public boolean isUserLike(Long userId) {
+        return likes.contains(userId);
+    }
+
+    public long countOfLikes(){
+        return likes.size();
     }
 }

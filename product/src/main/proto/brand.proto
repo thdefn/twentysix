@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "cm.twentysix";
+option java_outer_classname = "BrandProto";
+
+service BrandService {
+  rpc GetBrand (BrandRequest) returns (BrandResponse);
+}
+
+message BrandRequest {
+  int64 id = 1;
+}
+
+message BrandResponse {
+  int64 id = 1;
+  string name = 2;
+  int64 userId = 3;
+}

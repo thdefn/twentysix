@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/brands")
@@ -19,7 +21,7 @@ public class BrandController {
     public ResponseEntity<Void> createBrand(@Valid @RequestPart CreateBrandForm form,
                                             @Valid @RequestPart(required = false) MultipartFile image,
                                             @RequestHeader(value = "X-USER-ID") Long userId) {
-        brandService.createBrand(userId, image, form);
+        brandService.createBrand(userId, Optional.ofNullable(image), form);
         return ResponseEntity.ok().build();
     }
 
@@ -28,7 +30,7 @@ public class BrandController {
                                             @Valid @RequestPart UpdateBrandForm form,
                                             @Valid @RequestPart(required = false) MultipartFile image,
                                             @RequestHeader(value = "X-USER-ID") Long userId) {
-        brandService.updateBrand(brandId, image, form, userId);
+        brandService.updateBrand(brandId, Optional.ofNullable(image), form, userId);
         return ResponseEntity.ok().build();
     }
 }

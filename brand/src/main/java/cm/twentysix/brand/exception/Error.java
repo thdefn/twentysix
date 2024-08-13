@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum Error {
+    FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "파일 업로드에 실패했습니다."),
     NOT_BRAND_OWNER(HttpStatus.FORBIDDEN, "브랜드 관리자가 아닙니다."),
     BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 브랜드가 존재하지 않습니다."),
     BRAND_LIMIT_OVER(HttpStatus.BAD_REQUEST, "허용 가능한 브랜드 개수를 초과했습니다."),

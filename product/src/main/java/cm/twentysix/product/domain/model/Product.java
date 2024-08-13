@@ -27,7 +27,7 @@ public class Product extends BaseTimeDocument {
     private Integer price;
     private Integer discount;
     private String name;
-    private String information;
+    private ProductInfo productInfo;
     private Integer amount;
     private Integer deliveryFee;
     private LocalDateTime lastModifiedAt;
@@ -38,13 +38,13 @@ public class Product extends BaseTimeDocument {
     private boolean isDeleted;
 
     @Builder
-    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, String information, Integer amount, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, List<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted) {
+    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, String information, Integer amount, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, List<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo) {
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
         this.price = price;
         this.discount = discount;
         this.name = name;
-        this.information = information;
+        this.productInfo = productInfo;
         this.amount = amount;
         this.deliveryFee = deliveryFee;
         this.lastModifiedAt = lastModifiedAt;
@@ -61,7 +61,7 @@ public class Product extends BaseTimeDocument {
                 .amount(form.amount())
                 .name(form.name())
                 .discount(form.discount())
-                .information(form.information())
+                .productInfo(ProductInfo.from(form.manufacturer(), form.countryOfManufacture(), form.contact()))
                 .deliveryFee(form.deliveryFee())
                 .lastModifiedAt(LocalDateTime.now())
                 .likes(List.of())
@@ -78,7 +78,7 @@ public class Product extends BaseTimeDocument {
         this.price = form.price();
         this.discount = form.discount();
         this.name = form.name();
-        this.information = form.information();
+        this.productInfo = ProductInfo.from(form.manufacturer(), form.countryOfManufacture(), form.contact());
         this.amount = form.amount();
         this.deliveryFee = form.deliveryFee();
         this.lastModifiedAt = LocalDateTime.now();
@@ -90,7 +90,8 @@ public class Product extends BaseTimeDocument {
     }
 
     public void delete() {
-        this.isDeleted = true;
+        isDeleted = true;
+        lastModifiedAt = LocalDateTime.now();
     }
 
     public List<String> getFilePaths() {

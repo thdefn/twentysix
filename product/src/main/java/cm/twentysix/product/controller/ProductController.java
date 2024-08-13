@@ -17,8 +17,8 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Void> createProduct(@Valid @RequestPart CreateProductForm form,
-                                              @Valid @RequestPart(required = false) MultipartFile thumbnail,
-                                              @Valid @RequestPart MultipartFile descriptionImage,
+                                              @RequestPart MultipartFile thumbnail,
+                                              @RequestPart MultipartFile descriptionImage,
                                               @RequestHeader(value = "X-USER-ID") Long userId) {
         productService.createProduct(thumbnail, descriptionImage, form, userId);
         return ResponseEntity.ok().build();
@@ -27,8 +27,8 @@ public class ProductController {
     @PutMapping("/{productId}")
     public ResponseEntity<Void> updateProduct(@PathVariable String productId,
                                               @Valid @RequestPart UpdateProductForm form,
-                                              @Valid @RequestPart(required = false) MultipartFile thumbnail,
-                                              @Valid @RequestPart MultipartFile descriptionImage,
+                                              @RequestPart MultipartFile thumbnail,
+                                              @RequestPart MultipartFile descriptionImage,
                                               @RequestHeader(value = "X-USER-ID") Long userId) {
         productService.updateProduct(productId, thumbnail, descriptionImage, form, userId);
         return ResponseEntity.ok().build();

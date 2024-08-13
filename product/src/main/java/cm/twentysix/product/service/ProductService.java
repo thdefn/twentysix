@@ -4,6 +4,7 @@ import cm.twentysix.product.client.FileStorageClient;
 import cm.twentysix.product.constant.FileDomain;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
+import cm.twentysix.product.dto.BrandResponse;
 import cm.twentysix.product.dto.CreateProductForm;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.exception.Error;
@@ -27,10 +28,9 @@ public class ProductService {
         // TODO: request brand info
         // TODO: check user's authority about brand
 
-        fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);
-        productRepository.save(Product.of(form, null, userId, categoryInfoDtos, thumbnailPath, descriptionPath));
+        productRepository.save(Product.of(form, new BrandResponse(null, null, null), userId, categoryInfoDtos, thumbnailPath, descriptionPath));
     }
 
     public void updateProduct(String productId, MultipartFile thumbnail, MultipartFile descriptionImage, UpdateProductForm form, Long userId) {
@@ -38,13 +38,15 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUD));
         if (!product.getUserId().equals(userId))
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
+        if (product.isDeleted())
+            throw new ProductException(Error.ALREADY_DELETED_PRODUCT);
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
         // TODO: request brand info
         // TODO: check user's authority about brand
 
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);
-        product.update(form, null, userId, categoryInfoDtos, thumbnailPath, descriptionPath);
+        product.update(form, new BrandResponse(null, null, null), userId, categoryInfoDtos, thumbnailPath, descriptionPath);
         productRepository.save(product);
     }
 
@@ -54,6 +56,8 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUD));
         if (!product.getUserId().equals(userId))
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
+        if (product.isDeleted())
+            throw new ProductException(Error.ALREADY_DELETED_PRODUCT);
 
         fileStorageClient.deleteAll(product.getFilePaths());
         product.delete();

@@ -1,6 +1,6 @@
 package cm.twentysix.product.domain.model;
 
-import cm.twentysix.product.dto.BrandResponse;
+import cm.twentysix.BrandProto;
 import cm.twentysix.product.dto.CreateProductForm;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.service.dto.CategoryInfoDto;
@@ -55,7 +55,7 @@ public class Product extends BaseTimeDocument {
         this.isDeleted = isDeleted;
     }
 
-    public static Product of(CreateProductForm form, BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
+    public static Product of(CreateProductForm form, BrandProto.BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
         return Product.builder()
                 .price(form.price())
                 .amount(form.amount())
@@ -74,7 +74,7 @@ public class Product extends BaseTimeDocument {
                 .build();
     }
 
-    public void update(UpdateProductForm form, BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
+    public void update(UpdateProductForm form, BrandProto.BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
         this.price = form.price();
         this.discount = form.discount();
         this.name = form.name();

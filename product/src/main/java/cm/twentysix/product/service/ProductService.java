@@ -1,5 +1,7 @@
 package cm.twentysix.product.service;
 
+import cm.twentysix.BrandProto;
+import cm.twentysix.product.client.BrandGrpcClient;
 import cm.twentysix.product.client.FileStorageClient;
 import cm.twentysix.product.constant.FileDomain;
 import cm.twentysix.product.domain.model.Product;
@@ -22,38 +24,38 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
     private final FileStorageClient fileStorageClient;
+    private final BrandGrpcClient brandGrpcClient;
 
     public void createProduct(MultipartFile thumbnail, MultipartFile descriptionImage, CreateProductForm form, Long userId) {
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
-        // TODO: request brand info
-        // TODO: check user's authority about brand
-
+        BrandProto.BrandResponse response = brandGrpcClient.getBrandInfo(form.brandId());
+        if(!userId.equals(response.getUserId()))
+            throw new ProductException(Error.NOT_PRODUCT_ADMIN);
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);
-        productRepository.save(Product.of(form, new BrandResponse(null, null, null), userId, categoryInfoDtos, thumbnailPath, descriptionPath));
+        productRepository.save(Product.of(form, response, userId, categoryInfoDtos, thumbnailPath, descriptionPath));
     }
 
     public void updateProduct(String productId, MultipartFile thumbnail, MultipartFile descriptionImage, UpdateProductForm form, Long userId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUD));
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
         if (!product.getUserId().equals(userId))
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
         if (product.isDeleted())
             throw new ProductException(Error.ALREADY_DELETED_PRODUCT);
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
-        // TODO: request brand info
-        // TODO: check user's authority about brand
+        BrandProto.BrandResponse response = brandGrpcClient.getBrandInfo(product.getProductBrand().getId());
 
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);
-        product.update(form, new BrandResponse(null, null, null), userId, categoryInfoDtos, thumbnailPath, descriptionPath);
+        product.update(form, response, userId, categoryInfoDtos, thumbnailPath, descriptionPath);
         productRepository.save(product);
     }
 
 
     public void deleteProduct(String productId, Long userId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUD));
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
         if (!product.getUserId().equals(userId))
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
         if (product.isDeleted())

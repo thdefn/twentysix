@@ -5,6 +5,7 @@ option java_outer_classname = "BrandProto";
 
 service BrandService {
   rpc GetBrand (BrandRequest) returns (BrandResponse);
+  rpc GetBrandDetail (BrandDetailRequest) returns (BrandDetailResponse);
 }
 
 message BrandRequest {
@@ -15,4 +16,18 @@ message BrandResponse {
   int64 id = 1;
   string name = 2;
   int64 userId = 3;
+}
+
+message BrandDetailRequest {
+  int64 id = 1;
+}
+
+message BrandDetailResponse {
+  int64 id = 1;
+  string name = 2;
+  string legalName = 3;
+  string thumbnail = 4;
+  string introduction = 5;
+  string registrationNumber = 6;
+  int32 freeDeliveryInfimum = 7;
 }

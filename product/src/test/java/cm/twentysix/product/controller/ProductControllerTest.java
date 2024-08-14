@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -141,6 +140,34 @@ class ProductControllerTest {
         mockMvc.perform(delete("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-USER-ID", 1L))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void retrieveProduct_success() throws Exception {
+        //given
+        //when
+        //then
+        mockMvc.perform(get("/products/{productId}", "abcdefkghaskfldlm123")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-USER-ID", 1L)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void retrieveProducts_success() throws Exception {
+        //given
+        //when
+        //then
+        mockMvc.perform(get("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("page", "0")
+                        .param("size", "26")
+                        .header("X-USER-ID", 1L)
+                )
                 .andDo(print())
                 .andExpect(status().isOk());
     }

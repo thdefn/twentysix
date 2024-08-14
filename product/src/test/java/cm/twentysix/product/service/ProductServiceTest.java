@@ -9,6 +9,8 @@ import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.model.ProductInfo;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.CreateProductForm;
+import cm.twentysix.product.dto.ProductItem;
+import cm.twentysix.product.dto.ProductResponse;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
@@ -25,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -114,7 +117,7 @@ class ProductServiceTest {
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .amount(1000)
                 .deliveryFee(3000)
-                .likes(List.of(1L))
+                .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
                 .categories(List.of(CategoryInfo.builder()
                         .id("12efad").name("강아지 용품")
@@ -179,7 +182,7 @@ class ProductServiceTest {
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .amount(1000)
                 .deliveryFee(3000)
-                .likes(List.of(1L))
+                .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
                 .categories(List.of(CategoryInfo.builder()
                         .id("12efad").name("강아지 용품")
@@ -212,7 +215,7 @@ class ProductServiceTest {
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .amount(1000)
                 .deliveryFee(3000)
-                .likes(List.of(1L))
+                .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
                 .categories(List.of(CategoryInfo.builder()
                         .id("12efad").name("강아지 용품")
@@ -242,7 +245,7 @@ class ProductServiceTest {
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .amount(1000)
                 .deliveryFee(3000)
-                .likes(List.of(1L))
+                .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
                 .categories(List.of(CategoryInfo.builder()
                         .id("12efad").name("강아지 용품")
@@ -280,7 +283,7 @@ class ProductServiceTest {
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .amount(1000)
                 .deliveryFee(3000)
-                .likes(List.of(1L))
+                .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
                 .categories(List.of(CategoryInfo.builder()
                         .id("12efad").name("강아지 용품")
@@ -310,7 +313,7 @@ class ProductServiceTest {
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .amount(1000)
                 .deliveryFee(3000)
-                .likes(List.of(1L))
+                .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
                 .categories(List.of(CategoryInfo.builder()
                         .id("12efad").name("강아지 용품")
@@ -326,6 +329,188 @@ class ProductServiceTest {
         ProductException e = assertThrows(ProductException.class, () -> productService.deleteProduct("123456yl", 1L));
         //then
         assertEquals(e.getError(), Error.ALREADY_DELETED_PRODUCT);
+    }
+
+    @Test
+    void retrieveProducts_success() {
+        //given
+        List<Product> products = List.of(
+                Product.builder()
+                        .thumbnailPath("12345.jpg")
+                        .bodyImagePath("78910.jpg")
+                        .price(10000)
+                        .discount(10)
+                        .name("강아지 눈물 티슈")
+                        .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
+                        .amount(1000)
+                        .deliveryFee(0)
+                        .likes(Set.of(2L))
+                        .lastModifiedAt(LocalDateTime.MIN)
+                        .categories(List.of(CategoryInfo.builder()
+                                .id("12efad").name("강아지 용품")
+                                .build(), CategoryInfo.builder()
+                                .id("12345").name("리빙")
+                                .build()))
+                        .productBrand(ProductBrand.builder()
+                                .name("돌봄")
+                                .id(1L)
+                                .build()
+                        ).userId(1L).isDeleted(true).build(),
+                Product.builder()
+                        .thumbnailPath("12345.jpg")
+                        .bodyImagePath("78910.jpg")
+                        .price(5000)
+                        .discount(0)
+                        .name("스탠리 텀블러")
+                        .productInfo(ProductInfo.from("스탠리", "중국", "02-000-0000"))
+                        .amount(100)
+                        .deliveryFee(2500)
+                        .likes(Set.of(1L, 2L, 3L, 4L))
+                        .lastModifiedAt(LocalDateTime.MIN)
+                        .categories(List.of(CategoryInfo.builder()
+                                        .id("abcdee").name("주방 용품")
+                                        .build(),
+                                CategoryInfo.builder()
+                                        .id("12345").name("리빙")
+                                        .build()))
+                        .productBrand(ProductBrand.builder()
+                                .name("스탠리")
+                                .id(3L)
+                                .build()
+                        ).userId(4L).isDeleted(true).build()
+        );
+        given(productRepository.findByIsDeletedFalseOrderByIdDesc(any())).willReturn(products);
+        //when
+        List<ProductItem> productItems = productService.retrieveProducts(0, 10, Optional.of(1L));
+        //then
+        assertEquals(productItems.size(), 2);
+        assertEquals(productItems.getFirst().thumbnailPath(), "12345.jpg");
+        assertEquals(productItems.getFirst().name(), "강아지 눈물 티슈");
+        assertEquals(productItems.getFirst().price(), products.getFirst().getDiscountedPrice());
+        assertEquals(productItems.getFirst().countOfLikes(), 1);
+        assertEquals(productItems.getFirst().discount(), 10);
+        assertTrue(productItems.getFirst().isFreeDelivery());
+        assertFalse(productItems.getFirst().isUserLike());
+        assertEquals(productItems.getFirst().brandName(), "돌봄");
+        assertEquals(productItems.getFirst().brandId(), 1L);
+
+        assertEquals(productItems.getLast().thumbnailPath(), "12345.jpg");
+        assertEquals(productItems.getLast().name(), "스탠리 텀블러");
+        assertEquals(productItems.getLast().price(), products.getLast().getDiscountedPrice());
+        assertEquals(productItems.getLast().countOfLikes(), 4);
+        assertEquals(productItems.getLast().discount(), 0);
+        assertFalse(productItems.getLast().isFreeDelivery());
+        assertTrue(productItems.getLast().isUserLike());
+        assertEquals(productItems.getLast().brandName(), "스탠리");
+        assertEquals(productItems.getLast().brandId(), 3L);
+    }
+
+    @Test
+    void retrieveProducts_success_WhenUserIdIsNull() {
+        //given
+        List<Product> products = List.of(
+                Product.builder()
+                        .thumbnailPath("12345.jpg")
+                        .bodyImagePath("78910.jpg")
+                        .price(10000)
+                        .discount(10)
+                        .name("강아지 눈물 티슈")
+                        .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
+                        .amount(1000)
+                        .deliveryFee(0)
+                        .likes(Set.of(2L))
+                        .lastModifiedAt(LocalDateTime.MIN)
+                        .categories(List.of(CategoryInfo.builder()
+                                .id("12efad").name("강아지 용품")
+                                .build(), CategoryInfo.builder()
+                                .id("12345").name("리빙")
+                                .build()))
+                        .productBrand(ProductBrand.builder()
+                                .name("돌봄")
+                                .id(1L)
+                                .build()
+                        ).userId(1L).isDeleted(true).build()
+        );
+        given(productRepository.findByIsDeletedFalseOrderByIdDesc(any())).willReturn(products);
+        //when
+        List<ProductItem> productItems = productService.retrieveProducts(0, 10, Optional.empty());
+        //then
+        assertEquals(productItems.getFirst().thumbnailPath(), "12345.jpg");
+        assertEquals(productItems.getFirst().name(), "강아지 눈물 티슈");
+        assertEquals(productItems.getFirst().price(), products.getFirst().getDiscountedPrice());
+        assertEquals(productItems.getFirst().countOfLikes(), 1);
+        assertEquals(productItems.getFirst().discount(), 10);
+        assertTrue(productItems.getFirst().isFreeDelivery());
+        assertFalse(productItems.getFirst().isUserLike());
+        assertEquals(productItems.getFirst().brandName(), "돌봄");
+        assertEquals(productItems.getFirst().brandId(), 1L);
+    }
+
+    @Test
+    void retrieveProduct_success() {
+        //given
+        Product product = Product.builder()
+                .thumbnailPath("12345.jpg")
+                .bodyImagePath("78910.jpg")
+                .price(10000)
+                .discount(10)
+                .name("강아지 눈물 티슈")
+                .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
+                .amount(1000)
+                .deliveryFee(0)
+                .likes(Set.of(1L))
+                .lastModifiedAt(LocalDateTime.MIN)
+                .categories(List.of(CategoryInfo.builder()
+                        .id("12efad").name("강아지 용품")
+                        .build(), CategoryInfo.builder()
+                        .id("12345").name("리빙")
+                        .build()))
+                .productBrand(ProductBrand.builder()
+                        .name("돌봄")
+                        .id(1L)
+                        .build()
+                ).userId(1L).isDeleted(true).build();
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.of(product));
+        given(brandGrpcClient.getBrandDetail(anyLong())).willReturn(
+                BrandProto.BrandDetailResponse.newBuilder()
+                        .setId(1L)
+                        .setName("돌봄")
+                        .setLegalName("(주) 돌봄")
+                        .setIntroduction("강아지가 행복한 세상을 만듭니다.")
+                        .setFreeDeliveryInfimum(30000)
+                        .setRegistrationNumber("000-00-00000")
+                        .setThumbnail("101112.jpg")
+                        .build());
+        //when
+        ProductResponse response = productService.retrieveProduct("1234567675", Optional.of(1L));
+        //then
+        assertEquals(response.thumbnailPath(), "12345.jpg");
+        assertEquals(response.name(), "강아지 눈물 티슈");
+        assertEquals(response.price(), 10000);
+        assertEquals(response.discount(), 10);
+        assertEquals(response.discountedPrice(), product.getDiscountedPrice());
+        assertEquals(response.deliveryFee(), 0);
+        assertTrue(response.isFreeDelivery());
+        assertTrue(response.isUserLike());
+        assertEquals(response.info().contact(), "010-1111-1234");
+        assertEquals(response.info().countryOfManufacture(), "중국");
+        assertEquals(response.info().manufacturer(), "돌봄");
+        assertEquals(response.brand().brandId(), 1L);
+        assertEquals(response.brand().legalName(), "(주) 돌봄");
+        assertEquals(response.brand().introduction(), "강아지가 행복한 세상을 만듭니다.");
+        assertEquals(response.brand().freeDeliveryInfimum(), 30000);
+        assertEquals(response.brand().registrationNumber(), "000-00-00000");
+        assertEquals(response.brand().thumbnail(), "101112.jpg");
+    }
+
+    @Test
+    void retrieveProduct_fail_PRODUCT_NOT_FOUND() {
+        //given
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.empty());
+        //when
+        ProductException e = assertThrows(ProductException.class, () -> productService.retrieveProduct("123456yl", Optional.of(1L)));
+        //then
+        assertEquals(e.getError(), Error.PRODUCT_NOT_FOUND);
     }
 
 

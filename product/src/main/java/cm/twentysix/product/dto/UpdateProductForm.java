@@ -21,7 +21,7 @@ public record UpdateProductForm(
         Integer price,
         @Min(value = 0, message = "재고는 0개 이상입니다.")
         @Max(value = 1000, message = "재고는 1000개 이하입니다.")
-        Integer amount,
+        Integer quantity,
         @Min(value = 0, message = "할인율은 0 퍼센트 이상입니다.")
         @Max(value = 100, message = "할인율은 100 퍼센트 이하입니다.")
         Integer discount,

@@ -6,10 +6,7 @@ import cm.twentysix.product.client.FileStorageClient;
 import cm.twentysix.product.constant.FileDomain;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.CreateProductForm;
-import cm.twentysix.product.dto.ProductItem;
-import cm.twentysix.product.dto.ProductResponse;
-import cm.twentysix.product.dto.UpdateProductForm;
+import cm.twentysix.product.dto.*;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
 import cm.twentysix.product.service.dto.CategoryInfoDto;
@@ -18,7 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 

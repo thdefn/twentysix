@@ -7,9 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findByIsDeletedFalseOrderByIdDesc(Pageable pageable);
     Optional<Product> findByIdAndIsDeletedFalse(String productId);
+    List<Product> findByIdInAndIsDeletedFalse(Set<String> productIds);
 }

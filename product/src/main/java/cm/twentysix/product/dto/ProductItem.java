@@ -3,6 +3,8 @@ package cm.twentysix.product.dto;
 import cm.twentysix.product.domain.model.Product;
 import lombok.Builder;
 
+import java.util.Optional;
+
 @Builder
 public record ProductItem(
         String id,
@@ -17,7 +19,7 @@ public record ProductItem(
         Long brandId
 
 ) {
-    public static ProductItem from(Product product, Long userId) {
+    public static ProductItem from(Product product, Optional<Long> optionalUserId) {
         return ProductItem.builder()
                 .id(product.getId())
                 .thumbnailPath(product.getThumbnailPath())
@@ -30,7 +32,7 @@ public record ProductItem(
                 .brandName(product.getProductBrand().getName())
                 .brandId(product.getProductBrand().getId())
                 .countOfLikes(product.countOfLikes())
-                .isUserLike(product.isUserLike(userId))
+                .isUserLike(product.isUserLike(optionalUserId.orElse(Long.MIN_VALUE)))
                 .build();
     }
 

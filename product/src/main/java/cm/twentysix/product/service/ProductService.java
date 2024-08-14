@@ -8,6 +8,7 @@ import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.CreateProductForm;
 import cm.twentysix.product.dto.ProductItem;
+import cm.twentysix.product.dto.ProductResponse;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,10 +33,12 @@ public class ProductService {
     public void createProduct(MultipartFile thumbnail, MultipartFile descriptionImage, CreateProductForm form, Long userId) {
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
         BrandProto.BrandResponse response = brandGrpcClient.getBrandInfo(form.brandId());
-        if(!userId.equals(response.getUserId()))
+        if (!userId.equals(response.getUserId()))
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
+
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);
+
         productRepository.save(Product.of(form, response, userId, categoryInfoDtos, thumbnailPath, descriptionPath));
     }
 
@@ -45,11 +49,13 @@ public class ProductService {
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
         if (product.isDeleted())
             throw new ProductException(Error.ALREADY_DELETED_PRODUCT);
+
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
         BrandProto.BrandResponse response = brandGrpcClient.getBrandInfo(product.getProductBrand().getId());
 
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);
+
         product.update(form, response, userId, categoryInfoDtos, thumbnailPath, descriptionPath);
         productRepository.save(product);
     }
@@ -68,9 +74,19 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    public List<ProductItem> retrieveProduct(int page, int size, Long userId){
-        return productRepository.findByOrderByIdDesc(PageRequest.of(page, size))
-                .stream().map(product -> ProductItem.from(product, userId))
+    public List<ProductItem> retrieveProducts(int page, int size, Optional<Long> optionalUserId) {
+        return productRepository.findByIsDeletedFalseOrderByIdDesc(PageRequest.of(page, size))
+                .stream().map(product -> ProductItem.from(product, optionalUserId))
                 .collect(Collectors.toList());
     }
+
+    public ProductResponse retrieveProduct(String productId, Optional<Long> optionalUserId) {
+        Product product = productRepository.findByIdAndIsDeletedFalse(productId)
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
+
+        BrandProto.BrandDetailResponse response = brandGrpcClient.getBrandDetail(product.getProductBrand().getId());
+        return ProductResponse.of(product, response, optionalUserId);
+    }
+
+
 }

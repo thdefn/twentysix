@@ -15,4 +15,11 @@ public class BrandGrpcClient {
                 .setId(brandId).build();
         return brandServiceBlockingStub.getBrand(request);
     }
+
+    public BrandProto.BrandDetailResponse getBrandDetail(Long brandId) {
+        BrandProto.BrandDetailRequest request = BrandProto.BrandDetailRequest.newBuilder()
+                .setId(brandId).build();
+        return brandServiceBlockingStub.getBrandDetail(request);
+    }
+
 }

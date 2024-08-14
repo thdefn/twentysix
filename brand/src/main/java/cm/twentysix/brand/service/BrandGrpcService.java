@@ -41,6 +41,32 @@ public class BrandGrpcService extends BrandServiceGrpc.BrandServiceImplBase {
                     Status.INTERNAL.withDescription(HttpStatus.INTERNAL_SERVER_ERROR.name()).asRuntimeException()
             );
         }
+    }
 
+    @Override
+    public void getBrandDetail(BrandProto.BrandDetailRequest request, StreamObserver<BrandProto.BrandDetailResponse> responseObserver) {
+        try {
+            Brand brand = brandRepository.findById(request.getId())
+                    .orElseThrow(() -> new BrandException(Error.BRAND_NOT_FOUND));
+            BrandProto.BrandDetailResponse response = BrandProto.BrandDetailResponse.newBuilder()
+                    .setId(brand.getId())
+                    .setName(brand.getName())
+                    .setLegalName(brand.getLegalName())
+                    .setThumbnail(brand.getThumbnail())
+                    .setIntroduction(brand.getIntroduction())
+                    .setRegistrationNumber(brand.getRegistrationNumber())
+                    .setFreeDeliveryInfimum(brand.getFreeDeliveryInfimum())
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (BrandException e) {
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL.withDescription(HttpStatus.INTERNAL_SERVER_ERROR.name()).asRuntimeException()
+            );
+        }
     }
 }

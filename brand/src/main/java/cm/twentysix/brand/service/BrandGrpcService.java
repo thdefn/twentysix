@@ -2,7 +2,6 @@ package cm.twentysix.brand.service;
 
 import cm.twentysix.BrandProto;
 import cm.twentysix.BrandServiceGrpc;
-
 import cm.twentysix.brand.domain.model.Brand;
 import cm.twentysix.brand.domain.repository.BrandRepository;
 import cm.twentysix.brand.exception.BrandException;
@@ -13,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 
 @GrpcService
 @Slf4j
@@ -58,6 +59,30 @@ public class BrandGrpcService extends BrandServiceGrpc.BrandServiceImplBase {
                     .setFreeDeliveryInfimum(brand.getFreeDeliveryInfimum())
                     .build();
             responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (BrandException e) {
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL.withDescription(HttpStatus.INTERNAL_SERVER_ERROR.name()).asRuntimeException()
+            );
+        }
+    }
+
+    @Override
+    public void getBrandInfos(BrandProto.BrandInfosRequest request, StreamObserver<BrandProto.BrandInfosResponse> responseObserver) {
+        try {
+            List<BrandProto.BrandInfo> brandInfos = brandRepository.findByIdIn(request.getIdsList())
+                    .stream().map(brand -> BrandProto.BrandInfo.newBuilder()
+                            .setId(brand.getId())
+                            .setName(brand.getName())
+                            .setFreeDeliveryInfimum(brand.getFreeDeliveryInfimum())
+                            .setDeliveryFee(brand.getDeliveryFee())
+                            .build()
+                    ).toList();
+            responseObserver.onNext(BrandProto.BrandInfosResponse.newBuilder().addAllBrands(brandInfos).build());
             responseObserver.onCompleted();
         } catch (BrandException e) {
             responseObserver.onError(

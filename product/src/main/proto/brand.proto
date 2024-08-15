@@ -16,6 +16,7 @@ message BrandResponse {
   int64 id = 1;
   string name = 2;
   int64 userId = 3;
+  int32 freeDeliveryInfimum = 4;
 }
 
 message BrandDetailRequest {

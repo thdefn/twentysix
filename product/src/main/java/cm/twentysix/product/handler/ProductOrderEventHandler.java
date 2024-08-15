@@ -14,8 +14,8 @@ import static cm.twentysix.product.exception.Error.MESSAGE_SEND_ERROR;
 public class ProductOrderEventHandler {
     private final MessageSender messageSender;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
-    public void handleProductStockRollBackEvent(OrderReplyEvent event) {
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleProductStockCommitEvent(OrderReplyEvent event) {
         if (!messageSender.sendOrderReplyEvent(event))
             throw new RuntimeException(MESSAGE_SEND_ERROR.message);
     }

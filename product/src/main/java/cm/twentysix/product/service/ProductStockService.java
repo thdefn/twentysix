@@ -37,7 +37,6 @@ public class ProductStockService {
         for (Product p : products) {
             int requiredQuantity = orderedProductQuantity.get(p.getId());
             if (requiredQuantity <= p.getQuantity()) {
-                System.out.println(true);
                 orderItems.put(p.getId(), ProductOrderItem.from(p, requiredQuantity));
                 p.minusQuantity(requiredQuantity);
             }

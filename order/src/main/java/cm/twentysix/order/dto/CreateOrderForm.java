@@ -1,14 +1,17 @@
 package cm.twentysix.order.dto;
 
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.util.List;
 
 public record CreateOrderForm(
-        @NotEmpty(message = "상품은 비어있을 수 없습니다..")
+        @NotEmpty(message = "상품은 비어있을 수 없습니다.")
+        @Valid
         List<ProductItem> products,
-        boolean isNewAddress,
+        boolean shouldSaveNewAddress,
+        @Valid
         @NotNull(message = "수신지는 비어있을 수 없습니다.")
         Receiver receiver
 ) {

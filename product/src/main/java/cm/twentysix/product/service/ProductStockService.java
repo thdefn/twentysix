@@ -4,7 +4,6 @@ import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.OrderReplyEvent;
 import cm.twentysix.product.dto.ProductOrderItem;
-import cm.twentysix.product.messaging.MessageSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import java.util.Map;
 public class ProductStockService {
     private final ProductRepository productRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final MessageSender messageSender;
 
     @Transactional
     public void checkProductStock(Map<String, Integer> orderedProductQuantity, String orderId) {
@@ -39,6 +37,7 @@ public class ProductStockService {
         for (Product p : products) {
             int requiredQuantity = orderedProductQuantity.get(p.getId());
             if (requiredQuantity <= p.getQuantity()) {
+                System.out.println(true);
                 orderItems.put(p.getId(), ProductOrderItem.from(p, requiredQuantity));
                 p.minusQuantity(requiredQuantity);
             }

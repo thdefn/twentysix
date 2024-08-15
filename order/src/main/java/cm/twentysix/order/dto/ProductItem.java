@@ -1,9 +1,11 @@
 package cm.twentysix.order.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+@Valid
 public record ProductItem(
         @NotBlank(message = "아이디는 비어있을 수 없습니다.")
         String id,

@@ -6,6 +6,8 @@ import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.model.User;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;
+import cm.twentysix.user.dto.AddressSaveForm;
+import cm.twentysix.user.dto.SignUpForm;
 import cm.twentysix.user.exception.EmailAuthException;
 import cm.twentysix.user.exception.Error;
 import cm.twentysix.user.exception.UserException;

@@ -13,7 +13,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public void createOrder(@Valid @RequestBody CreateOrderForm form,
+    public void receiveOrder(@Valid @RequestBody CreateOrderForm form,
                             @RequestHeader(value = "X-USER-ID") Long userId) {
         orderService.receiveOrder(form, userId);
     }

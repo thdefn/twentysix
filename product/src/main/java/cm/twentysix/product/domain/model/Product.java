@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class Product extends BaseTimeDocument {
     private Integer discount;
     private String name;
     private ProductInfo productInfo;
-    private Integer amount;
+    private Integer quantity;
     private Integer deliveryFee;
     private LocalDateTime lastModifiedAt;
     private List<CategoryInfo> categories;
@@ -40,14 +39,14 @@ public class Product extends BaseTimeDocument {
     private boolean isDeleted;
 
     @Builder
-    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer amount, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo) {
+    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer quantity, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo) {
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
         this.price = price;
         this.discount = discount;
         this.name = name;
         this.productInfo = productInfo;
-        this.amount = amount;
+        this.quantity = quantity;
         this.deliveryFee = deliveryFee;
         this.lastModifiedAt = lastModifiedAt;
         this.categories = categories;
@@ -60,7 +59,7 @@ public class Product extends BaseTimeDocument {
     public static Product of(CreateProductForm form, BrandProto.BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
         return Product.builder()
                 .price(form.price())
-                .amount(form.amount())
+                .quantity(form.quantity())
                 .name(form.name())
                 .discount(form.discount())
                 .productInfo(ProductInfo.from(form.manufacturer(), form.countryOfManufacture(), form.contact()))
@@ -81,7 +80,7 @@ public class Product extends BaseTimeDocument {
         this.discount = form.discount();
         this.name = form.name();
         this.productInfo = ProductInfo.from(form.manufacturer(), form.countryOfManufacture(), form.contact());
-        this.amount = form.amount();
+        this.quantity = form.quantity();
         this.deliveryFee = form.deliveryFee();
         this.lastModifiedAt = LocalDateTime.now();
         this.categories = categoryInfoDtos.stream().map(CategoryInfo::from).collect(Collectors.toList());
@@ -115,7 +114,11 @@ public class Product extends BaseTimeDocument {
         return likes.contains(userId);
     }
 
-    public long countOfLikes(){
+    public long countOfLikes() {
         return likes.size();
+    }
+
+    public void minusQuantity(int requiredQuantity) {
+        this.quantity -= requiredQuantity;
     }
 }

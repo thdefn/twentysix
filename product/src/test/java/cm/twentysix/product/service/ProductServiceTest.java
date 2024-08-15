@@ -91,7 +91,7 @@ class ProductServiceTest {
         assertEquals(product.getProductInfo().getContact(), form.contact());
         assertEquals(product.getProductInfo().getManufacturer(), form.manufacturer());
         assertEquals(product.getProductInfo().getCountryOfManufacture(), form.countryOfManufacture());
-        assertEquals(product.getAmount(), form.amount());
+        assertEquals(product.getQuantity(), form.quantity());
         assertEquals(product.getDeliveryFee(), form.deliveryFee());
         assertNotNull(product.getLastModifiedAt());
         assertEquals(product.getCategories().size(), 4);
@@ -115,7 +115,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(3000)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
@@ -143,7 +143,7 @@ class ProductServiceTest {
         assertEquals(product.getProductInfo().getContact(), form.contact());
         assertEquals(product.getProductInfo().getManufacturer(), form.manufacturer());
         assertEquals(product.getProductInfo().getCountryOfManufacture(), form.countryOfManufacture());
-        assertEquals(product.getAmount(), form.amount());
+        assertEquals(product.getQuantity(), form.quantity());
         assertEquals(product.getDeliveryFee(), form.deliveryFee());
         assertTrue(product.getLastModifiedAt().isAfter(LocalDateTime.MIN));
         assertEquals(product.getCategories().size(), 4);
@@ -180,7 +180,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(3000)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
@@ -213,7 +213,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(3000)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
@@ -243,7 +243,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(3000)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
@@ -281,7 +281,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(3000)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
@@ -311,7 +311,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(3000)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)
@@ -342,7 +342,7 @@ class ProductServiceTest {
                         .discount(10)
                         .name("강아지 눈물 티슈")
                         .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                        .amount(1000)
+                        .quantity(1000)
                         .deliveryFee(0)
                         .likes(Set.of(2L))
                         .lastModifiedAt(LocalDateTime.MIN)
@@ -363,7 +363,7 @@ class ProductServiceTest {
                         .discount(0)
                         .name("스탠리 텀블러")
                         .productInfo(ProductInfo.from("스탠리", "중국", "02-000-0000"))
-                        .amount(100)
+                        .quantity(100)
                         .deliveryFee(2500)
                         .likes(Set.of(1L, 2L, 3L, 4L))
                         .lastModifiedAt(LocalDateTime.MIN)
@@ -416,7 +416,7 @@ class ProductServiceTest {
                         .discount(10)
                         .name("강아지 눈물 티슈")
                         .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                        .amount(1000)
+                        .quantity(1000)
                         .deliveryFee(0)
                         .likes(Set.of(2L))
                         .lastModifiedAt(LocalDateTime.MIN)
@@ -456,7 +456,7 @@ class ProductServiceTest {
                 .discount(10)
                 .name("강아지 눈물 티슈")
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
-                .amount(1000)
+                .quantity(1000)
                 .deliveryFee(0)
                 .likes(Set.of(1L))
                 .lastModifiedAt(LocalDateTime.MIN)

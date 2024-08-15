@@ -76,7 +76,7 @@ class ProductControllerTest {
                         jsonPath("$.message.countryOfManufacture").value("제조국은 50글자 이내, 1글자 이상입니다."),
                         jsonPath("$.message.contact").value("A/S 책임자와 전화번호는 50글자 이내, 1글자 이상입니다."),
                         jsonPath("$.message.price").value("가격은 0원 이상입니다."),
-                        jsonPath("$.message.amount").value("재고는 0개 이상입니다."),
+                        jsonPath("$.message.quantity").value("재고는 0개 이상입니다."),
                         jsonPath("$.message.discount").value("할인율은 100 퍼센트 이하입니다."),
                         jsonPath("$.message.deliveryFee").value("기본 배송비는 10000원 이하입니다.")
                 );
@@ -126,7 +126,7 @@ class ProductControllerTest {
                         jsonPath("$.message.countryOfManufacture").value("제조국은 50글자 이내, 1글자 이상입니다."),
                         jsonPath("$.message.contact").value("A/S 책임자와 전화번호는 50글자 이내, 1글자 이상입니다."),
                         jsonPath("$.message.price").value("가격은 0원 이상입니다."),
-                        jsonPath("$.message.amount").value("재고는 0개 이상입니다."),
+                        jsonPath("$.message.quantity").value("재고는 0개 이상입니다."),
                         jsonPath("$.message.discount").value("할인율은 100 퍼센트 이하입니다."),
                         jsonPath("$.message.deliveryFee").value("기본 배송비는 10000원 이하입니다.")
                 );

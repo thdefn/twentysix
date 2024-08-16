@@ -10,7 +10,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +40,7 @@ public class ProductGrpcClient {
             if (maybeProductItem.isPresent())
                 return maybeProductItem.get();
         }
-        
+
         ProductItemResponse response = productServiceBlockingStub.getProductItem(
                 ProductItemRequest.newBuilder()
                         .setId(productId).build());
@@ -46,31 +48,31 @@ public class ProductGrpcClient {
         return response;
     }
 
-    public Map<String, ProductItemResponse> findProductItems(List<String> productIds) {
+    public List<ProductItemResponse> findProductItems(List<String> productIds) {
         Cache cache = cacheManager.getCache("productInfos");
         List<String> idsToFetch = new ArrayList<>();
-        Map<String, ProductItemResponse> idProductInfo = new HashMap<>();
+        List<ProductItemResponse> productInfos = new ArrayList<>();
 
         if (cache != null) {
             for (String productId : productIds) {
                 Optional<ProductItemResponse> maybeProductInfo = Optional.ofNullable(cache.get(productId, ProductItemResponse.class));
                 if (maybeProductInfo.isPresent()) {
                     ProductItemResponse productInfo = maybeProductInfo.get();
-                    idProductInfo.put(productId, productInfo);
+                    productInfos.add(productInfo);
                 } else idsToFetch.add(productId);
             }
         }
 
         if (!idsToFetch.isEmpty()) {
             List<ProductItemResponse> fetched = getProductItems(productIds).getProductsList();
-            fetched.forEach(item -> idProductInfo.put(item.getId(), item));
+            productInfos.addAll(fetched);
 
             CompletableFuture.runAsync(() -> {
                 fetched.forEach(productInfo -> cache.put(productInfo.getId(), productInfo));
             });
         }
 
-        return idProductInfo;
+        return productInfos;
     }
 
     private ProductItemsResponse getProductItems(List<String> productIds) {

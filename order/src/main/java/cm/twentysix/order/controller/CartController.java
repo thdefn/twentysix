@@ -1,6 +1,7 @@
 package cm.twentysix.order.controller;
 
 import cm.twentysix.order.dto.AddCartItemForm;
+import cm.twentysix.order.dto.CartItem;
 import cm.twentysix.order.dto.ChangeCartItemQuantityForm;
 import cm.twentysix.order.dto.DeleteCartItemForm;
 import cm.twentysix.order.service.CartService;
@@ -8,6 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,5 +38,11 @@ public class CartController {
                                                        @RequestHeader(value = "X-USER-ID") Long userId) {
         cartService.changeCartItemQuantity(userId, form);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public CompletableFuture<ResponseEntity<List<CartItem>>> retrieveCart(@RequestHeader(value = "X-USER-ID") Long userId) {
+        return cartService.retrieveCart(userId)
+                .thenApply(ResponseEntity::ok);
     }
 }

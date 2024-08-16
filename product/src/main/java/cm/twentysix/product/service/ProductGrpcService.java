@@ -10,7 +10,6 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -36,10 +35,10 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
                     .setThumbnail(product.getThumbnailPath())
                     .setDiscount(product.getDiscount())
                     .setPrice(product.getPrice())
+                    .setDiscountedPrice(product.getDiscountedPrice())
                     .setBrandName(product.getProductBrand().getName())
                     .build();
             responseObserver.onNext(response);
-            log.error(response+"");
             responseObserver.onCompleted();
 
         } catch (ProductException e) {
@@ -53,4 +52,32 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
         }
     }
 
+    @Override
+    public void getProductItems(ProductItemsRequest request, StreamObserver<ProductItemsResponse> responseObserver) {
+        try {
+            List<ProductItemResponse> products = productRepository.findByIdInAndIsDeletedFalse(new HashSet<>(request.getIdsList()))
+                    .stream().map(product -> ProductItemResponse.newBuilder()
+                            .setId(product.getId())
+                            .setBrandId(product.getProductBrand().getId())
+                            .setName(product.getName())
+                            .setThumbnail(product.getThumbnailPath())
+                            .setDiscount(product.getDiscount())
+                            .setPrice(product.getPrice())
+                            .setDiscountedPrice(product.getDiscountedPrice())
+                            .setBrandName(product.getProductBrand().getName())
+                            .build()).toList();
+            ProductItemsResponse response = ProductItemsResponse.newBuilder().addAllProducts(products).build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        } catch (ProductException e) {
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL.withDescription(HttpStatus.INTERNAL_SERVER_ERROR.name()).asRuntimeException()
+            );
+        }
+    }
 }

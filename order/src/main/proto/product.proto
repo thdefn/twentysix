@@ -20,6 +20,7 @@ message ProductItemResponse {
   string name = 5;
   int32 discount = 6;
   int32 price = 7;
+  int32 discountedPrice = 8;
 }
 
 message ProductItemsRequest {

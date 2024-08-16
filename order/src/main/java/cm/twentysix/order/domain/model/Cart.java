@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 @RedisHash(value = "carts")
@@ -46,5 +47,15 @@ public class Cart implements Serializable {
         CartProduct product = items.get(productId);
         product.changeQuantity(quantity);
 
+    }
+
+    public List<Long> getBrandIds() {
+        return items.values().stream()
+                .map(CartProduct::getBrandId)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getProductIds() {
+        return items.keySet().stream().toList();
     }
 }

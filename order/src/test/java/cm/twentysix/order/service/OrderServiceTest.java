@@ -6,7 +6,7 @@ import cm.twentysix.order.domain.model.*;
 import cm.twentysix.order.domain.repository.OrderRepository;
 import cm.twentysix.order.dto.CreateOrderForm;
 import cm.twentysix.order.dto.OrderReplyEvent;
-import cm.twentysix.order.dto.ProductItem;
+import cm.twentysix.order.dto.OrderProductItemForm;
 import cm.twentysix.order.dto.ProductOrderItem;
 import cm.twentysix.order.util.IdUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -57,10 +57,10 @@ class OrderServiceTest {
     @Test
     void receiveOrderTest() {
         //given
-        List<ProductItem> items = List.of(
-                new ProductItem("123456", 1)
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("123456", 1)
         );
-        CreateOrderForm.Receiver receiver = new CreateOrderForm.Receiver("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
         CreateOrderForm form = new CreateOrderForm(items, true, receiver);
         //when
         orderService.receiveOrder(form, 1L);

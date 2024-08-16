@@ -1,7 +1,7 @@
 package cm.twentysix.order.controller;
 
 import cm.twentysix.order.dto.CreateOrderForm;
-import cm.twentysix.order.dto.ProductItem;
+import cm.twentysix.order.dto.OrderProductItemForm;
 import cm.twentysix.order.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,8 @@ class OrderControllerTest {
     @Test
     void receiveOrder_success() throws Exception {
         //given
-        List<ProductItem> items = List.of(
-                new ProductItem("123456", 1)
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("123456", 1)
         );
         CreateOrderForm.Receiver receiver = new CreateOrderForm.Receiver("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
         CreateOrderForm form = new CreateOrderForm(items, true, receiver);
@@ -53,8 +53,8 @@ class OrderControllerTest {
     @Test
     void receiveOrder_fail() throws Exception {
         //given
-        List<ProductItem> items = List.of(
-                new ProductItem("1", 0)
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("1", 0)
         );
         CreateOrderForm.Receiver receiver = new CreateOrderForm.Receiver("송", "           ", "1212", "010-");
         CreateOrderForm form = new CreateOrderForm(items, true, receiver);

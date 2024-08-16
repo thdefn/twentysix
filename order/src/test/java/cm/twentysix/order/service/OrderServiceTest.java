@@ -4,10 +4,8 @@ import cm.twentysix.BrandProto;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.domain.model.*;
 import cm.twentysix.order.domain.repository.OrderRepository;
-import cm.twentysix.order.dto.CreateOrderForm;
-import cm.twentysix.order.dto.OrderReplyEvent;
-import cm.twentysix.order.dto.OrderProductItemForm;
-import cm.twentysix.order.dto.ProductOrderItem;
+import cm.twentysix.order.dto.*;
+import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +36,10 @@ class OrderServiceTest {
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
     private BrandGrpcClient brandGrpcClient;
+    @Mock
+    CartService cartService;
+    @Mock
+    MessageSender messageSender;
     @InjectMocks
     private OrderService orderService;
 
@@ -55,16 +57,51 @@ class OrderServiceTest {
     }
 
     @Test
-    void receiveOrderTest() {
+    void receiveOrder_success() {
         //given
         List<OrderProductItemForm> items = List.of(
                 new OrderProductItemForm("123456", 1)
         );
-        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
-        CreateOrderForm form = new CreateOrderForm(items, true, receiver);
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
         //when
         orderService.receiveOrder(form, 1L);
         //then
+        ArgumentCaptor<AddressSaveEvent> addressSaveEventCaptor = ArgumentCaptor.forClass(AddressSaveEvent.class);
+        verify(messageSender, times(1)).sendAddressSaveEvent(addressSaveEventCaptor.capture());
+        AddressSaveEvent event = addressSaveEventCaptor.getValue();
+        assertTrue(event.isDefault());
+        assertEquals(event.name(), receiver.name());
+        assertEquals(event.address(), receiver.address());
+        assertEquals(event.phone(), receiver.phone());
+        assertEquals(event.userId(), 1L);
+        assertEquals(event.zipCode(), receiver.zipCode());
+
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+        verify(orderRepository, times(1)).save(orderCaptor.capture());
+        Order saved = orderCaptor.getValue();
+        assertEquals(saved.getOrderId(), "2032032003030-afsfdasfdsfdsafdl2");
+        assertEquals(saved.getReceiver().getName(), receiver.name());
+        assertEquals(saved.getReceiver().getPhone(), receiver.phone());
+        assertEquals(saved.getReceiver().getZipCode(), receiver.zipCode());
+        assertEquals(saved.getReceiver().getAddress(), receiver.address());
+        assertEquals(saved.getUserId(), 1L);
+        assertEquals(saved.getStatus(), OrderStatus.CHECK_PENDING);
+    }
+
+    @Test
+    void receiveOrder_success_whenShouldSaveNewAddressIsFalse() {
+        //given
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("123456", 1)
+        );
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, false, true, receiver);
+        //when
+        orderService.receiveOrder(form, 1L);
+        //then
+        verify(messageSender, times(0)).sendAddressSaveEvent(any());
+
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
         verify(orderRepository, times(1)).save(orderCaptor.capture());
         Order saved = orderCaptor.getValue();

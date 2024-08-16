@@ -3,7 +3,7 @@ package cm.twentysix.user.service;
 import cm.twentysix.user.domain.model.Address;
 import cm.twentysix.user.domain.repository.AddressRepository;
 import cm.twentysix.user.dto.AddressItem;
-import cm.twentysix.user.dto.AddressSaveForm;
+import cm.twentysix.user.dto.AddressSaveEvent;
 import cm.twentysix.user.exception.AddressException;
 import cm.twentysix.user.exception.Error;
 import cm.twentysix.user.util.CipherManager;
@@ -58,10 +58,10 @@ class AddressServiceTest {
     @Test
     void saveAddress_success() {
         //given
-        AddressSaveForm form = new AddressSaveForm(true, "송송", "서울 특별시 보문로 23", "11111", "010-1111-1111");
+        AddressSaveEvent form = new AddressSaveEvent(1L, true, "송송", "서울 특별시 보문로 23", "11111", "010-1111-1111");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypted");
         //when
-        addressService.saveAddress(1L, form);
+        addressService.saveAddress(form);
         //then
         ArgumentCaptor<Address> addressCaptor = ArgumentCaptor.forClass(Address.class);
         verify(addressRepository, times(1)).save(addressCaptor.capture());

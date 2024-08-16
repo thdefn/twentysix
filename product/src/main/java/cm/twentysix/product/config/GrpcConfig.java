@@ -1,19 +1,32 @@
 package cm.twentysix.product.config;
 
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import cm.twentysix.product.service.ProductGrpcService;
+import com.google.common.collect.Lists;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 
 @Configuration
-@ImportAutoConfiguration({
-        net.devh.boot.grpc.client.autoconfigure.GrpcClientAutoConfiguration.class,
-        net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration.class,
-        net.devh.boot.grpc.client.autoconfigure.GrpcClientHealthAutoConfiguration.class,
-        net.devh.boot.grpc.client.autoconfigure.GrpcClientSecurityAutoConfiguration.class,
-        net.devh.boot.grpc.client.autoconfigure.GrpcClientTraceAutoConfiguration.class,
-        net.devh.boot.grpc.client.autoconfigure.GrpcDiscoveryClientAutoConfiguration.class,
-
-        net.devh.boot.grpc.common.autoconfigure.GrpcCommonCodecAutoConfiguration.class,
-        net.devh.boot.grpc.common.autoconfigure.GrpcCommonTraceAutoConfiguration.class,
-})
 public class GrpcConfig {
+    @Value("${grpc.server.port}")
+    private int port;
+
+    @Bean
+    public Server grpcServer(ProductGrpcService productGrpcService) {
+        return ServerBuilder.forPort(port)
+                .addService(productGrpcService)
+                .build();
+    }
+
+    @Bean
+    public ProtobufHttpMessageConverter protobufHttpMessageConverter() {
+        ProtobufHttpMessageConverter protobufHttpMessageConverter = new ProtobufHttpMessageConverter();
+        protobufHttpMessageConverter.setSupportedMediaTypes(Lists.newArrayList(MediaType.APPLICATION_JSON,
+                MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE + ";charset=ISO-8859-1")));
+        return protobufHttpMessageConverter;
+    }
 }

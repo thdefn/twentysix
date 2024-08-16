@@ -4,25 +4,33 @@ import cm.twentysix.BrandProto.BrandInfo;
 import cm.twentysix.BrandProto.BrandInfosRequest;
 import cm.twentysix.BrandProto.BrandInfosResponse;
 import cm.twentysix.BrandServiceGrpc;
-import lombok.RequiredArgsConstructor;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class BrandGrpcClient {
     private final CacheManager cacheManager;
-    @GrpcClient("brand")
-    private BrandServiceGrpc.BrandServiceBlockingStub brandServiceBlockingStub;
+    private final ManagedChannel managedChannel;
+    private final BrandServiceGrpc.BrandServiceBlockingStub brandServiceBlockingStub;
 
-    public BrandInfosResponse getBrandInfos(List<Long> brandIds) {
+    public BrandGrpcClient(CacheManager cacheManager, @Value("${grpc.client.brand.host}") String host, @Value("${grpc.client.brand.port}") int port) {
+        this.cacheManager = cacheManager;
+        managedChannel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        this.brandServiceBlockingStub = BrandServiceGrpc.newBlockingStub(managedChannel);
+    }
+
+    private BrandInfosResponse getBrandInfos(List<Long> brandIds) {
         BrandInfosRequest request = BrandInfosRequest.newBuilder()
                 .addAllIds(brandIds).build();
         return brandServiceBlockingStub.getBrandInfos(request);
@@ -58,7 +66,21 @@ public class BrandGrpcClient {
         }
 
         return idBrandInfo;
+    }
 
+    @PreDestroy
+    public void shutdown() {
+        if (managedChannel != null && !managedChannel.isShutdown()) {
+            managedChannel.shutdown();
+            try {
+                if (!managedChannel.awaitTermination(5, TimeUnit.SECONDS)) {
+                    managedChannel.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                managedChannel.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
 }

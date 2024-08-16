@@ -3,7 +3,7 @@ package cm.twentysix.user.service;
 import cm.twentysix.user.domain.model.Address;
 import cm.twentysix.user.domain.repository.AddressRepository;
 import cm.twentysix.user.dto.AddressItem;
-import cm.twentysix.user.dto.AddressSaveForm;
+import cm.twentysix.user.dto.AddressSaveEvent;
 import cm.twentysix.user.exception.AddressException;
 import cm.twentysix.user.exception.Error;
 import cm.twentysix.user.util.CipherManager;
@@ -21,15 +21,15 @@ public class AddressService {
     private final CipherManager cipherManager;
 
     @Transactional
-    public void saveAddress(Long userId, AddressSaveForm form) {
+    public void saveAddress(AddressSaveEvent form) {
         String encryptedAddress = cipherManager.encrypt(form.address());
         String encryptedName = cipherManager.encrypt(form.name());
         String encryptedPhone = cipherManager.encrypt(form.phone());
         if (form.isDefault()) {
-            addressRepository.findByUserIdAndIsDefaultTrue(userId)
+            addressRepository.findByUserIdAndIsDefaultTrue(form.userId())
                     .ifPresent(Address::turnOffDefault);
         }
-        addressRepository.save(Address.of(form.isDefault(), encryptedName, form.zipCode(), encryptedAddress, userId, encryptedPhone));
+        addressRepository.save(Address.of(form.isDefault(), encryptedName, form.zipCode(), encryptedAddress, form.userId(), encryptedPhone));
     }
 
     public AddressItem retrieveDefaultAddress(Long userId) {

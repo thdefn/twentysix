@@ -1,6 +1,6 @@
 package cm.twentysix.user.service;
 
-import cm.twentysix.user.dto.AddressSaveForm;
+import cm.twentysix.user.dto.AddressSaveEvent;
 import cm.twentysix.user.dto.SignUpForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.model.User;
@@ -46,6 +46,6 @@ public class SignUpService {
         String encryptedPassword = passwordEncoder.encode(form.password());
         User savedUser = userRepository.save(User.of(encryptedEmail, encryptedPhone, encryptedName, encryptedPassword, UserType.valueOf(form.userType())));
 
-        addressService.saveAddress(savedUser.getId(), AddressSaveForm.from(form));
+        addressService.saveAddress(AddressSaveEvent.from(form, savedUser.getId()));
     }
 }

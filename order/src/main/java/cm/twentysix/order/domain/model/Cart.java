@@ -28,6 +28,10 @@ public class Cart implements Serializable {
         this.items = new HashMap<>();
     }
 
+    public Cart() {
+        this.items = new HashMap<>();
+    }
+
     @Builder
     public Cart(Long userId, Map<String, CartProduct> items) {
         this.userId = userId;

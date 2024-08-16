@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,8 +40,7 @@ public class CartController {
     }
 
     @GetMapping
-    public CompletableFuture<ResponseEntity<List<CartItem>>> retrieveCart(@RequestHeader(value = "X-USER-ID") Long userId) {
-        return cartService.retrieveCart(userId)
-                .thenApply(ResponseEntity::ok);
+    public ResponseEntity<List<CartItem>> retrieveCart(@RequestHeader(value = "X-USER-ID") Long userId) {
+        return ResponseEntity.ok(cartService.retrieveCart(userId));
     }
 }

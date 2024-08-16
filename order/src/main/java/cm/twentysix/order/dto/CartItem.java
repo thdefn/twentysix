@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public record CartItem(
         Long brandId,
+        String brandName,
         Integer freeDeliveryInfimum,
         Integer deliveryFee,
         List<CartProductItem> items
@@ -18,6 +19,7 @@ public record CartItem(
     public static CartItem from(BrandInfo brandInfo) {
         return CartItem.builder()
                 .brandId(brandInfo.getId())
+                .brandName(brandInfo.getName())
                 .deliveryFee(brandInfo.getDeliveryFee())
                 .freeDeliveryInfimum(brandInfo.getFreeDeliveryInfimum())
                 .items(new ArrayList<>())

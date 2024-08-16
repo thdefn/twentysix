@@ -4,6 +4,7 @@ import cm.twentysix.ProductProto.ProductItemResponse;
 import cm.twentysix.order.dto.AddCartItemForm;
 import cm.twentysix.order.exception.CartException;
 import cm.twentysix.order.exception.Error;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -26,6 +27,12 @@ public class Cart implements Serializable {
         this.items = new HashMap<>();
     }
 
+    @Builder
+    public Cart(Long userId, Map<String, CartProduct> items) {
+        this.userId = userId;
+        this.items = items;
+    }
+
     public void addItem(AddCartItemForm form, ProductItemResponse response) {
         CartProduct product = items.getOrDefault(form.id(), CartProduct.of(response));
         product.addQuantity(form.quantity());
@@ -37,6 +44,8 @@ public class Cart implements Serializable {
     }
 
     private void deleteItem(String productId) {
+        if (!items.containsKey(productId))
+            throw new CartException(Error.ITEM_DOES_NOT_EXIST);
         items.remove(productId);
     }
 

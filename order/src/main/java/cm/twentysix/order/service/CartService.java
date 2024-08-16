@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +51,12 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    public CompletableFuture<List<CartItem>> retrieveCart(Long userId) {
+    public List<CartItem> retrieveCart(Long userId) {
         Cart cart = cartRepository.findById(userId)
                 .orElseGet(() -> new Cart(userId));
+
+        if(cart.getItems().isEmpty())
+            return new ArrayList<>();
 
         List<String> productIds = cart.getProductIds();
         List<Long> brandIds = cart.getBrandIds();
@@ -73,7 +77,7 @@ public class CartService {
                         throw new RuntimeException(e);
                     }
                 }
-        );
+        ).join();
     }
 
     private List<CartItem> toCartItems(List<ProductItemResponse> containingProductInfo, Map<Long, BrandInfo> containingBrandInfo, Map<String, CartProduct> cartProducts) {

@@ -8,6 +8,7 @@ import java.util.List;
 
 public record CreateOrderForm(
         @NotEmpty(message = "상품은 비어있을 수 없습니다.")
+        @Size(min = 1)
         @Valid
         List<OrderProductItemForm> products,
         boolean shouldSaveNewAddress,

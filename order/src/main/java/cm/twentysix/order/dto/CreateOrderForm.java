@@ -12,11 +12,13 @@ public record CreateOrderForm(
         @Valid
         List<OrderProductItemForm> products,
         boolean shouldSaveNewAddress,
+        boolean shouldDeleteCartItem,
         @Valid
         @NotNull(message = "수신지는 비어있을 수 없습니다.")
         ReceiverForm receiver
 ) {
     public record ReceiverForm(
+            boolean isDefault,
             @Size(min = 2, max = 30, message = "이름의 형식이 아닙니다.")
             @NotBlank(message = "이름은 비어있을 수 없습니다.")
             String name,

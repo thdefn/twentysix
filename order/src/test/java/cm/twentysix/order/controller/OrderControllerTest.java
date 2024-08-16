@@ -36,8 +36,8 @@ class OrderControllerTest {
         List<OrderProductItemForm> items = List.of(
                 new OrderProductItemForm("123456", 1)
         );
-        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
-        CreateOrderForm form = new CreateOrderForm(items, true, receiver);
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(false,"송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, true,true, receiver);
         //when
         //then
         mockMvc.perform(post("/orders")
@@ -56,8 +56,8 @@ class OrderControllerTest {
         List<OrderProductItemForm> items = List.of(
                 new OrderProductItemForm("1", 0)
         );
-        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm("송", "           ", "1212", "010-");
-        CreateOrderForm form = new CreateOrderForm(items, true, receiver);
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(false,"송", "           ", "1212", "010-");
+        CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
         //when
         //then
         mockMvc.perform(post("/orders")

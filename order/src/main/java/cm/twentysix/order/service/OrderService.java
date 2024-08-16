@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -28,10 +29,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final BrandGrpcClient brandGrpcClient;
+    private final CartService cartService;
 
     @Transactional
     public void receiveOrder(CreateOrderForm form, Long userId) {
         String orderId = IdUtil.generate();
+        CompletableFuture
+                .runAsync(() -> cartService.removeOrderedCartItem(form, userId));
         // TODO : 배송지 정보 업데이트 요청
         orderRepository.save(Order.of(orderId, userId, form));
 

@@ -16,9 +16,6 @@ public class Address extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 20)
-    private String alias;
-
     @Column(length = 130)
     private String receiverName;
 
@@ -35,8 +32,7 @@ public class Address extends BaseTimeEntity {
     private Long userId;
 
     @Builder
-    public Address(String alias, String receiverName, boolean isDefault, String zipCode, String address, Long userId) {
-        this.alias = alias;
+    public Address(String receiverName, boolean isDefault, String zipCode, String address, Long userId) {
         this.receiverName = receiverName;
         this.isDefault = isDefault;
         this.zipCode = zipCode;
@@ -44,13 +40,21 @@ public class Address extends BaseTimeEntity {
         this.userId = userId;
     }
 
-    public static Address of(String alias, String receiverName, String zipCode, String address, Long userId) {
+    public static Address of(boolean isDefault, String receiverName, String zipCode, String address, Long userId) {
         return Address.builder()
-                .alias(alias)
+                .isDefault(isDefault)
                 .receiverName(receiverName)
                 .zipCode(zipCode)
                 .address(address)
                 .userId(userId)
                 .build();
+    }
+
+    public void turnOffDefault(){
+        isDefault = false;
+    }
+
+    public void turnOnDefault(){
+        isDefault = true;
     }
 }

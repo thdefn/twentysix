@@ -7,10 +7,7 @@ import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.Cart;
 import cm.twentysix.order.domain.model.CartProduct;
 import cm.twentysix.order.domain.repository.CartRepository;
-import cm.twentysix.order.dto.AddCartItemForm;
-import cm.twentysix.order.dto.CartItem;
-import cm.twentysix.order.dto.ChangeCartItemQuantityForm;
-import cm.twentysix.order.dto.DeleteCartItemForm;
+import cm.twentysix.order.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -92,6 +89,15 @@ public class CartService {
             cartItem.addCartProductItem(productInfo, cartProduct.getQuantity());
         }
         return cartItems.values().stream().toList();
+    }
+
+    public void removeOrderedCartItem(CreateOrderForm form, Long userId){
+        if(!form.shouldDeleteCartItem())
+            return;
+        Cart cart = cartRepository.findById(userId)
+                .orElseGet(() -> new Cart(userId));
+        cart.removeOrderedItems(form.products());
+        cartRepository.save(cart);
     }
 
 }

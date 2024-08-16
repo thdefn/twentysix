@@ -2,6 +2,7 @@ package cm.twentysix.order.domain.model;
 
 import cm.twentysix.ProductProto.ProductItemResponse;
 import cm.twentysix.order.dto.AddCartItemForm;
+import cm.twentysix.order.dto.OrderProductItemForm;
 import cm.twentysix.order.exception.CartException;
 import cm.twentysix.order.exception.Error;
 import lombok.Builder;
@@ -66,5 +67,10 @@ public class Cart implements Serializable {
 
     public List<String> getProductIds() {
         return items.keySet().stream().toList();
+    }
+
+    public void removeOrderedItems(List<OrderProductItemForm> orderedItem) {
+        orderedItem.forEach(itemToBeRemoved ->
+                items.get(itemToBeRemoved.id()).decreaseQuantity(itemToBeRemoved.quantity()));
     }
 }

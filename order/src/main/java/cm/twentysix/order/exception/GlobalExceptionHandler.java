@@ -1,22 +1,37 @@
 package cm.twentysix.order.exception;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static cm.twentysix.order.exception.Error.GRPC_COMMUNICATION_ERROR;
 import static cm.twentysix.order.exception.Error.REQUEST_ARGUMENT_NOT_VALID;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Map<Status.Code, HttpStatus> grpcStatusHttpStatusMap = Map.of(Status.Code.NOT_FOUND, HttpStatus.NOT_FOUND, Status.Code.INVALID_ARGUMENT, HttpStatus.BAD_REQUEST, Status.Code.UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
+
+    @ExceptionHandler(StatusRuntimeException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleStatusRuntimeException(StatusRuntimeException e) {
+        Status status = e.getStatus();
+        String errorMessage = e.getMessage();
+        HttpStatus httpStatus = grpcStatusHttpStatusMap.getOrDefault(status.getCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), GRPC_COMMUNICATION_ERROR, errorMessage);
+        return ResponseEntity.status(httpStatus)
+                .body(new ExceptionResponse<>(GRPC_COMMUNICATION_ERROR.name(), errorMessage));
+    }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ExceptionResponse<String>> handleConstraintViolationException(ConstraintViolationException e) {
@@ -30,6 +45,20 @@ public class GlobalExceptionHandler {
         log.info(LOG_FORMAT, e.getClass().getSimpleName(), e.getError(), e.getError().message);
         return ResponseEntity.status(e.getError().httpStatus)
                 .body(new ExceptionResponse<>(e.getError().name(), e.getError().message));
+    }
+
+    @ExceptionHandler(CartException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleCartException(CartException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), e.getError(), e.getError().message);
+        return ResponseEntity.status(e.getError().httpStatus)
+                .body(new ExceptionResponse<>(e.getError().name(), e.getError().message));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleMissingRequestHeaderException(MissingRequestHeaderException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), HttpStatus.BAD_REQUEST.name(), e.getMessage());
+        return ResponseEntity.badRequest()
+                .body(new ExceptionResponse<>(HttpStatus.BAD_REQUEST.name(), e.getMessage()));
     }
 
 

@@ -1,10 +1,12 @@
 package cm.twentysix.order.service;
 
+import cm.twentysix.BrandProto;
+import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.domain.model.*;
 import cm.twentysix.order.domain.repository.OrderRepository;
 import cm.twentysix.order.dto.CreateOrderForm;
 import cm.twentysix.order.dto.OrderReplyEvent;
-import cm.twentysix.order.dto.ProductItem;
+import cm.twentysix.order.dto.OrderProductItemForm;
 import cm.twentysix.order.dto.ProductOrderItem;
 import cm.twentysix.order.util.IdUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +20,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +36,8 @@ class OrderServiceTest {
     private OrderRepository orderRepository;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+    @Mock
+    private BrandGrpcClient brandGrpcClient;
     @InjectMocks
     private OrderService orderService;
 
@@ -52,10 +57,10 @@ class OrderServiceTest {
     @Test
     void receiveOrderTest() {
         //given
-        List<ProductItem> items = List.of(
-                new ProductItem("123456", 1)
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("123456", 1)
         );
-        CreateOrderForm.Receiver receiver = new CreateOrderForm.Receiver("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm("송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
         CreateOrderForm form = new CreateOrderForm(items, true, receiver);
         //when
         orderService.receiveOrder(form, 1L);
@@ -69,7 +74,7 @@ class OrderServiceTest {
         assertEquals(saved.getReceiver().getZipCode(), receiver.zipCode());
         assertEquals(saved.getReceiver().getAddress(), receiver.address());
         assertEquals(saved.getUserId(), 1L);
-        assertEquals(saved.getStatus(), OrderStatus.PENDING);
+        assertEquals(saved.getStatus(), OrderStatus.CHECK_PENDING);
     }
 
     @Test
@@ -84,15 +89,19 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
+                .products(new HashMap<>())
+                .deliveryFees(new HashMap<>())
                 .receiver(OrderReceiver.builder()
                         .name("송송이")
                         .address("서울 특별시 성북구 보문로")
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.PENDING)
+                .status(OrderStatus.CHECK_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
+                .setName("JAJU").setDeliveryFee(20000).setId(2L).setFreeDeliveryInfimum(500000).build()));
         //when
         orderService.approveOrDenyOrder(event);
         //then
@@ -112,7 +121,7 @@ class OrderServiceTest {
         assertEquals(order.getReceiver().getZipCode(), "11112");
         assertEquals(order.getReceiver().getAddress(), "서울 특별시 성북구 보문로");
         assertEquals(order.getUserId(), 1L);
-        assertEquals(order.getStatus(), OrderStatus.PENDING);
+        assertEquals(order.getStatus(), OrderStatus.PAYMENT_PENDING);
     }
 
     @Test
@@ -133,7 +142,7 @@ class OrderServiceTest {
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.PENDING)
+                .status(OrderStatus.CHECK_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         //when

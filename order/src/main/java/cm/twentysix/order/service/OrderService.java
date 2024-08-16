@@ -43,7 +43,7 @@ public class OrderService {
         // TODO : approve 받았는데 리소스가 없을때 재고 관리
         Order order = orderRepository.findByOrderId(event.orderId())
                 .stream().findFirst()
-                .filter(o -> OrderStatus.PENDING.equals(o.getStatus()))
+                .filter(o -> OrderStatus.CHECK_PENDING.equals(o.getStatus()))
                 .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
         if (event.isSuccess()) {
             List<Long> brandIds = event.orderedItem().values()

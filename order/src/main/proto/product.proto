@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option java_package = "cm.twentysix";
+option java_outer_classname = "ProductProto";
+
+service ProductService {
+  rpc GetProductItem (ProductItemRequest) returns (ProductItemResponse);
+  rpc GetProductItems (ProductItemsRequest) returns (ProductItemsResponse);
+}
+
+message ProductItemRequest {
+  string id = 1;
+}
+
+message ProductItemResponse {
+  string id = 1;
+  string thumbnail = 2;
+  int64 brandId = 3;
+  string brandName = 4;
+  string name = 5;
+  int32 discount = 6;
+  int32 price = 7;
+  int32 discountedPrice = 8;
+}
+
+message ProductItemsRequest {
+  repeated string ids = 1;
+}
+
+message ProductItemsResponse {
+  repeated ProductItemResponse products = 1;
+}
+
+
+

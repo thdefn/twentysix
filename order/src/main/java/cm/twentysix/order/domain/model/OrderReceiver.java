@@ -21,7 +21,7 @@ public class OrderReceiver implements Serializable {
         this.phone = phone;
     }
 
-    public static OrderReceiver of(CreateOrderForm.Receiver receiver) {
+    public static OrderReceiver of(CreateOrderForm.ReceiverForm receiver) {
         return OrderReceiver.builder()
                 .address(receiver.address())
                 .name(receiver.name())

@@ -1,25 +1,32 @@
 package cm.twentysix.brand.config;
 
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import cm.twentysix.brand.service.BrandGrpcService;
+import com.google.common.collect.Lists;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 
 @Configuration
-@ImportAutoConfiguration({
-        net.devh.boot.grpc.common.autoconfigure.GrpcCommonCodecAutoConfiguration.class,
-        net.devh.boot.grpc.common.autoconfigure.GrpcCommonTraceAutoConfiguration.class,
-
-        net.devh.boot.grpc.server.autoconfigure.GrpcAdviceAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcHealthServiceAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataConsulConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataEurekaConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataNacosConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataZookeeperConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcReflectionServiceAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcServerTraceAutoConfiguration.class
-})
 public class GrpcConfig {
+    @Value("${grpc.server.port}")
+    private int port;
+
+    @Bean
+    public Server grpcServer(BrandGrpcService brandGrpcService) {
+        return ServerBuilder.forPort(port)
+                .addService(brandGrpcService)
+                .build();
+    }
+
+    @Bean
+    public ProtobufHttpMessageConverter protobufHttpMessageConverter() {
+        ProtobufHttpMessageConverter protobufHttpMessageConverter = new ProtobufHttpMessageConverter();
+        protobufHttpMessageConverter.setSupportedMediaTypes(Lists.newArrayList(MediaType.APPLICATION_JSON,
+                MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE + ";charset=ISO-8859-1")));
+        return protobufHttpMessageConverter;
+    }
 }

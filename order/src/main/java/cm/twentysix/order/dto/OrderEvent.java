@@ -11,11 +11,11 @@ public record OrderEvent(
         String orderId,
         Map<String, Integer> productQuantity
 ) {
-    public static OrderEvent of(List<ProductItem> products, String orderId) {
+    public static OrderEvent of(List<OrderProductItemForm> products, String orderId) {
         return OrderEvent.builder()
                 .productQuantity(products.stream().collect(Collectors.toMap(
-                        ProductItem::id,
-                        ProductItem::quantity)))
+                        OrderProductItemForm::id,
+                        OrderProductItemForm::quantity)))
                 .orderId(orderId)
                 .build();
     }

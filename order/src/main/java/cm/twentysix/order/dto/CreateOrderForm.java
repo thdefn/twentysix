@@ -8,14 +8,15 @@ import java.util.List;
 
 public record CreateOrderForm(
         @NotEmpty(message = "상품은 비어있을 수 없습니다.")
+        @Size(min = 1)
         @Valid
-        List<ProductItem> products,
+        List<OrderProductItemForm> products,
         boolean shouldSaveNewAddress,
         @Valid
         @NotNull(message = "수신지는 비어있을 수 없습니다.")
-        Receiver receiver
+        ReceiverForm receiver
 ) {
-    public record Receiver(
+    public record ReceiverForm(
             @Size(min = 2, max = 30, message = "이름의 형식이 아닙니다.")
             @NotBlank(message = "이름은 비어있을 수 없습니다.")
             String name,

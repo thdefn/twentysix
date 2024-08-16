@@ -71,7 +71,7 @@ public class Order extends BaseTimeEntity {
                 .products(new HashMap<>())
                 .deliveryFees(new HashMap<>())
                 .receiver(OrderReceiver.of(form.receiver()))
-                .status(OrderStatus.PENDING).build();
+                .status(OrderStatus.CHECK_PENDING).build();
     }
 
     public void approve(Map<String, ProductOrderItem> orderedItem, Map<Long, BrandInfo> containedBrandInfo) {
@@ -79,6 +79,7 @@ public class Order extends BaseTimeEntity {
         calculateDeliveryFee(containedBrandInfo);
         this.totalAmount = products.values().stream().mapToInt(OrderProduct::getAmount).sum();
         this.totalDeliveryFee = deliveryFees.values().stream().mapToInt(Integer::intValue).sum();
+        status = OrderStatus.PAYMENT_PENDING;
     }
 
     private void saveOrderProducts(Map<String, ProductOrderItem> orderedItem) {

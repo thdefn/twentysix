@@ -42,6 +42,7 @@ class AddressServiceTest {
         given(mockAddressA.getUserId()).willReturn(1L);
         given(mockAddressA.getAddress()).willReturn("encrypted-addressA");
         given(mockAddressA.getReceiverName()).willReturn("encrypted-nameA");
+        given(mockAddressA.getPhone()).willReturn("encrypted-phoneA");
         given(mockAddressA.getZipCode()).willReturn("11111");
         given(mockAddressA.isDefault()).willReturn(true);
 
@@ -49,6 +50,7 @@ class AddressServiceTest {
         given(mockAddressB.getUserId()).willReturn(1L);
         given(mockAddressB.getAddress()).willReturn("encrypted-addressB");
         given(mockAddressB.getReceiverName()).willReturn("encrypted-nameB");
+        given(mockAddressB.getPhone()).willReturn("encrypted-phoneB");
         given(mockAddressB.getZipCode()).willReturn("22222");
         given(mockAddressB.isDefault()).willReturn(false);
     }
@@ -56,7 +58,7 @@ class AddressServiceTest {
     @Test
     void saveAddress_success() {
         //given
-        AddressSaveForm form = new AddressSaveForm(true, "송송", "서울 특별시 보문로 23", "11111");
+        AddressSaveForm form = new AddressSaveForm(true, "송송", "서울 특별시 보문로 23", "11111", "010-1111-1111");
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypted");
         //when
         addressService.saveAddress(1L, form);
@@ -66,6 +68,7 @@ class AddressServiceTest {
         Address saved = addressCaptor.getValue();
         assertEquals(saved.getAddress(), "cipherManagerEncrypted");
         assertEquals(saved.getReceiverName(), "cipherManagerEncrypted");
+        assertEquals(saved.getPhone(), "cipherManagerEncrypted");
         assertEquals(saved.getZipCode(), form.zipCode());
 
     }
@@ -80,6 +83,7 @@ class AddressServiceTest {
                         .address("encryptedaddress")
                         .userId(1L)
                         .zipCode("11111")
+                        .phone("encryptedphone")
                         .build()));
         given(cipherManager.decrypt(anyString())).willReturn("decrypted");
         //when
@@ -89,6 +93,7 @@ class AddressServiceTest {
         assertTrue(item.isDefault());
         assertEquals(item.zipCode(), "11111");
         assertEquals(item.receiverName(), "decrypted");
+        assertEquals(item.phone(), "decrypted");
     }
 
     @Test
@@ -110,6 +115,7 @@ class AddressServiceTest {
                         .isDefault(true)
                         .receiverName("encryptedname1")
                         .address("encryptedaddress1")
+                        .phone("encryptedphone1")
                         .userId(1L)
                         .zipCode("11111")
                         .build(),
@@ -117,6 +123,7 @@ class AddressServiceTest {
                         .isDefault(false)
                         .receiverName("encryptedname2")
                         .address("encryptedaddress2")
+                        .phone("encryptedphone2")
                         .userId(1L)
                         .zipCode("22222")
                         .build()
@@ -133,11 +140,13 @@ class AddressServiceTest {
         assertTrue(item.isDefault());
         assertEquals(item.zipCode(), "11111");
         assertEquals(item.receiverName(), "decrypted");
+        assertEquals(item.receiverName(), "decrypted");
 
         AddressItem second = items.getLast();
         assertEquals(second.address(), "decrypted");
         assertFalse(second.isDefault());
         assertEquals(second.zipCode(), "22222");
+        assertEquals(second.receiverName(), "decrypted");
         assertEquals(second.receiverName(), "decrypted");
     }
 
@@ -148,6 +157,7 @@ class AddressServiceTest {
                 .isDefault(false)
                 .receiverName("encryptedname2")
                 .address("encryptedaddress2")
+                .phone("encryptedphone2")
                 .userId(1L)
                 .zipCode("22222")
                 .build();
@@ -193,6 +203,7 @@ class AddressServiceTest {
                 .receiverName("encryptedname2")
                 .address("encryptedaddress2")
                 .userId(1L)
+                .phone("encryptedphone2")
                 .zipCode("22222")
                 .build();
         List<Address> addresses = List.of(anotherAddress, mockAddressB);

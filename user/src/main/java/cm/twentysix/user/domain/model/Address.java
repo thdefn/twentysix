@@ -22,6 +22,9 @@ public class Address extends BaseTimeEntity {
     @Column(columnDefinition = "bit(1) default 0")
     private boolean isDefault;
 
+    @Column(length = 13, nullable = false)
+    private String phone;
+
     @Column(length = 5, nullable = false)
     private String zipCode;
 
@@ -32,29 +35,31 @@ public class Address extends BaseTimeEntity {
     private Long userId;
 
     @Builder
-    public Address(String receiverName, boolean isDefault, String zipCode, String address, Long userId) {
+    public Address(String receiverName, boolean isDefault, String zipCode, String address, Long userId, String phone) {
         this.receiverName = receiverName;
         this.isDefault = isDefault;
         this.zipCode = zipCode;
         this.address = address;
         this.userId = userId;
+        this.phone = phone;
     }
 
-    public static Address of(boolean isDefault, String receiverName, String zipCode, String address, Long userId) {
+    public static Address of(boolean isDefault, String receiverName, String zipCode, String address, Long userId, String phone) {
         return Address.builder()
                 .isDefault(isDefault)
                 .receiverName(receiverName)
                 .zipCode(zipCode)
                 .address(address)
                 .userId(userId)
+                .phone(phone)
                 .build();
     }
 
-    public void turnOffDefault(){
+    public void turnOffDefault() {
         isDefault = false;
     }
 
-    public void turnOnDefault(){
+    public void turnOnDefault() {
         isDefault = true;
     }
 }

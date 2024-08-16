@@ -24,11 +24,12 @@ public class AddressService {
     public void saveAddress(Long userId, AddressSaveForm form) {
         String encryptedAddress = cipherManager.encrypt(form.address());
         String encryptedName = cipherManager.encrypt(form.name());
+        String encryptedPhone = cipherManager.encrypt(form.phone());
         if (form.isDefault()) {
             addressRepository.findByUserIdAndIsDefaultTrue(userId)
                     .ifPresent(Address::turnOffDefault);
         }
-        addressRepository.save(Address.of(form.isDefault(), encryptedName, form.zipCode(), encryptedAddress, userId));
+        addressRepository.save(Address.of(form.isDefault(), encryptedName, form.zipCode(), encryptedAddress, userId, encryptedPhone));
     }
 
     public AddressItem retrieveDefaultAddress(Long userId) {
@@ -37,8 +38,9 @@ public class AddressService {
 
         String decryptedAddress = cipherManager.decrypt(address.getAddress());
         String decryptedName = cipherManager.decrypt(address.getReceiverName());
+        String decryptedPhone = cipherManager.decrypt(address.getPhone());
 
-        return AddressItem.of(address, decryptedName, decryptedAddress);
+        return AddressItem.of(address, decryptedName, decryptedAddress, decryptedPhone);
     }
 
     public List<AddressItem> retrieveAllAddress(Long userId) {
@@ -46,7 +48,8 @@ public class AddressService {
                 .stream().map(address -> {
                     String decryptedAddress = cipherManager.decrypt(address.getAddress());
                     String decryptedName = cipherManager.decrypt(address.getReceiverName());
-                    return AddressItem.of(address, decryptedName, decryptedAddress);
+                    String decryptedPhone = cipherManager.decrypt(address.getPhone());
+                    return AddressItem.of(address, decryptedName, decryptedAddress, decryptedPhone);
                 })
                 .collect(Collectors.toList());
     }

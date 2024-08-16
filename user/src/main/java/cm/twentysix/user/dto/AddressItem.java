@@ -9,15 +9,17 @@ public record AddressItem(
         boolean isDefault,
         String receiverName,
         String address,
-        String zipCode
+        String zipCode,
+        String phone
 ) {
-    public static AddressItem of(Address address, String decryptedReceiverName, String decryptedAddress) {
+    public static AddressItem of(Address address, String decryptedReceiverName, String decryptedAddress, String decryptedPhone) {
         return AddressItem.builder()
                 .id(address.getId())
                 .address(decryptedAddress)
                 .isDefault(address.isDefault())
                 .receiverName(decryptedReceiverName)
                 .zipCode(address.getZipCode())
+                .phone(decryptedPhone)
                 .build();
     }
 }

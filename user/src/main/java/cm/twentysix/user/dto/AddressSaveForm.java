@@ -12,7 +12,9 @@ public record AddressSaveForm(
         @Size(min = 8, max = 100, message = "주소의 형식이 아닙니다.")
         String address,
         @Pattern(regexp = "^[0-9]{5}$", message = "우편번호 형식이 아닙니다.")
-        String zipCode
+        String zipCode,
+        @Pattern(regexp = "^0\\d{1,2}-\\d{3,4}-\\d{4}$", message = "전화 번호 형식이 아닙니다.")
+        String phone
 ) {
     public static AddressSaveForm from(SignUpForm form) {
         return AddressSaveForm.builder()
@@ -20,6 +22,7 @@ public record AddressSaveForm(
                 .address(form.address())
                 .zipCode(form.zipCode())
                 .isDefault(true)
+                .phone(form.phone())
                 .build();
     }
 }

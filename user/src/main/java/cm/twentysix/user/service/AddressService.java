@@ -55,11 +55,9 @@ public class AddressService {
     public void deleteAddress(Long id, Long userId) {
         List<Address> addresses = addressRepository.findByUserIdOrderByIsDefaultDesc(userId);
         Address address = addresses.stream()
-                .filter(ad -> ad.getId().equals(id))
+                .filter(ad -> id.equals(ad.getId()))
                 .findFirst()
                 .orElseThrow(() -> new AddressException(Error.ADDRESS_NOT_FOUND));
-        if (!address.getUserId().equals(userId))
-            throw new AddressException(Error.NOT_USERS_ADDRESS);
         if (addresses.size() == 1)
             throw new AddressException(Error.ONLY_ADDRESS);
 
@@ -72,11 +70,9 @@ public class AddressService {
     public void changeDefaultAddress(Long id, Long userId) {
         List<Address> addresses = addressRepository.findByUserIdOrderByIsDefaultDesc(userId);
         Address address = addresses.stream()
-                .filter(ad -> ad.getId().equals(id))
+                .filter(ad -> id.equals(ad.getId()))
                 .findFirst()
                 .orElseThrow(() -> new AddressException(Error.ADDRESS_NOT_FOUND));
-        if (!address.getUserId().equals(userId))
-            throw new AddressException(Error.NOT_USERS_ADDRESS);
         if (address.isDefault())
             throw new AddressException(Error.ALREADY_DEFAULT_ADDRESS);
 

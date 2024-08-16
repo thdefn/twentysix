@@ -5,12 +5,10 @@ import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.domain.model.Order;
 import cm.twentysix.order.domain.model.OrderStatus;
 import cm.twentysix.order.domain.repository.OrderRepository;
-import cm.twentysix.order.dto.CreateOrderForm;
-import cm.twentysix.order.dto.OrderEvent;
-import cm.twentysix.order.dto.OrderReplyEvent;
-import cm.twentysix.order.dto.ProductOrderItem;
+import cm.twentysix.order.dto.*;
 import cm.twentysix.order.exception.Error;
 import cm.twentysix.order.exception.OrderException;
+import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -28,11 +27,19 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final BrandGrpcClient brandGrpcClient;
+    private final CartService cartService;
+    private final MessageSender messageSender;
 
     @Transactional
     public void receiveOrder(CreateOrderForm form, Long userId) {
         String orderId = IdUtil.generate();
-        // TODO : 배송지 정보 업데이트 요청
+        CompletableFuture.runAsync(() -> {
+            if (form.shouldSaveNewAddress()) {
+                messageSender.sendAddressSaveEvent(
+                        AddressSaveEvent.from(form.receiver(), userId));
+            }
+        });
+
         orderRepository.save(Order.of(orderId, userId, form));
 
         eventPublisher.publishEvent(OrderEvent.of(form.products(), orderId));

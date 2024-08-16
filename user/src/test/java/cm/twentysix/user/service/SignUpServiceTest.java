@@ -1,13 +1,11 @@
 package cm.twentysix.user.service;
 
-import cm.twentysix.user.dto.AddressSaveForm;
+import cm.twentysix.user.dto.AddressSaveEvent;
 import cm.twentysix.user.dto.SignUpForm;
 import cm.twentysix.user.domain.model.EmailAuth;
 import cm.twentysix.user.domain.model.User;
 import cm.twentysix.user.domain.repository.EmailAuthRedisRepository;
 import cm.twentysix.user.domain.repository.UserRepository;
-import cm.twentysix.user.dto.AddressSaveForm;
-import cm.twentysix.user.dto.SignUpForm;
 import cm.twentysix.user.exception.EmailAuthException;
 import cm.twentysix.user.exception.Error;
 import cm.twentysix.user.exception.UserException;
@@ -78,12 +76,12 @@ class SignUpServiceTest {
         assertEquals(savedUser.getName(), "cipherManagerEncrypt");
         assertEquals(savedUser.getPassword(), "passwordEncoderEncrypt");
 
-        ArgumentCaptor<AddressSaveForm> formCaptor = ArgumentCaptor.forClass(AddressSaveForm.class);
-        verify(addressService, times(1)).saveAddress(anyLong(), formCaptor.capture());
-        AddressSaveForm addressSaveForm = formCaptor.getValue();
-        assertEquals(form.address(), addressSaveForm.address());
-        assertEquals(form.name(), addressSaveForm.name());
-        assertEquals(form.zipCode(), addressSaveForm.zipCode());
+        ArgumentCaptor<AddressSaveEvent> formCaptor = ArgumentCaptor.forClass(AddressSaveEvent.class);
+        verify(addressService, times(1)).saveAddress(formCaptor.capture());
+        AddressSaveEvent addressSaveEvent = formCaptor.getValue();
+        assertEquals(form.address(), addressSaveEvent.address());
+        assertEquals(form.name(), addressSaveEvent.name());
+        assertEquals(form.zipCode(), addressSaveEvent.zipCode());
     }
 
     @Test

@@ -31,4 +31,8 @@ public class CartProduct implements Serializable {
     public void changeQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    public void decreaseQuantity(int quantity) {
+        this.quantity -= quantity;
+    }
 }

@@ -1,8 +1,7 @@
 package cm.twentysix.order.domain.model;
 
 import cm.twentysix.BrandProto.BrandInfo;
-import cm.twentysix.order.dto.CreateOrderForm;
-import cm.twentysix.order.dto.ProductOrderItem;
+import cm.twentysix.ProductProto.ProductItemResponse;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -15,6 +14,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static cm.twentysix.order.dto.CreateOrderForm.ReceiverForm;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -66,32 +68,32 @@ public class Order extends BaseTimeEntity {
         this.deliveryFees = deliveryFees;
     }
 
-    public static Order of(String orderId, Long userId, CreateOrderForm form) {
+
+    public static Order of(String orderId, List<ProductItemResponse> containedProducts,
+                           Map<String, Integer> productIdQuantityMap, ReceiverForm receiver, Long userId) {
         return Order.builder()
                 .orderId(orderId)
                 .userId(userId)
-                .products(new HashMap<>())
-                .deliveryFees(new HashMap<>())
-                .receiver(OrderReceiver.of(form.receiver()))
-                .status(OrderStatus.CHECK_PENDING).build();
+                .products(containedProducts.stream()
+                        .collect(Collectors.toMap(ProductItemResponse::getId,
+                                product -> OrderProduct.of(product, productIdQuantityMap.get(product.getId())))))
+                .status(OrderStatus.PAYMENT_PENDING)
+                .receiver(OrderReceiver.from(receiver))
+                .build();
     }
 
-    public void approve(Map<String, ProductOrderItem> orderedItem, Map<Long, BrandInfo> containedBrandInfo) {
-        saveOrderProducts(orderedItem);
-        calculateDeliveryFee(containedBrandInfo);
-        this.totalAmount = products.values().stream().mapToInt(OrderProduct::getAmount).sum();
-        this.totalDeliveryFee = deliveryFees.values().stream().mapToInt(Integer::intValue).sum();
-        status = OrderStatus.PAYMENT_PENDING;
+    public int settlePayment(Map<Long, BrandInfo> containedBrands) {
+        totalAmount = calculateTotalAmount();
+        totalDeliveryFee = calculateDeliveryFee(containedBrands);
+        return totalDeliveryFee + totalDeliveryFee;
+
     }
 
-    private void saveOrderProducts(Map<String, ProductOrderItem> orderedItem) {
-        for (String productId : orderedItem.keySet()) {
-            ProductOrderItem item = orderedItem.get(productId);
-            products.put(productId, OrderProduct.from(item));
-        }
+    private int calculateTotalAmount() {
+        return products.values().stream().mapToInt(OrderProduct::getAmount).sum();
     }
 
-    private void calculateDeliveryFee(Map<Long, BrandInfo> containedBrandInfo) {
+    private int calculateDeliveryFee(Map<Long, BrandInfo> containedBrands) {
         Map<Long, Integer> brandIdAmountMap = new HashMap<>();
         for (OrderProduct p : products.values()) {
             brandIdAmountMap.put(p.getBrandId(), brandIdAmountMap.getOrDefault(p.getBrandId(), 0) + p.getAmount());
@@ -99,12 +101,13 @@ public class Order extends BaseTimeEntity {
 
         for (Long brandId : brandIdAmountMap.keySet()) {
             int brandTotalAmount = brandIdAmountMap.get(brandId);
-            int brandFreeDeliveryInfimum = containedBrandInfo.get(brandId).getFreeDeliveryInfimum();
+            int brandFreeDeliveryInfimum = containedBrands.get(brandId).getFreeDeliveryInfimum();
             if (brandTotalAmount >= brandFreeDeliveryInfimum)
                 deliveryFees.put(brandId, 0);
             else
-                deliveryFees.put(brandId, containedBrandInfo.get(brandId).getDeliveryFee());
+                deliveryFees.put(brandId, containedBrands.get(brandId).getDeliveryFee());
         }
+        return deliveryFees.values().stream().mapToInt(Integer::intValue).sum();
     }
 
     public String getOrderName() {
@@ -112,5 +115,9 @@ public class Order extends BaseTimeEntity {
         if (orderProducts.size() > 1)
             return orderProducts.getFirst().getName() + " 외" + (products.size() - 1) + "건";
         return orderProducts.getFirst().getName();
+    }
+
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
     }
 }

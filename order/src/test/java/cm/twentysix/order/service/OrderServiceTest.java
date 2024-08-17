@@ -86,7 +86,7 @@ class OrderServiceTest {
         assertEquals(saved.getReceiver().getZipCode(), receiver.zipCode());
         assertEquals(saved.getReceiver().getAddress(), receiver.address());
         assertEquals(saved.getUserId(), 1L);
-        assertEquals(saved.getStatus(), OrderStatus.CHECK_PENDING);
+        assertEquals(saved.getStatus(), OrderStatus.PAYMENT_PENDING);
     }
 
     @Test
@@ -111,16 +111,14 @@ class OrderServiceTest {
         assertEquals(saved.getReceiver().getZipCode(), receiver.zipCode());
         assertEquals(saved.getReceiver().getAddress(), receiver.address());
         assertEquals(saved.getUserId(), 1L);
-        assertEquals(saved.getStatus(), OrderStatus.CHECK_PENDING);
+        assertEquals(saved.getStatus(), OrderStatus.PAYMENT_PENDING);
     }
 
     @Test
     void approveOrDenyOrder_success_WhenOrderReplyEventIsSuccess() {
         //given
         ProductOrderItem item = new ProductOrderItem("수건", "1234.jpg", 1, 100000, 1L, "JAJU", 0);
-        OrderReplyEvent event = OrderReplyEvent.builder()
-                .isSuccess(true)
-                .orderedItem(Map.of("1234t5gf", item))
+        ProductOrderFailedEvent event = ProductOrderFailedEvent.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .build();
         Order order = Order.builder()
@@ -134,13 +132,13 @@ class OrderServiceTest {
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.CHECK_PENDING)
+                .status(OrderStatus.PAYMENT_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(20000).setId(2L).setFreeDeliveryInfimum(500000).build()));
         //when
-        orderService.approveOrDenyOrder(event);
+        orderService.handleProductOrderFailedEvent(event);
         //then
         assertTrue(order.getProducts().containsKey("1234t5gf"));
         OrderProduct product = order.getProducts().get("1234t5gf");
@@ -165,9 +163,7 @@ class OrderServiceTest {
     void approveOrDenyOrder_success_WhenOrderReplyEventIsFail() {
         //given
         ProductOrderItem item = new ProductOrderItem("수건", "1234.jpg", 1, 100000, 1L, "JAJU", 0);
-        OrderReplyEvent event = OrderReplyEvent.builder()
-                .isSuccess(false)
-                .orderedItem(Map.of("1234t5gf", item))
+        ProductOrderFailedEvent event = ProductOrderFailedEvent.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .build();
         Order order = Order.builder()
@@ -179,11 +175,11 @@ class OrderServiceTest {
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.CHECK_PENDING)
+                .status(OrderStatus.PAYMENT_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         //when
-        orderService.approveOrDenyOrder(event);
+        orderService.handleProductOrderFailedEvent(event);
         //then
         verify(orderRepository, times(1)).delete(any());
     }

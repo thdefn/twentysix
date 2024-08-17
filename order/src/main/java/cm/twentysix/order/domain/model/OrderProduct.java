@@ -1,6 +1,6 @@
 package cm.twentysix.order.domain.model;
 
-import cm.twentysix.order.dto.ProductOrderItem;
+import cm.twentysix.ProductProto.ProductItemResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -27,15 +27,15 @@ public class OrderProduct implements Serializable {
         this.status = status;
     }
 
-    public static OrderProduct from(ProductOrderItem item) {
+    public static OrderProduct of(ProductItemResponse product, int quantity) {
         return OrderProduct.builder()
-                .brandId(item.brandId())
-                .quantity(item.quantity())
-                .name(item.name())
+                .name(product.getId())
+                .quantity(quantity)
+                .thumbnail(product.getThumbnail())
+                .brandId(product.getBrandId())
+                .brandName(product.getBrandName())
+                .amount(product.getDiscountedPrice() * quantity)
                 .status(OrderProductStatus.ORDER_PLACED)
-                .brandName(item.brandName())
-                .thumbnail(item.thumbnail())
-                .amount(item.amount())
                 .build();
     }
 }

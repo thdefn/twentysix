@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_package = "cm.twentysix";
+option java_outer_classname = "OrderProto";
+
+service OrderService {
+  rpc GetOrder (OrderInfoRequest) returns (OrderInfoResponse);
+}
+
+message OrderInfoRequest {
+  string orderId = 1;
+}
+
+message OrderInfoResponse {
+  string orderId = 1;
+  string orderName = 2;
+  int32 totalAmount = 3;
+  int64 userId = 4;
+}
+
+
+
+

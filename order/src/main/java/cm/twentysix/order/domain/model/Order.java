@@ -11,7 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -103,5 +105,12 @@ public class Order extends BaseTimeEntity {
             else
                 deliveryFees.put(brandId, containedBrandInfo.get(brandId).getDeliveryFee());
         }
+    }
+
+    public String getOrderName() {
+        List<OrderProduct> orderProducts = new ArrayList<>(products.values());
+        if (orderProducts.size() > 1)
+            return orderProducts.getFirst().getName() + " 외" + (products.size() - 1) + "건";
+        return orderProducts.getFirst().getName();
     }
 }

@@ -82,11 +82,13 @@ public class Order extends BaseTimeEntity {
                 .build();
     }
 
-    public int settlePayment(Map<Long, BrandInfo> containedBrands) {
+    public void settlePayment(Map<Long, BrandInfo> containedBrands) {
         totalAmount = calculateTotalAmount();
         totalDeliveryFee = calculateDeliveryFee(containedBrands);
-        return totalDeliveryFee + totalDeliveryFee;
+    }
 
+    public int getPaymentAmount() {
+        return totalAmount + totalDeliveryFee;
     }
 
     private int calculateTotalAmount() {

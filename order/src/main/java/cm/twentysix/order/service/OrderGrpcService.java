@@ -29,7 +29,7 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
 
             OrderInfoResponse response = OrderInfoResponse.newBuilder()
                     .setOrderId(order.getOrderId())
-                    .setTotalAmount(order.getTotalAmount())
+                    .setPaymentAmount(order.getPaymentAmount())
                     .setUserId(order.getUserId())
                     .setOrderName(order.getOrderName())
                     .build();

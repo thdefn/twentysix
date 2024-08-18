@@ -68,12 +68,11 @@ public class OrderService {
         try {
             Order order = orderFuture.get();
             orderRepository.save(order);
+            eventPublisher.publishEvent(OrderEvent.of(order));
+            return ReceiveOrderResponse.of(orderId);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-
-        eventPublisher.publishEvent(OrderEvent.of(form.products(), orderId));
-        return ReceiveOrderResponse.of(orderId);
     }
 
     @Transactional
@@ -84,7 +83,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
 
 
-       order.changeStatus(OrderStatus.CHECK_FAIL);
+        order.changeStatus(OrderStatus.CHECK_FAIL);
     }
 
 

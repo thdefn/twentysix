@@ -1,7 +1,6 @@
 package cm.twentysix.payment.controller;
 
 import cm.twentysix.payment.dto.RequiredPaymentResponse;
-import cm.twentysix.payment.exception.Error;
 import cm.twentysix.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,20 +25,17 @@ public class CheckoutController {
         model.addAttribute("orderId", orderId);
         model.addAttribute("userId", response.userId());
         model.addAttribute("orderName", response.orderName());
+        model.addAttribute("isBlocked", response.isBlocked());
         return "checkout";
     }
 
     @GetMapping("/fail")
-    public String fail(@RequestParam String code, @RequestParam String message, @RequestParam String orderId) {
+    public String fail(@RequestParam String code, @RequestParam String message) {
         return "fail";
     }
 
     @GetMapping("/success")
     public String success(@RequestParam String paymentKey, @RequestParam String orderId, @RequestParam Integer amount) {
-        boolean shouldRedirect = !paymentService.success(paymentKey, orderId, amount);
-        if (shouldRedirect)
-            return "redirect:/fail?code=" + Error.STOCK_SHORTAGE +
-                    "?message=" + Error.STOCK_SHORTAGE.message + "?orderId=" + orderId;
         return "success";
     }
 }

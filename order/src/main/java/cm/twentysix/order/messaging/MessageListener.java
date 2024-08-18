@@ -17,7 +17,6 @@ public class MessageListener {
 
     @Bean(name = "product-order-failed")
     public Consumer<ProductOrderFailedEvent> productOrderFailedEventConsumer() {
-        log.error("productOrderFailedEventConsumer");
         return orderService::handleProductOrderFailedEvent;
     }
 }

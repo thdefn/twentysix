@@ -34,6 +34,11 @@
     main();
 
     async function main() {
+        const isBlocked = [[${isBlocked}]];
+
+        if(isBlocked)
+            window.location.href = `/checkout/fail?message=Order failed due to insufficient stock&code=STOCK_SHORTAGE`;
+
         const button = document.getElementById("payment-button");
         // ------  결제위젯 초기화 ------
         const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
@@ -43,7 +48,6 @@
         const widgets = tossPayments.widgets({
             customerKey,
         });
-
         // ------ 주문의 결제 금액 설정 ------
         await widgets.setAmount({
             currency: "KRW",

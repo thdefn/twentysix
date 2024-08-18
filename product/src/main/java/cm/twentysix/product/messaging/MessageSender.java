@@ -15,7 +15,6 @@ public class MessageSender {
     private final StreamBridge streamBridge;
 
     public boolean sendProductOrderFailedEvent(ProductOrderFailedEvent event) {
-        log.error(event.toString());
         return streamBridge.send("product-order-failed-out-0", MessageBuilder.withPayload(event).build());
     }
 }

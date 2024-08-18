@@ -1,6 +1,8 @@
 package cm.twentysix.payment.controller;
 
-import cm.twentysix.payment.service.CheckoutService;
+import cm.twentysix.payment.dto.RequiredPaymentResponse;
+import cm.twentysix.payment.exception.Error;
+import cm.twentysix.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -10,22 +12,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import static cm.twentysix.OrderProto.OrderInfoResponse;
-
 @Controller
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/checkout")
 public class CheckoutController {
-    private final CheckoutService checkoutService;
+    private final PaymentService paymentService;
 
     @GetMapping("/{orderId}")
     public String checkout(@PathVariable String orderId, Model model) {
-        OrderInfoResponse response = checkoutService.getOrderInfo(orderId);
-        model.addAttribute("amount", response.getTotalAmount());
-        model.addAttribute("orderId", response.getOrderId());
-        model.addAttribute("userId", response.getUserId());
-        model.addAttribute("orderName", response.getOrderName());
+        RequiredPaymentResponse response = paymentService.getRequiredPayment(orderId);
+        model.addAttribute("amount", response.amount());
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("userId", response.userId());
+        model.addAttribute("orderName", response.orderName());
         return "checkout";
     }
 
@@ -36,6 +36,10 @@ public class CheckoutController {
 
     @GetMapping("/success")
     public String success(@RequestParam String paymentKey, @RequestParam String orderId, @RequestParam Integer amount) {
+        boolean shouldRedirect = !paymentService.success(paymentKey, orderId, amount);
+        if (shouldRedirect)
+            return "redirect:/fail?code=" + Error.STOCK_SHORTAGE +
+                    "?message=" + Error.STOCK_SHORTAGE.message + "?orderId=" + orderId;
         return "success";
     }
 }

@@ -78,6 +78,7 @@ public class Order extends BaseTimeEntity {
                         .collect(Collectors.toMap(ProductItemResponse::getId,
                                 product -> OrderProduct.of(product, productIdQuantityMap.get(product.getId())))))
                 .status(OrderStatus.PAYMENT_PENDING)
+                .deliveryFees(new HashMap<>())
                 .receiver(OrderReceiver.from(receiver))
                 .build();
     }
@@ -119,7 +120,7 @@ public class Order extends BaseTimeEntity {
         return orderProducts.getFirst().getName();
     }
 
-    public void changeStatus(OrderStatus status) {
-        this.status = status;
+    public void fail() {
+        status = OrderStatus.CHECK_FAIL;
     }
 }

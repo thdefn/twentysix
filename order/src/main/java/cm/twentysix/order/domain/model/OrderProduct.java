@@ -29,7 +29,7 @@ public class OrderProduct implements Serializable {
 
     public static OrderProduct of(ProductItemResponse product, int quantity) {
         return OrderProduct.builder()
-                .name(product.getId())
+                .name(product.getName())
                 .quantity(quantity)
                 .thumbnail(product.getThumbnail())
                 .brandId(product.getBrandId())

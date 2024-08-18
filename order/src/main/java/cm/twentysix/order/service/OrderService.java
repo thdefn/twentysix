@@ -82,8 +82,7 @@ public class OrderService {
                 .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
                 .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
 
-
-        order.changeStatus(OrderStatus.CHECK_FAIL);
+        order.fail();
     }
 
 

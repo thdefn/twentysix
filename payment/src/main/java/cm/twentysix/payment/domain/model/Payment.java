@@ -1,6 +1,7 @@
 package cm.twentysix.payment.domain.model;
 
 import cm.twentysix.OrderProto.OrderInfoResponse;
+import cm.twentysix.payment.dto.PaymentResponse;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -66,16 +67,6 @@ public class Payment extends BaseTimeEntity {
         this.status = status;
     }
 
-    public static Payment from(OrderInfoResponse order) {
-        return Payment.builder()
-                .amount(order.getPaymentAmount())
-                .orderId(order.getOrderId())
-                .orderName(order.getOrderName())
-                .userId(order.getUserId())
-                .status(PaymentStatus.PENDING)
-                .build();
-    }
-
     public void updateOrderInfo(OrderInfoResponse orderInfo) {
         this.userId = orderInfo.getUserId();
         this.orderName = orderInfo.getOrderName();
@@ -97,9 +88,16 @@ public class Payment extends BaseTimeEntity {
         status = PaymentStatus.CANCEL;
     }
 
-    public void complete(String paymentKey, Integer amount) {
-        this.paymentKey = paymentKey;
-        this.amount = amount;
+    public void confirmPayment(PaymentResponse response) {
+        paymentKey = response.paymentKey();
+        amount = response.totalAmount();
+        requestedAt = response.getRequestedAt();
+    }
+
+    public void complete(PaymentResponse response) {
+        method = PaymentMethod.valueOf(response.method());
+        methodDetail = method.getMethodDetail(response);
+        approvedAt = response.getApprovedAt();
         status = PaymentStatus.COMPLETE;
     }
 

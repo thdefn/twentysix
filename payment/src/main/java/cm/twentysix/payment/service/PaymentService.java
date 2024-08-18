@@ -5,11 +5,9 @@ import cm.twentysix.payment.client.PaymentClient;
 import cm.twentysix.payment.domain.model.Payment;
 import cm.twentysix.payment.domain.model.PaymentStatus;
 import cm.twentysix.payment.domain.repository.PaymentRepository;
-import cm.twentysix.payment.dto.PaymentCancelForm;
-import cm.twentysix.payment.dto.PaymentForm;
-import cm.twentysix.payment.dto.ProductOrderFailedEvent;
-import cm.twentysix.payment.dto.RequiredPaymentResponse;
+import cm.twentysix.payment.dto.*;
 import cm.twentysix.payment.exception.PaymentException;
+import cm.twentysix.payment.messaging.MessageSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +23,7 @@ public class PaymentService {
     private final OrderGrpcClient orderGrpcClient;
     private final PaymentRepository paymentRepository;
     private final PaymentClient paymentClient;
+    private final MessageSender messageSender;
 
     public RequiredPaymentResponse getRequiredPayment(String orderId) {
         OrderInfoResponse orderInfo = orderGrpcClient.getOrderInfo(orderId);
@@ -41,8 +40,16 @@ public class PaymentService {
                 .filter(p -> PaymentStatus.PENDING.equals(p.getStatus()))
                 .orElseThrow(() -> new PaymentException(STOCK_SHORTAGE));
 
-        paymentClient.confirm(form);
-        payment.complete(form.paymentKey(), Integer.parseInt(form.amount()));
+        PaymentResponse response = paymentClient.confirm(form);
+        payment.confirmPayment(response);
+        if ("DONE".equals(response.status())) {
+            payment.complete(response);
+            messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(response.orderId(), true));
+        } else if ("ABORTED".equals(response.status())) {
+            payment.cancel();
+            messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(response.orderId(), false));
+        }
+        // TODO : 429 500 토스 측에서 에러 났을 때 핸들링
     }
 
     @Transactional

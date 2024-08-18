@@ -21,9 +21,10 @@ public class ProductStockService {
     @Transactional
     public void checkProductStock(Map<String, Integer> productIdQuantity, String orderId) {
         List<Product> products = productRepository.findByIdInAndIsDeletedFalse(productIdQuantity.keySet());
-        if(checkAndUpdateProductStock(products, productIdQuantity))
+        if (checkAndUpdateProductStock(products, productIdQuantity))
             productRepository.saveAll(products);
-        else messageSender.sendProductOrderFailedEvent(ProductOrderFailedEvent.of(orderId));
+        else
+            messageSender.sendProductOrderFailedEvent(ProductOrderFailedEvent.of(orderId));
     }
 
 
@@ -35,5 +36,15 @@ public class ProductStockService {
             p.minusQuantity(requiredQuantity);
         }
         return true;
+    }
+
+    public void restoreProductStock(Map<String, Integer> productIdQuantity) {
+        List<Product> products = productRepository.findByIdInAndIsDeletedFalse(productIdQuantity.keySet());
+
+        for (Product p : products) {
+            int quantityToAdded = productIdQuantity.get(p.getId());
+            p.addQuantity(quantityToAdded);
+        }
+        productRepository.saveAll(products);
     }
 }

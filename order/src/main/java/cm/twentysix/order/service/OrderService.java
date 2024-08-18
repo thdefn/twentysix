@@ -43,7 +43,7 @@ public class OrderService {
                 messageSender.sendAddressSaveEvent(
                         AddressSaveEvent.from(form.receiver(), userId));
             }
-        });
+        }).thenRunAsync(() -> cartService.removeOrderedCartItem(form, userId));
 
         Map<String, Integer> productIdQuantityMap = form.products().stream()
                 .collect(Collectors.toMap(OrderProductItemForm::id, OrderProductItemForm::quantity));
@@ -82,7 +82,22 @@ public class OrderService {
                 .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
                 .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
 
-        order.fail();
+        order.checkFail();
+    }
+
+    @Transactional
+    public void handlePaymentFinalizedEvent(PaymentFinalizedEvent event) {
+        Order order = orderRepository.findByOrderId(event.orderId())
+                .stream().findFirst()
+                .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
+                .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
+
+        if (event.isSuccess()) {
+            order.placed();
+        } else {
+            order.paymentFail();
+            messageSender.sendOrderFailedEvent(OrderFailedEvent.of(order));
+        }
     }
 
 

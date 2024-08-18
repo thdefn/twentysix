@@ -1,5 +1,6 @@
 package cm.twentysix.order.messaging;
 
+import cm.twentysix.order.dto.PaymentFinalizedEvent;
 import cm.twentysix.order.dto.ProductOrderFailedEvent;
 import cm.twentysix.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,10 @@ public class MessageListener {
     @Bean(name = "product-order-failed")
     public Consumer<ProductOrderFailedEvent> productOrderFailedEventConsumer() {
         return orderService::handleProductOrderFailedEvent;
+    }
+
+    @Bean(name = "payment-finalized")
+    public Consumer<PaymentFinalizedEvent> paymentFinalizedEventConsumer() {
+        return orderService::handlePaymentFinalizedEvent;
     }
 }

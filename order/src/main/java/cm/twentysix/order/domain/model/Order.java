@@ -120,7 +120,15 @@ public class Order extends BaseTimeEntity {
         return orderProducts.getFirst().getName();
     }
 
-    public void fail() {
+    public void checkFail() {
         status = OrderStatus.CHECK_FAIL;
+    }
+
+    public void paymentFail() {
+        status = OrderStatus.PAYMENT_FAIL;
+    }
+
+    public void placed() {
+        status = OrderStatus.ORDER_PLACED;
     }
 }

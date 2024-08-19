@@ -1,10 +1,14 @@
 package cm.twentysix.order.service;
 
 import cm.twentysix.BrandProto;
+import cm.twentysix.ProductProto;
 import cm.twentysix.order.client.BrandGrpcClient;
+import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.*;
 import cm.twentysix.order.domain.repository.OrderRepository;
 import cm.twentysix.order.dto.*;
+import cm.twentysix.order.exception.Error;
+import cm.twentysix.order.exception.OrderException;
 import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -23,8 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -37,9 +40,11 @@ class OrderServiceTest {
     @Mock
     private BrandGrpcClient brandGrpcClient;
     @Mock
-    CartService cartService;
+    private ProductGrpcClient productGrpcClient;
     @Mock
-    MessageSender messageSender;
+    private CartService cartService;
+    @Mock
+    private MessageSender messageSender;
     @InjectMocks
     private OrderService orderService;
 
@@ -64,8 +69,24 @@ class OrderServiceTest {
         );
         CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
         CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
+        given(productGrpcClient.findProductItems(anyList())).willReturn(
+                List.of(
+                        ProductProto.ProductItemResponse.newBuilder()
+                                .setId("123456")
+                                .setDiscountedPrice(27000)
+                                .setDiscount(10)
+                                .setThumbnail("so-cute.jpg")
+                                .setPrice(30000)
+                                .setName("모달 잠옷 여성")
+                                .setBrandName("JAJU")
+                                .setBrandId(1L)
+                                .build()
+                )
+        );
+        given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
+                .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
         //when
-        orderService.receiveOrder(form, 1L);
+        ReceiveOrderResponse response = orderService.receiveOrder(form, 1L);
         //then
         ArgumentCaptor<AddressSaveEvent> addressSaveEventCaptor = ArgumentCaptor.forClass(AddressSaveEvent.class);
         verify(messageSender, times(1)).sendAddressSaveEvent(addressSaveEventCaptor.capture());
@@ -85,8 +106,22 @@ class OrderServiceTest {
         assertEquals(saved.getReceiver().getPhone(), receiver.phone());
         assertEquals(saved.getReceiver().getZipCode(), receiver.zipCode());
         assertEquals(saved.getReceiver().getAddress(), receiver.address());
+
+        OrderProduct savedItem = saved.getProducts().get("123456");
+        assertEquals(savedItem.getAmount(), 27000);
+        assertEquals(savedItem.getQuantity(), 1);
+        assertEquals(savedItem.getBrandId(), 1L);
+        assertEquals(savedItem.getBrandName(), "JAJU");
+        assertEquals(savedItem.getThumbnail(), "so-cute.jpg");
+        assertEquals(savedItem.getName(), "모달 잠옷 여성");
+        assertEquals(saved.getProducts().get("123456").getBrandId(), 1L);
+
         assertEquals(saved.getUserId(), 1L);
-        assertEquals(saved.getStatus(), OrderStatus.CHECK_PENDING);
+        assertEquals(saved.getStatus(), OrderStatus.PAYMENT_PENDING);
+        assertEquals(saved.getTotalAmount(), 27000);
+        assertEquals(saved.getTotalDeliveryFee(), 3000);
+        assertEquals(saved.getPaymentAmount(), 30000);
+        assertEquals(response.orderId(), "2032032003030-afsfdasfdsfdsafdl2");
     }
 
     @Test
@@ -97,8 +132,24 @@ class OrderServiceTest {
         );
         CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
         CreateOrderForm form = new CreateOrderForm(items, false, true, receiver);
+        given(productGrpcClient.findProductItems(anyList())).willReturn(
+                List.of(
+                        ProductProto.ProductItemResponse.newBuilder()
+                                .setId("123456")
+                                .setDiscountedPrice(27000)
+                                .setDiscount(10)
+                                .setThumbnail("so-cute.jpg")
+                                .setPrice(30000)
+                                .setName("모달 잠옷 여성")
+                                .setBrandName("JAJU")
+                                .setBrandId(1L)
+                                .build()
+                )
+        );
+        given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
+                .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
         //when
-        orderService.receiveOrder(form, 1L);
+        ReceiveOrderResponse response = orderService.receiveOrder(form, 1L);
         //then
         verify(messageSender, times(0)).sendAddressSaveEvent(any());
 
@@ -111,16 +162,150 @@ class OrderServiceTest {
         assertEquals(saved.getReceiver().getZipCode(), receiver.zipCode());
         assertEquals(saved.getReceiver().getAddress(), receiver.address());
         assertEquals(saved.getUserId(), 1L);
-        assertEquals(saved.getStatus(), OrderStatus.CHECK_PENDING);
+        assertEquals(saved.getStatus(), OrderStatus.PAYMENT_PENDING);
+        assertEquals(response.orderId(), "2032032003030-afsfdasfdsfdsafdl2");
     }
+
+    @Test
+    void handleProductOrderFailedEvent_success() {
+        //given
+        ProductOrderFailedEvent event = new ProductOrderFailedEvent("2032032003030-afsfdasfdsfdsafdl2");
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(1L)
+                .products(new HashMap<>())
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.PAYMENT_PENDING)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        orderService.handleProductOrderFailedEvent(event);
+        //then
+        assertEquals(order.getStatus(), OrderStatus.CHECK_FAIL);
+    }
+
+    @Test
+    void handleProductOrderFailedEvent_fail_PROCESSING_ORDER_NOT_FOUND() {
+        //given
+        ProductOrderFailedEvent event = new ProductOrderFailedEvent("2032032003030-afsfdasfdsfdsafdl2");
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(1L)
+                .products(new HashMap<>())
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.PAYMENT_FAIL)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.handleProductOrderFailedEvent(event));
+        //then
+        assertEquals(e.getError(), Error.PROCESSING_ORDER_NOT_FOUND);
+    }
+
+
+    @Test
+    void handlePaymentFinalizedEvent_success() {
+        //given
+        PaymentFinalizedEvent event = new PaymentFinalizedEvent("2032032003030-afsfdasfdsfdsafdl2", true);
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(1L)
+                .products(new HashMap<>())
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.PAYMENT_PENDING)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        orderService.handlePaymentFinalizedEvent(event);
+        //then
+        assertEquals(order.getStatus(), OrderStatus.ORDER_PLACED);
+    }
+
+    @Test
+    void handlePaymentFinalizedEvent_success_WhenPaymentIsFail() {
+        //given
+        PaymentFinalizedEvent event = new PaymentFinalizedEvent("2032032003030-afsfdasfdsfdsafdl2", false);
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(1L)
+                .products(Map.of(
+                        "1234", OrderProduct.builder().quantity(2).build(),
+                        "2345", OrderProduct.builder().quantity(1).build(),
+                        "3456", OrderProduct.builder().quantity(1).build()
+                ))
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.PAYMENT_PENDING)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        orderService.handlePaymentFinalizedEvent(event);
+        //then
+        ArgumentCaptor<OrderFailedEvent> orderFailedEventCaptor = ArgumentCaptor.forClass(OrderFailedEvent.class);
+        verify(messageSender, times(1)).sendOrderFailedEvent(orderFailedEventCaptor.capture());
+        OrderFailedEvent orderFailedEvent = orderFailedEventCaptor.getValue();
+        Map<String, Integer> productQuantityMap = orderFailedEvent.productQuantity();
+        assertEquals(productQuantityMap.get("1234"), 2);
+        assertEquals(productQuantityMap.get("2345"), 1);
+        assertEquals(productQuantityMap.get("3456"), 1);
+        assertEquals(order.getStatus(), OrderStatus.PAYMENT_FAIL);
+    }
+
+    @Test
+    void handlePaymentFinalizedEvent_fail_PROCESSING_ORDER_NOT_FOUND() {
+        //given
+        PaymentFinalizedEvent event = new PaymentFinalizedEvent("2032032003030-afsfdasfdsfdsafdl2", true);
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(1L)
+                .products(new HashMap<>())
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.CHECK_FAIL)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.handlePaymentFinalizedEvent(event));
+        //then
+        assertEquals(e.getError(), Error.PROCESSING_ORDER_NOT_FOUND);
+    }
+
+
+
 
     @Test
     void approveOrDenyOrder_success_WhenOrderReplyEventIsSuccess() {
         //given
         ProductOrderItem item = new ProductOrderItem("수건", "1234.jpg", 1, 100000, 1L, "JAJU", 0);
-        OrderReplyEvent event = OrderReplyEvent.builder()
-                .isSuccess(true)
-                .orderedItem(Map.of("1234t5gf", item))
+        ProductOrderFailedEvent event = ProductOrderFailedEvent.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .build();
         Order order = Order.builder()
@@ -134,13 +319,13 @@ class OrderServiceTest {
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.CHECK_PENDING)
+                .status(OrderStatus.PAYMENT_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(20000).setId(2L).setFreeDeliveryInfimum(500000).build()));
         //when
-        orderService.approveOrDenyOrder(event);
+        orderService.handleProductOrderFailedEvent(event);
         //then
         assertTrue(order.getProducts().containsKey("1234t5gf"));
         OrderProduct product = order.getProducts().get("1234t5gf");
@@ -165,9 +350,7 @@ class OrderServiceTest {
     void approveOrDenyOrder_success_WhenOrderReplyEventIsFail() {
         //given
         ProductOrderItem item = new ProductOrderItem("수건", "1234.jpg", 1, 100000, 1L, "JAJU", 0);
-        OrderReplyEvent event = OrderReplyEvent.builder()
-                .isSuccess(false)
-                .orderedItem(Map.of("1234t5gf", item))
+        ProductOrderFailedEvent event = ProductOrderFailedEvent.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .build();
         Order order = Order.builder()
@@ -179,11 +362,11 @@ class OrderServiceTest {
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.CHECK_PENDING)
+                .status(OrderStatus.PAYMENT_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         //when
-        orderService.approveOrDenyOrder(event);
+        orderService.handleProductOrderFailedEvent(event);
         //then
         verify(orderRepository, times(1)).delete(any());
     }

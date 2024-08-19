@@ -2,14 +2,12 @@ package cm.twentysix.product.service;
 
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.OrderReplyEvent;
-import cm.twentysix.product.dto.ProductOrderItem;
+import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.messaging.MessageSender;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,30 +15,37 @@ import java.util.Map;
 @Service
 public class ProductStockService {
     private final ProductRepository productRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final MessageSender messageSender;
+
 
     @Transactional
-    public void checkProductStock(Map<String, Integer> orderedProductQuantity, String orderId) {
-        List<Product> products = productRepository.findByIdInAndIsDeletedFalse(orderedProductQuantity.keySet());
-        Map<String, ProductOrderItem> orderItems = getProductOrderItems(products, orderedProductQuantity);
-
-        boolean isSuccess = orderItems.size() == orderedProductQuantity.size();
-        if (isSuccess) {
+    public void checkProductStock(Map<String, Integer> productIdQuantity, String orderId) {
+        List<Product> products = productRepository.findByIdInAndIsDeletedFalse(productIdQuantity.keySet());
+        if (checkAndUpdateProductStock(products, productIdQuantity))
             productRepository.saveAll(products);
-        }
-        applicationEventPublisher.publishEvent(OrderReplyEvent.of(orderId, isSuccess, orderItems));
+        else
+            messageSender.sendProductOrderFailedEvent(ProductOrderFailedEvent.of(orderId));
     }
 
 
-    private Map<String, ProductOrderItem> getProductOrderItems(List<Product> products, Map<String, Integer> orderedProductQuantity) {
-        Map<String, ProductOrderItem> orderItems = new HashMap<>();
+    private boolean checkAndUpdateProductStock(List<Product> products, Map<String, Integer> orderedProductQuantity) {
         for (Product p : products) {
             int requiredQuantity = orderedProductQuantity.get(p.getId());
-            if (requiredQuantity <= p.getQuantity()) {
-                orderItems.put(p.getId(), ProductOrderItem.from(p, requiredQuantity));
-                p.minusQuantity(requiredQuantity);
-            }
+            if (requiredQuantity > p.getQuantity())
+                return false;
+            p.minusQuantity(requiredQuantity);
         }
-        return orderItems;
+        return true;
+    }
+
+    @Transactional
+    public void restoreProductStock(Map<String, Integer> productIdQuantity) {
+        List<Product> products = productRepository.findByIdInAndIsDeletedFalse(productIdQuantity.keySet());
+
+        for (Product p : products) {
+            int quantityToAdded = productIdQuantity.get(p.getId());
+            p.addQuantity(quantityToAdded);
+        }
+        productRepository.saveAll(products);
     }
 }

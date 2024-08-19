@@ -6,6 +6,8 @@ import lombok.Getter;
 
 import java.io.Serializable;
 
+import static cm.twentysix.order.dto.CreateOrderForm.*;
+
 @Getter
 public class OrderReceiver implements Serializable {
     private String name;
@@ -21,7 +23,7 @@ public class OrderReceiver implements Serializable {
         this.phone = phone;
     }
 
-    public static OrderReceiver of(CreateOrderForm.ReceiverForm receiver) {
+    public static OrderReceiver from(ReceiverForm receiver) {
         return OrderReceiver.builder()
                 .address(receiver.address())
                 .name(receiver.name())

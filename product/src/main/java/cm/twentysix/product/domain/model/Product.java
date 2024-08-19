@@ -121,4 +121,8 @@ public class Product extends BaseTimeDocument {
     public void minusQuantity(int requiredQuantity) {
         this.quantity -= requiredQuantity;
     }
+
+    public void addQuantity(int quantityToAdded) {
+        this.quantity += quantityToAdded;
+    }
 }

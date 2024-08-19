@@ -1,9 +1,13 @@
 package cm.twentysix.product.dto;
 
+import cm.twentysix.product.util.validator.NullOrAfterDateTime;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 public record UpdateProductForm(
         @NotBlank(message = "카테고리 id는 비어 있을 수 없습니다.")
@@ -27,6 +31,17 @@ public record UpdateProductForm(
         Integer discount,
         @Min(value = 0, message = "기본 배송비는 0원 이상입니다.")
         @Max(value = 100000, message = "기본 배송비는 10000원 이하입니다.")
-        Integer deliveryFee
+        Integer deliveryFee,
+        @NullOrAfterDateTime(message = "과거이거나 datetime 형식이 아닙니다.")
+        String orderingOpensAt
 ) {
+    public LocalDateTime parseOrderingOpensAt() {
+        if (orderingOpensAt == null)
+            return LocalDateTime.now();
+        try {
+            return LocalDateTime.parse(orderingOpensAt);
+        } catch (DateTimeParseException e) {
+            return LocalDateTime.now();
+        }
+    }
 }

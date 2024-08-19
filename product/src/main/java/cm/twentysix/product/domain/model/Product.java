@@ -37,9 +37,10 @@ public class Product extends BaseTimeDocument {
     private ProductBrand productBrand;
     private Long userId;
     private boolean isDeleted;
+    private LocalDateTime orderingOpensAt;
 
     @Builder
-    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer quantity, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo) {
+    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer quantity, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo, LocalDateTime orderingOpensAt) {
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
         this.price = price;
@@ -54,6 +55,7 @@ public class Product extends BaseTimeDocument {
         this.productBrand = productBrand;
         this.userId = userId;
         this.isDeleted = isDeleted;
+        this.orderingOpensAt = orderingOpensAt;
     }
 
     public static Product of(CreateProductForm form, BrandProto.BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
@@ -72,6 +74,7 @@ public class Product extends BaseTimeDocument {
                 .userId(userId)
                 .thumbnailPath(thumbnailPath)
                 .bodyImagePath(bodyImagePath)
+                .orderingOpensAt(form.parseOrderingOpensAt())
                 .build();
     }
 
@@ -88,6 +91,7 @@ public class Product extends BaseTimeDocument {
         this.userId = userId;
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
+        this.orderingOpensAt = form.parseOrderingOpensAt();
     }
 
     public void delete() {

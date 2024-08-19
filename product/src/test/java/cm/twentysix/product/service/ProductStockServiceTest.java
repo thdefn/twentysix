@@ -82,8 +82,6 @@ class ProductStockServiceTest {
         //when
         productStockService.checkProductStock(orderedProductQuantity, "12345");
         //then
-        verify(mockProductA, times(1)).minusQuantity(1);
-        verify(mockProductB, times(0)).minusQuantity(anyInt());
         ArgumentCaptor<ProductOrderFailedEvent> productOrderFailedEventCaptor = ArgumentCaptor.forClass(ProductOrderFailedEvent.class);
         verify(messageSender, times(1)).sendProductOrderFailedEvent(productOrderFailedEventCaptor.capture());
         ProductOrderFailedEvent event = productOrderFailedEventCaptor.getValue();

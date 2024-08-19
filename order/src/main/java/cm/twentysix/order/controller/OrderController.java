@@ -19,4 +19,11 @@ public class OrderController {
                                                              @RequestHeader(value = "X-USER-ID") Long userId) {
         return ResponseEntity.ok(orderService.receiveOrder(form, userId));
     }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> cancelOrder(@PathVariable String orderId,
+                                            @RequestHeader(value = "X-USER-ID") Long userId) {
+        orderService.cancelOrder(orderId, userId);
+        return ResponseEntity.ok().build();
+    }
 }

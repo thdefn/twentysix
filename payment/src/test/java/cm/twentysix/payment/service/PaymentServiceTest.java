@@ -3,6 +3,7 @@ package cm.twentysix.payment.service;
 import cm.twentysix.OrderProto;
 import cm.twentysix.payment.client.OrderGrpcClient;
 import cm.twentysix.payment.client.PaymentClient;
+import cm.twentysix.payment.constant.CancelReason;
 import cm.twentysix.payment.domain.model.Payment;
 import cm.twentysix.payment.domain.model.PaymentMethod;
 import cm.twentysix.payment.domain.model.PaymentStatus;
@@ -227,7 +228,7 @@ class PaymentServiceTest {
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
         //when
-        paymentService.handleProductOrderFailedEvent(event);
+        paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
         assertEquals(payment.getStatus(), PaymentStatus.BLOCK);
     }
@@ -247,7 +248,7 @@ class PaymentServiceTest {
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
         //when
-        paymentService.handleProductOrderFailedEvent(event);
+        paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
         verify(paymentClient, times(1)).cancel(eq("any-payment-key"), any());
         assertEquals(payment.getStatus(), PaymentStatus.CANCEL);
@@ -260,7 +261,7 @@ class PaymentServiceTest {
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.empty());
         //when
-        paymentService.handleProductOrderFailedEvent(event);
+        paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
         ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
         verify(paymentRepository, times(1)).save(paymentCaptor.capture());

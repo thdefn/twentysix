@@ -131,4 +131,8 @@ public class Order extends BaseTimeEntity {
     public void placed() {
         status = OrderStatus.ORDER_PLACED;
     }
+
+    public void cancel() {
+        status = OrderStatus.CANCEL;
+    }
 }

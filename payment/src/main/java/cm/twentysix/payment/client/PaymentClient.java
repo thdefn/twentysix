@@ -14,7 +14,7 @@ public interface PaymentClient {
     @PostMapping("/confirm")
     PaymentResponse confirm(@RequestBody PaymentForm form);
 
-    @PostMapping("/cancel/{paymentKey}")
+    @PostMapping("/{paymentKey}/cancel")
     String cancel(@PathVariable String paymentKey, @RequestBody PaymentCancelForm form);
 
 

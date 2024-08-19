@@ -101,4 +101,17 @@ public class OrderService {
     }
 
 
+    @Transactional
+    public void cancelOrder(String orderId, Long userId) {
+        Order order = orderRepository.findByOrderId(orderId)
+                .stream().findFirst()
+                .filter(o -> o.getStatus().isOrderProcessingStatus())
+                .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
+
+        if (!order.getUserId().equals(userId))
+            throw new OrderException(Error.NOT_USERS_ORDER);
+
+        order.cancel();
+        messageSender.sendOrderCancelledEvent(OrderCancelledEvent.from(order));
+    }
 }

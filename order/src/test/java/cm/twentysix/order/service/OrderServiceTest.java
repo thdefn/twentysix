@@ -298,20 +298,17 @@ class OrderServiceTest {
         assertEquals(e.getError(), Error.PROCESSING_ORDER_NOT_FOUND);
     }
 
-
-
-
     @Test
-    void approveOrDenyOrder_success_WhenOrderReplyEventIsSuccess() {
+    void cancelOrder_success() {
         //given
-        ProductOrderItem item = new ProductOrderItem("수건", "1234.jpg", 1, 100000, 1L, "JAJU", 0);
-        ProductOrderFailedEvent event = ProductOrderFailedEvent.builder()
-                .orderId("2032032003030-afsfdasfdsfdsafdl2")
-                .build();
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
-                .products(new HashMap<>())
+                .products(Map.of(
+                        "1234", OrderProduct.builder().quantity(2).build(),
+                        "2345", OrderProduct.builder().quantity(1).build(),
+                        "3456", OrderProduct.builder().quantity(1).build()
+                ))
                 .deliveryFees(new HashMap<>())
                 .receiver(OrderReceiver.builder()
                         .name("송송이")
@@ -322,53 +319,73 @@ class OrderServiceTest {
                 .status(OrderStatus.PAYMENT_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
-        given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
-                .setName("JAJU").setDeliveryFee(20000).setId(2L).setFreeDeliveryInfimum(500000).build()));
         //when
-        orderService.handleProductOrderFailedEvent(event);
+        orderService.cancelOrder("2032032003030-afsfdasfdsfdsafdl2", 1L);
         //then
-        assertTrue(order.getProducts().containsKey("1234t5gf"));
-        OrderProduct product = order.getProducts().get("1234t5gf");
-        assertEquals(product.getStatus(), OrderProductStatus.ORDER_PLACED);
-        assertEquals(product.getBrandName(), "JAJU");
-        assertEquals(product.getBrandId(), 1L);
-        assertEquals(product.getThumbnail(), "1234.jpg");
-        assertEquals(product.getQuantity(), 1);
-        assertEquals(product.getAmount(), 100000);
-
-        assertEquals(order.getOrderId(), "2032032003030-afsfdasfdsfdsafdl2");
-        assertEquals(order.getTotalAmount(), 100000);
-        assertEquals(order.getReceiver().getName(), "송송이");
-        assertEquals(order.getReceiver().getPhone(), "010-1111-1111");
-        assertEquals(order.getReceiver().getZipCode(), "11112");
-        assertEquals(order.getReceiver().getAddress(), "서울 특별시 성북구 보문로");
-        assertEquals(order.getUserId(), 1L);
-        assertEquals(order.getStatus(), OrderStatus.PAYMENT_PENDING);
+        ArgumentCaptor<OrderCancelledEvent> orderCancelledEventCaptor = ArgumentCaptor.forClass(OrderCancelledEvent.class);
+        verify(messageSender, times(1)).sendOrderCancelledEvent(orderCancelledEventCaptor.capture());
+        OrderCancelledEvent orderCancelledEvent = orderCancelledEventCaptor.getValue();
+        Map<String, Integer> productQuantityMap = orderCancelledEvent.productQuantity();
+        assertEquals(productQuantityMap.get("1234"), 2);
+        assertEquals(productQuantityMap.get("2345"), 1);
+        assertEquals(productQuantityMap.get("3456"), 1);
+        assertEquals(order.getStatus(), OrderStatus.CANCEL);
     }
 
     @Test
-    void approveOrDenyOrder_success_WhenOrderReplyEventIsFail() {
+    void cancelOrder_fail_PROCESSING_ORDER_NOT_FOUND() {
         //given
-        ProductOrderItem item = new ProductOrderItem("수건", "1234.jpg", 1, 100000, 1L, "JAJU", 0);
-        ProductOrderFailedEvent event = ProductOrderFailedEvent.builder()
-                .orderId("2032032003030-afsfdasfdsfdsafdl2")
-                .build();
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
+                .products(Map.of(
+                        "1234", OrderProduct.builder().quantity(2).build(),
+                        "2345", OrderProduct.builder().quantity(1).build(),
+                        "3456", OrderProduct.builder().quantity(1).build()
+                ))
+                .deliveryFees(new HashMap<>())
                 .receiver(OrderReceiver.builder()
                         .name("송송이")
                         .address("서울 특별시 성북구 보문로")
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.PAYMENT_PENDING)
+                .status(OrderStatus.PAYMENT_FAIL)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         //when
-        orderService.handleProductOrderFailedEvent(event);
+        OrderException e = assertThrows(OrderException.class, () -> orderService.cancelOrder("2032032003030-afsfdasfdsfdsafdl2", 1L));
         //then
-        verify(orderRepository, times(1)).delete(any());
+        assertEquals(e.getError(), Error.PROCESSING_ORDER_NOT_FOUND);
     }
+
+    @Test
+    void cancelOrder_fail_NOT_USERS_ORDER() {
+        //given
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(2L)
+                .products(Map.of(
+                        "1234", OrderProduct.builder().quantity(2).build(),
+                        "2345", OrderProduct.builder().quantity(1).build(),
+                        "3456", OrderProduct.builder().quantity(1).build()
+                ))
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.ORDER_PLACED)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.cancelOrder("2032032003030-afsfdasfdsfdsafdl2", 1L));
+        //then
+        assertEquals(e.getError(), Error.NOT_USERS_ORDER);
+    }
+
+
 
 }

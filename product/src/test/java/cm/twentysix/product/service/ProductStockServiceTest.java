@@ -4,6 +4,7 @@ import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.messaging.MessageSender;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,13 +12,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -27,7 +26,7 @@ class ProductStockServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private MessageSender messageSender;
     @InjectMocks
     private ProductStockService productStockService;
 
@@ -63,39 +62,46 @@ class ProductStockServiceTest {
     @Test
     void checkProductStock_success() {
         //given
-        Map<String, Integer> orderedProductQuantity = Map.of("1", 1, "2", 1);
+        Map<String, Integer> orderedProductQuantity = Map.of("1", 1, "2", 2);
         List<Product> products = List.of(mockProductA, mockProductB);
         given(productRepository.findByIdInAndIsDeletedFalse(any())).willReturn(products);
         //when
         productStockService.checkProductStock(orderedProductQuantity, "12345");
         //then
+        verify(mockProductA, times(1)).minusQuantity(1);
+        verify(mockProductB, times(1)).minusQuantity(2);
         verify(productRepository, times(1)).saveAll(anyCollection());
+    }
 
-        ArgumentCaptor<ProductOrderFailedEvent> orderReplyEventCaptor = ArgumentCaptor.forClass(ProductOrderFailedEvent.class);
-        verify(applicationEventPublisher, times(1)).publishEvent(orderReplyEventCaptor.capture());
-//        OrderReplyEvent orderReplyEvent = orderReplyEventCaptor.getValue();
-//        assertTrue(orderReplyEvent.isSuccess());
-//        assertEquals(orderReplyEvent.orderId(), "12345");
-//        assertEquals(orderReplyEvent.orderedItem().size(), 2);
-//        assertTrue(orderReplyEvent.orderedItem().containsKey("1"));
-//        ProductOrderItem item = orderReplyEvent.orderedItem().get("1");
-//
-//        assertEquals(item.amount(), mockProductA.getDiscountedPrice() * item.quantity());
-//        assertEquals(item.name(), mockProductA.getName());
-//        assertEquals(item.brandId(), mockProductA.getProductBrand().getId());
-//        assertEquals(item.brandName(), mockProductA.getProductBrand().getName());
-//        assertEquals(item.deliveryFee(), mockProductA.getDeliveryFee());
-//
-//        assertTrue(orderReplyEvent.orderedItem().containsKey("2"));
-//        item = orderReplyEvent.orderedItem().get("2");
-//
-//        assertEquals(item.amount(), mockProductB.getDiscountedPrice() * item.quantity());
-//        assertEquals(item.name(), mockProductB.getName());
-//        assertEquals(item.brandId(), mockProductB.getProductBrand().getId());
-//        assertEquals(item.brandName(), mockProductB.getProductBrand().getName());
-//        assertEquals(item.deliveryFee(), mockProductB.getDeliveryFee());
+    @Test
+    void checkProductStock_success_ProductStockShortage() {
+        //given
+        Map<String, Integer> orderedProductQuantity = Map.of("1", 1, "2", 3);
+        List<Product> products = List.of(mockProductA, mockProductB);
+        given(productRepository.findByIdInAndIsDeletedFalse(any())).willReturn(products);
+        //when
+        productStockService.checkProductStock(orderedProductQuantity, "12345");
+        //then
+        verify(mockProductA, times(1)).minusQuantity(1);
+        verify(mockProductB, times(0)).minusQuantity(anyInt());
+        ArgumentCaptor<ProductOrderFailedEvent> productOrderFailedEventCaptor = ArgumentCaptor.forClass(ProductOrderFailedEvent.class);
+        verify(messageSender, times(1)).sendProductOrderFailedEvent(productOrderFailedEventCaptor.capture());
+        ProductOrderFailedEvent event = productOrderFailedEventCaptor.getValue();
+        assertEquals(event.orderId(), "12345");
+    }
 
-
+    @Test
+    void restoreProductStock_success() {
+        //given
+        Map<String, Integer> productQuantity = Map.of("1", 1, "2", 3);
+        List<Product> products = List.of(mockProductA, mockProductB);
+        given(productRepository.findByIdInAndIsDeletedFalse(any())).willReturn(products);
+        //when
+        productStockService.restoreProductStock(productQuantity);
+        //then
+        verify(mockProductA, times(1)).addQuantity(1);
+        verify(mockProductB, times(1)).addQuantity(3);
+        verify(productRepository, times(1)).saveAll(anyCollection());
     }
 
 }

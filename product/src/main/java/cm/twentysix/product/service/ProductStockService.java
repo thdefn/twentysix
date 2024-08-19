@@ -38,6 +38,7 @@ public class ProductStockService {
         return true;
     }
 
+    @Transactional
     public void restoreProductStock(Map<String, Integer> productIdQuantity) {
         List<Product> products = productRepository.findByIdInAndIsDeletedFalse(productIdQuantity.keySet());
 

@@ -79,8 +79,8 @@ public class OrderService {
     public void handleProductOrderFailedEvent(ProductOrderFailedEvent event) {
         Order order = orderRepository.findByOrderId(event.orderId())
                 .stream().findFirst()
-                .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
-                .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
+                .filter(o -> o.getStatus().isOrderProcessingStatus())
+                .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
 
         order.checkFail();
     }
@@ -90,7 +90,7 @@ public class OrderService {
         Order order = orderRepository.findByOrderId(event.orderId())
                 .stream().findFirst()
                 .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
-                .orElseThrow(() -> new OrderException(Error.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
 
         if (event.isSuccess()) {
             order.placed();

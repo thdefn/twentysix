@@ -1,11 +1,13 @@
 package cm.twentysix.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Builder
 public record PaymentResponse(
         @JsonProperty("mId") String mId,
         @JsonProperty("lastTransactionKey") String lastTransactionKey,

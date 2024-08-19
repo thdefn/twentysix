@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PaymentException.class)
-    public ResponseEntity<ExceptionResponse<String>> handleOrderException(PaymentException e) {
+    public ResponseEntity<ExceptionResponse<String>> handlePaymentException(PaymentException e) {
         log.info(LOG_FORMAT, e.getClass().getSimpleName(), e.getError(), e.getError().message);
         return ResponseEntity.status(e.getError().httpStatus)
                 .body(new ExceptionResponse<>(e.getError().name(), e.getError().message));

@@ -10,10 +10,12 @@ import cm.twentysix.payment.exception.PaymentException;
 import cm.twentysix.payment.messaging.MessageSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static cm.twentysix.OrderProto.OrderInfoResponse;
+import static cm.twentysix.payment.exception.Error.PAYMENT_FAILED;
 import static cm.twentysix.payment.exception.Error.STOCK_SHORTAGE;
 
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentClient paymentClient;
     private final MessageSender messageSender;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public RequiredPaymentResponse getRequiredPayment(String orderId) {
         OrderInfoResponse orderInfo = orderGrpcClient.getOrderInfo(orderId);
@@ -41,13 +44,13 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentException(STOCK_SHORTAGE));
 
         PaymentResponse response = paymentClient.confirm(form);
-        payment.confirmPayment(response);
         if ("DONE".equals(response.status())) {
+            payment.confirmPayment(response);
             payment.complete(response);
             messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(response.orderId(), true));
         } else if ("ABORTED".equals(response.status())) {
-            payment.cancel();
-            messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(response.orderId(), false));
+            applicationEventPublisher.publishEvent(PaymentAbortedEvent.of(response));
+            throw new PaymentException(PAYMENT_FAILED);
         }
         // TODO : 429 500 토스 측에서 에러 났을 때 핸들링
     }

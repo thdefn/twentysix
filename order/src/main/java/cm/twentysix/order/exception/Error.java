@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum Error {
+    PROCESSING_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "처리 진행 중인 주문이 없습니다."),
     ITEM_DOES_NOT_EXIST(HttpStatus.BAD_REQUEST, "해당 아이템이 없습니다."),
     GRPC_COMMUNICATION_ERROR(HttpStatus.BAD_REQUEST, "grpc 통신 중 문제가 발생했습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문이 없습니다."),

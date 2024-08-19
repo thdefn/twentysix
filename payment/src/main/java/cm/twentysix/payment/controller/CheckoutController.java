@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @Slf4j
@@ -19,7 +16,7 @@ public class CheckoutController {
     private final PaymentService paymentService;
 
     @GetMapping("/{orderId}")
-    public String checkout(@PathVariable String orderId, Model model) {
+    public String checkout(@PathVariable String orderId, Model model,  @RequestHeader(value = "X-USER-ID", required = false) Long userId) {
         RequiredPaymentResponse response = paymentService.getRequiredPayment(orderId);
         model.addAttribute("amount", response.amount());
         model.addAttribute("orderId", orderId);

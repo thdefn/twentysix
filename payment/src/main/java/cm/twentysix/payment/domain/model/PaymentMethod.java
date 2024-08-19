@@ -6,7 +6,7 @@ public enum PaymentMethod {
     카드 {
         @Override
         public String getMethodDetail(PaymentResponse response) {
-            return response.card();
+            return response.getCard();
         }
     },
     가상계좌 {

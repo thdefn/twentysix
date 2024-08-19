@@ -1,5 +1,6 @@
 package cm.twentysix.product.messaging;
 
+import cm.twentysix.product.dto.OrderCancelledEvent;
 import cm.twentysix.product.dto.OrderEvent;
 import cm.twentysix.product.dto.OrderFailedEvent;
 import cm.twentysix.product.service.ProductStockService;
@@ -22,6 +23,11 @@ public class MessageListener {
     @Bean(name = "order-failed")
     public Consumer<OrderFailedEvent> orderFailedEventConsumer() {
         return orderFailedEvent -> productOrderService.restoreProductStock(orderFailedEvent.productQuantity());
+    }
+
+    @Bean(name = "order-cancelled")
+    public Consumer<OrderCancelledEvent> orderCancelledEventConsumer() {
+        return orderCancelledEvent -> productOrderService.restoreProductStock(orderCancelledEvent.productQuantity());
     }
 
 

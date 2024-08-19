@@ -1,6 +1,7 @@
 package cm.twentysix.order.messaging;
 
 import cm.twentysix.order.dto.AddressSaveEvent;
+import cm.twentysix.order.dto.OrderCancelledEvent;
 import cm.twentysix.order.dto.OrderEvent;
 import cm.twentysix.order.dto.OrderFailedEvent;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,10 @@ public class MessageSender {
 
     public boolean sendOrderFailedEvent(OrderFailedEvent event) {
         return streamBridge.send("order-failed-out-0", MessageBuilder.withPayload(event).build());
+    }
+
+    public boolean sendOrderCancelledEvent(OrderCancelledEvent event) {
+        return streamBridge.send("order-cancelled-out-0", MessageBuilder.withPayload(event).build());
     }
 
 }

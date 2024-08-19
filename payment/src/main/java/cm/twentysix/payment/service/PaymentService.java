@@ -56,12 +56,12 @@ public class PaymentService {
     }
 
     @Transactional
-    public void handleProductOrderFailedEvent(ProductOrderFailedEvent event) {
-        Payment payment = paymentRepository.findByOrderId(event.orderId())
-                .orElseGet(() -> Payment.of(event.orderId(), PaymentStatus.BLOCK));
+    public void cancelOrBlockPayment(String orderId, String cancelReason) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseGet(() -> Payment.of(orderId, PaymentStatus.BLOCK));
 
         if (PaymentStatus.COMPLETE.equals(payment.getStatus())) {
-            paymentClient.cancel(payment.getPaymentKey(), PaymentCancelForm.of(STOCK_SHORTAGE.message));
+            paymentClient.cancel(payment.getPaymentKey(), PaymentCancelForm.of(cancelReason));
             payment.cancel();
         } else payment.block();
         paymentRepository.save(payment);

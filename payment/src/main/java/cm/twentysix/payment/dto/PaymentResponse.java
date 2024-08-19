@@ -20,7 +20,7 @@ public record PaymentResponse(
         @JsonProperty("approvedAt") String approvedAt,
         @JsonProperty("useEscrow") boolean useEscrow,
         @JsonProperty("cultureExpense") boolean cultureExpense,
-        @JsonProperty("card") String card,
+        @JsonProperty("card") Card card,
         @JsonProperty("virtualAccount") String virtualAccount,
         @JsonProperty("transfer") String transfer,
         @JsonProperty("mobilePhone") String mobilePhone,
@@ -46,6 +46,22 @@ public record PaymentResponse(
         @JsonProperty("method") String method,
         @JsonProperty("version") String version
 ) {
+
+    public record Card(
+            @JsonProperty("issuerCode") String issuerCode,
+            @JsonProperty("acquirerCode") String acquirerCode,
+            @JsonProperty("number") String number,
+            @JsonProperty("installmentPlanMonths") int installmentPlanMonths,
+            @JsonProperty("isInterestFree") boolean isInterestFree,
+            @JsonProperty("interestPayer") String interestPayer,
+            @JsonProperty("approveNo") String approveNo,
+            @JsonProperty("useCardPoint") boolean useCardPoint,
+            @JsonProperty("cardType") String cardType,
+            @JsonProperty("ownerType") String ownerType,
+            @JsonProperty("acquireStatus") String acquireStatus,
+            @JsonProperty("amount") int amount
+    ) {
+    }
 
     public record EasyPay(
             @JsonProperty("provider") String provider,
@@ -74,6 +90,10 @@ public record PaymentResponse(
 
     public String getEasyPay() {
         return easyPay.toString();
+    }
+
+    public String getCard() {
+        return card.toString();
     }
 }
 

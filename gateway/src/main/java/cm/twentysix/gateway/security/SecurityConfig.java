@@ -3,6 +3,7 @@ package cm.twentysix.gateway.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -33,6 +34,10 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .authorizeExchange(authorizeExchangeSpec ->
                         authorizeExchangeSpec.pathMatchers("/users/email-auths/**", "/users/signup", "/users/login").permitAll()
+                                .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
+                                .pathMatchers(HttpMethod.POST, "/products/**", "/brands/**").hasAnyAuthority("SELLER")
+                                .pathMatchers(HttpMethod.PUT, "/products/**", "/brands/**").hasAnyAuthority("SELLER")
+                                .pathMatchers(HttpMethod.DELETE, "/products/**", "/brands/**").hasAnyAuthority("SELLER")
                                 .anyExchange().hasAnyAuthority("SELLER", "USER"))
                 .build();
     }

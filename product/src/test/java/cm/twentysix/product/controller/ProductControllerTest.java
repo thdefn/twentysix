@@ -15,6 +15,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,10 +33,11 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
+
     @Test
     void createProduct_success() throws Exception {
         //given
-        CreateProductForm form = new CreateProductForm(1L, "123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500);
+        CreateProductForm form = new CreateProductForm(1L, "123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500, null);
         //when
         //then
         mockMvc.perform(multipart(HttpMethod.POST, "/products")
@@ -54,7 +57,7 @@ class ProductControllerTest {
     @Test
     void createProduct_fail() throws Exception {
         //given
-        CreateProductForm form = new CreateProductForm(null, "      ", "", "In a @WebMvcTest setup, if you encounter errors related to unnecessary bean dependencies, it often means there might be some implicit dependencies or configurations that the test context is trying to resolve. This usually occurs when the test context is expecting certain beans that aren't explicitly mocked or provided. It is essential to ensure that only the necessary beans for the controller under test are included and correctly mocked to avoid such dependency issues.", "very long long long long long country nameeeee", "AS센터", -1, -1, 101, 100001);
+        CreateProductForm form = new CreateProductForm(null, "      ", "", "In a @WebMvcTest setup, if you encounter errors related to unnecessary bean dependencies, it often means there might be some implicit dependencies or configurations that the test context is trying to resolve. This usually occurs when the test context is expecting certain beans that aren't explicitly mocked or provided. It is essential to ensure that only the necessary beans for the controller under test are included and correctly mocked to avoid such dependency issues.", "very long long long long long country nameeeee", "AS센터", -1, -1, 101, 100001, "1234");
         //when
         //then
         mockMvc.perform(multipart(HttpMethod.POST, "/products")
@@ -78,14 +81,15 @@ class ProductControllerTest {
                         jsonPath("$.message.price").value("가격은 0원 이상입니다."),
                         jsonPath("$.message.quantity").value("재고는 0개 이상입니다."),
                         jsonPath("$.message.discount").value("할인율은 100 퍼센트 이하입니다."),
-                        jsonPath("$.message.deliveryFee").value("기본 배송비는 10000원 이하입니다.")
+                        jsonPath("$.message.deliveryFee").value("기본 배송비는 10000원 이하입니다."),
+                        jsonPath("$.message.orderingOpensAt").value("과거이거나 datetime 형식이 아닙니다.")
                 );
     }
 
     @Test
     void updateProduct_success() throws Exception {
         //given
-        UpdateProductForm form = new UpdateProductForm("123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500);
+        UpdateProductForm form = new UpdateProductForm("123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500, LocalDateTime.MAX.toString());
         //when
         //then
         mockMvc.perform(multipart(HttpMethod.PUT, "/products/{productId}", "abcdefkghaskfldlm123")
@@ -105,7 +109,7 @@ class ProductControllerTest {
     @Test
     void updateProduct_fail() throws Exception {
         //given
-        UpdateProductForm form = new UpdateProductForm("      ", "", "In a @WebMvcTest setup, if you encounter errors related to unnecessary bean dependencies, it often means there might be some implicit dependencies or configurations that the test context is trying to resolve. This usually occurs when the test context is expecting certain beans that aren't explicitly mocked or provided. It is essential to ensure that only the necessary beans for the controller under test are included and correctly mocked to avoid such dependency issues.", "very long long long long long country nameeeee", "AS센터", -1, -1, 101, 100001);
+        UpdateProductForm form = new UpdateProductForm("      ", "", "In a @WebMvcTest setup, if you encounter errors related to unnecessary bean dependencies, it often means there might be some implicit dependencies or configurations that the test context is trying to resolve. This usually occurs when the test context is expecting certain beans that aren't explicitly mocked or provided. It is essential to ensure that only the necessary beans for the controller under test are included and correctly mocked to avoid such dependency issues.", "very long long long long long country nameeeee", "AS센터", -1, -1, 101, 100001, "1234");
         //when
         //then
         mockMvc.perform(multipart(HttpMethod.PUT, "/products/{productId}", "abcdefkghaskfldlm123")
@@ -128,7 +132,8 @@ class ProductControllerTest {
                         jsonPath("$.message.price").value("가격은 0원 이상입니다."),
                         jsonPath("$.message.quantity").value("재고는 0개 이상입니다."),
                         jsonPath("$.message.discount").value("할인율은 100 퍼센트 이하입니다."),
-                        jsonPath("$.message.deliveryFee").value("기본 배송비는 10000원 이하입니다.")
+                        jsonPath("$.message.deliveryFee").value("기본 배송비는 10000원 이하입니다."),
+                        jsonPath("$.message.orderingOpensAt").value("과거이거나 datetime 형식이 아닙니다.")
                 );
     }
 

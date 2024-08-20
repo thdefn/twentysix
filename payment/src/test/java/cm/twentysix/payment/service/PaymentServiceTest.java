@@ -2,7 +2,7 @@ package cm.twentysix.payment.service;
 
 import cm.twentysix.OrderProto;
 import cm.twentysix.payment.client.OrderGrpcClient;
-import cm.twentysix.payment.client.PaymentClient;
+import cm.twentysix.payment.client.TossPaymentClient;
 import cm.twentysix.payment.constant.CancelReason;
 import cm.twentysix.payment.domain.model.Payment;
 import cm.twentysix.payment.domain.model.PaymentMethod;
@@ -36,7 +36,7 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
     @Mock
-    private PaymentClient paymentClient;
+    private TossPaymentClient tossPaymentClient;
     @Mock
     private MessageSender messageSender;
     @Mock
@@ -146,7 +146,7 @@ class PaymentServiceTest {
                 .method("간편결제")
                 .easyPay(new PaymentResponse.EasyPay("카카오페이", 10000, 0))
                 .build();
-        given(paymentClient.confirm(any())).willReturn(response);
+        given(tossPaymentClient.confirm(any())).willReturn(response);
         //when
         paymentService.confirm(form);
         //then
@@ -185,7 +185,7 @@ class PaymentServiceTest {
                 .method("간편결제")
                 .easyPay(new PaymentResponse.EasyPay("카카오페이", 10000, 0))
                 .build();
-        given(paymentClient.confirm(any())).willReturn(response);
+        given(tossPaymentClient.confirm(any())).willReturn(response);
         //when
         PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
         //then
@@ -250,7 +250,7 @@ class PaymentServiceTest {
         //when
         paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
-        verify(paymentClient, times(1)).cancel(eq("any-payment-key"), any());
+        verify(tossPaymentClient, times(1)).cancel(eq("any-payment-key"), any());
         assertEquals(payment.getStatus(), PaymentStatus.CANCEL);
     }
 

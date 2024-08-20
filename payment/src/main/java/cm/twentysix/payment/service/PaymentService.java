@@ -44,11 +44,11 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentException(STOCK_SHORTAGE));
 
         PaymentResponse response = paymentClient.confirm(form);
-        if ("DONE".equals(response.status())) {
+        if ("DONE" .equals(response.status())) {
             payment.confirmPayment(response);
             payment.complete(response);
             messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(response.orderId(), true));
-        } else if ("ABORTED".equals(response.status())) {
+        } else if ("ABORTED" .equals(response.status())) {
             applicationEventPublisher.publishEvent(PaymentAbortedEvent.of(response));
             throw new PaymentException(PAYMENT_FAILED);
         }

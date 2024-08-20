@@ -4,6 +4,7 @@ import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.dto.ProductStockResponse;
 import cm.twentysix.product.messaging.MessageSender;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -100,6 +102,18 @@ class ProductStockServiceTest {
         verify(mockProductA, times(1)).addQuantity(1);
         verify(mockProductB, times(1)).addQuantity(3);
         verify(productRepository, times(1)).saveAll(anyCollection());
+    }
+
+    @Test
+    void retrieveProductStock_success() {
+        //given
+        given(productRepository.findByIdAndIsDeletedFalse(any())).willReturn(Optional.of(mockProductA));
+        //when
+        ProductStockResponse response = productStockService.retrieveProductStock("12345");
+        //then
+        assertEquals(response.id(), "1");
+        assertEquals(response.name(), "강아지 눈물 티슈");
+        assertEquals(response.quantity(), 1);
     }
 
 }

@@ -1,9 +1,6 @@
 package cm.twentysix.product.controller;
 
-import cm.twentysix.product.dto.CreateProductForm;
-import cm.twentysix.product.dto.ProductItem;
-import cm.twentysix.product.dto.ProductResponse;
-import cm.twentysix.product.dto.UpdateProductForm;
+import cm.twentysix.product.dto.*;
 import cm.twentysix.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -3,6 +3,9 @@ package cm.twentysix.product.service;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.dto.ProductStockResponse;
+import cm.twentysix.product.exception.Error;
+import cm.twentysix.product.exception.ProductException;
 import cm.twentysix.product.messaging.MessageSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,5 +50,12 @@ public class ProductStockService {
             p.addQuantity(quantityToAdded);
         }
         productRepository.saveAll(products);
+    }
+
+
+    public ProductStockResponse retrieveProductStock(String productId) {
+        Product product = productRepository.findByIdAndIsDeletedFalse(productId)
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
+        return ProductStockResponse.from(product);
     }
 }

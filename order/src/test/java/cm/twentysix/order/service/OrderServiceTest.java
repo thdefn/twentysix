@@ -22,6 +22,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ class OrderServiceTest {
     private OrderService orderService;
 
     static MockedStatic<IdUtil> mockIdUtil;
+
+    LocalDateTime now = LocalDateTime.now();
 
     @BeforeEach
     void init() {
@@ -80,13 +83,14 @@ class OrderServiceTest {
                                 .setName("모달 잠옷 여성")
                                 .setBrandName("JAJU")
                                 .setBrandId(1L)
+                                .setOrderingOpensAt(LocalDateTime.MIN.toString())
                                 .build()
                 )
         );
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
         //when
-        ReceiveOrderResponse response = orderService.receiveOrder(form, 1L);
+        ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
         ArgumentCaptor<AddressSaveEvent> addressSaveEventCaptor = ArgumentCaptor.forClass(AddressSaveEvent.class);
         verify(messageSender, times(1)).sendAddressSaveEvent(addressSaveEventCaptor.capture());
@@ -142,6 +146,7 @@ class OrderServiceTest {
                                 .setPrice(30000)
                                 .setName("모달 잠옷 여성")
                                 .setBrandName("JAJU")
+                                .setOrderingOpensAt(LocalDateTime.MIN.toString())
                                 .setBrandId(1L)
                                 .build()
                 )
@@ -149,7 +154,7 @@ class OrderServiceTest {
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
         //when
-        ReceiveOrderResponse response = orderService.receiveOrder(form, 1L);
+        ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
         verify(messageSender, times(0)).sendAddressSaveEvent(any());
 
@@ -164,6 +169,35 @@ class OrderServiceTest {
         assertEquals(saved.getUserId(), 1L);
         assertEquals(saved.getStatus(), OrderStatus.PAYMENT_PENDING);
         assertEquals(response.orderId(), "2032032003030-afsfdasfdsfdsafdl2");
+    }
+
+    @Test
+    void receiveOrder_fail_ORDER_CONTAIN_CLOSING_PRODUCT() {
+        //given
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("123456", 1)
+        );
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
+        given(productGrpcClient.findProductItems(anyList())).willReturn(
+                List.of(
+                        ProductProto.ProductItemResponse.newBuilder()
+                                .setId("123456")
+                                .setDiscountedPrice(27000)
+                                .setDiscount(10)
+                                .setThumbnail("so-cute.jpg")
+                                .setPrice(30000)
+                                .setName("모달 잠옷 여성")
+                                .setBrandName("JAJU")
+                                .setBrandId(1L)
+                                .setOrderingOpensAt(LocalDateTime.MAX.toString())
+                                .build()
+                )
+        );
+       //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
+        //then
+        assertEquals(e.getError(), Error.ORDER_CONTAIN_CLOSING_PRODUCT);
     }
 
     @Test

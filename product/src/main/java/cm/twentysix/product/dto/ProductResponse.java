@@ -5,6 +5,7 @@ import cm.twentysix.product.domain.model.CategoryInfo;
 import cm.twentysix.product.domain.model.Product;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +24,9 @@ public record ProductResponse(
         boolean isUserLike,
         ProductInfoResponse info,
         ProductBrandResponse brand,
-        List<String> categories
+        List<String> categories,
+        boolean isOpen,
+        LocalDateTime orderingOpensAt
 ) {
     public static ProductResponse of(Product product, BrandProto.BrandDetailResponse brandDetailResponse, Optional<Long> optionalUserId) {
         return ProductResponse.builder()
@@ -40,6 +43,8 @@ public record ProductResponse(
                 .info(ProductInfoResponse.from(product.getProductInfo()))
                 .brand(ProductBrandResponse.from(brandDetailResponse))
                 .categories(product.getCategories().stream().map(CategoryInfo::getName).collect(Collectors.toList()))
+                .isOpen(product.isOpen())
+                .orderingOpensAt(product.getOrderingOpensAt())
                 .build();
     }
 }

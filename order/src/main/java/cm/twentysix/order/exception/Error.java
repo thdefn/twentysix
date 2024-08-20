@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum Error {
+    ORDER_CONTAIN_CLOSING_PRODUCT(HttpStatus.BAD_REQUEST, "구매 불가능한 상품이 포함되어 있습니다."),
     NOT_USERS_ORDER(HttpStatus.BAD_REQUEST, "유저의 주문이 아닙니다."),
     PROCESSING_ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "처리 진행 중인 주문이 없습니다."),
     ITEM_DOES_NOT_EXIST(HttpStatus.BAD_REQUEST, "해당 아이템이 없습니다."),

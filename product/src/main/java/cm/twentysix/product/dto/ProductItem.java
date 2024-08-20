@@ -16,7 +16,8 @@ public record ProductItem(
         Long countOfLikes,
         boolean isUserLike,
         String brandName,
-        Long brandId
+        Long brandId,
+        boolean isOpen
 
 ) {
     public static ProductItem from(Product product, Optional<Long> optionalUserId) {
@@ -33,6 +34,7 @@ public record ProductItem(
                 .brandId(product.getProductBrand().getId())
                 .countOfLikes(product.countOfLikes())
                 .isUserLike(product.isUserLike(optionalUserId.orElse(Long.MIN_VALUE)))
+                .isOpen(product.isOpen())
                 .build();
     }
 

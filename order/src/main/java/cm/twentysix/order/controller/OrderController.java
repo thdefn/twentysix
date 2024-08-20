@@ -5,10 +5,14 @@ import cm.twentysix.order.dto.ReceiveOrderResponse;
 import cm.twentysix.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/orders")
 public class OrderController {
@@ -16,8 +20,9 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ReceiveOrderResponse> receiveOrder(@Valid @RequestBody CreateOrderForm form,
+                                                             @RequestAttribute("requestedAt") LocalDateTime requestedAt,
                                                              @RequestHeader(value = "X-USER-ID") Long userId) {
-        return ResponseEntity.ok(orderService.receiveOrder(form, userId));
+        return ResponseEntity.ok(orderService.receiveOrder(form, userId, requestedAt));
     }
 
     @DeleteMapping("/{orderId}")

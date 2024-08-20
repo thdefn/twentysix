@@ -50,6 +50,7 @@ dependencies {
 	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-protobuf'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 dependencyManagement {

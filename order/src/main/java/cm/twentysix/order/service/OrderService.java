@@ -18,11 +18,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import static cm.twentysix.order.exception.Error.ORDER_CONTAIN_CLOSING_PRODUCT;
 
 @Service
 @Slf4j
@@ -36,22 +39,23 @@ public class OrderService {
     private final MessageSender messageSender;
 
     @Transactional
-    public ReceiveOrderResponse receiveOrder(CreateOrderForm form, Long userId) {
+    public ReceiveOrderResponse receiveOrder(CreateOrderForm form, Long userId, LocalDateTime requestedAt) {
         String orderId = IdUtil.generate();
         CompletableFuture.runAsync(() -> {
-            if (form.shouldSaveNewAddress()) {
-                messageSender.sendAddressSaveEvent(
-                        AddressSaveEvent.from(form.receiver(), userId));
-            }
-        }).thenRunAsync(() -> cartService.removeOrderedCartItem(form, userId));
+            if (form.shouldSaveNewAddress())
+                messageSender.sendAddressSaveEvent(AddressSaveEvent.from(form.receiver(), userId));
+        });
 
         Map<String, Integer> productIdQuantityMap = form.products().stream()
                 .collect(Collectors.toMap(OrderProductItemForm::id, OrderProductItemForm::quantity));
 
         CompletableFuture<List<ProductItemResponse>> productFuture =
-                CompletableFuture.supplyAsync(() ->
-                        productGrpcClient.findProductItems(productIdQuantityMap.keySet().stream().toList()));
-
+                CompletableFuture.supplyAsync(() -> productGrpcClient.findProductItems(productIdQuantityMap.keySet().stream().toList()))
+                        .thenApply(products -> {
+                            for (ProductItemResponse product : products)
+                                validProductIsOpen(product.getOrderingOpensAt(), requestedAt);
+                            return products;
+                        });
 
         CompletableFuture<Map<Long, BrandInfo>> brandInfoFuture = productFuture.thenCompose(products -> {
             List<Long> brandIds = products.stream().map(ProductItemResponse::getBrandId).collect(Collectors.toList());
@@ -69,10 +73,21 @@ public class OrderService {
             Order order = orderFuture.get();
             orderRepository.save(order);
             eventPublisher.publishEvent(OrderEvent.of(order));
+            CompletableFuture.runAsync(() -> cartService.removeOrderedCartItem(form, userId));
             return ReceiveOrderResponse.of(orderId);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OrderException) {
+                throw (OrderException) cause;
+            } else throw new RuntimeException(e);
         }
+    }
+
+    private void validProductIsOpen(String orderingOpensAt, LocalDateTime requestedAt) {
+        if (LocalDateTime.parse(orderingOpensAt).isAfter(requestedAt))
+            throw new OrderException(ORDER_CONTAIN_CLOSING_PRODUCT);
     }
 
     @Transactional

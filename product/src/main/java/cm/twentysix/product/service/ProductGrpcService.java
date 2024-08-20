@@ -37,6 +37,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
                     .setPrice(product.getPrice())
                     .setDiscountedPrice(product.getDiscountedPrice())
                     .setBrandName(product.getProductBrand().getName())
+                    .setOrderingOpensAt(product.getOrderingOpensAt().toString())
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
@@ -65,6 +66,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
                             .setPrice(product.getPrice())
                             .setDiscountedPrice(product.getDiscountedPrice())
                             .setBrandName(product.getProductBrand().getName())
+                            .setOrderingOpensAt(product.getOrderingOpensAt().toString())
                             .build()).toList();
             ProductItemsResponse response = ProductItemsResponse.newBuilder().addAllProducts(products).build();
             responseObserver.onNext(response);

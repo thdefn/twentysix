@@ -129,4 +129,8 @@ public class Product extends BaseTimeDocument {
     public void addQuantity(int quantityToAdded) {
         this.quantity += quantityToAdded;
     }
+
+    public boolean isOpen() {
+        return orderingOpensAt.isBefore(LocalDateTime.now());
+    }
 }

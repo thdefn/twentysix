@@ -1,0 +1,18 @@
+FROM openjdk:22
+ARG JAR_FILE=order/build/libs/order-0.0.1-SNAPSHOT.jar
+
+ARG DB_URL
+ARG DB_PASSWORD
+ARG KAFKA_BROKERS
+ARG REDIS_PASSWORD
+ARG REDIS_HOST
+
+ENV DB_URL=${DB_URL}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV REDIS_PASSWORD=${REDIS_PASSWORD}
+ENV REDIS_HOST=${REDIS_HOST}
+ENV KAFKA_BROKERS=${KAFKA_BROKERS}
+
+
+COPY ${JAR_FILE} /app.jar
+ENTRYPOINT ["java","-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=test","-jar","/app.jar"]

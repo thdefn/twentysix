@@ -45,11 +45,6 @@ class EmailAuthServiceTest {
     @InjectMocks
     private EmailAuthService emailAuthService;
 
-    @BeforeEach
-    void init() {
-        ReflectionTestUtils.setField(emailAuthService, "serverUrl", "http://26cm.com");
-    }
-
     @Test
     @DisplayName("인증 메일 발송_성공")
     void sendAuthEmail_success() {
@@ -62,7 +57,7 @@ class EmailAuthServiceTest {
                 .sessionId("sessionId")
                 .build());
         //when
-        SendAuthEmailResponse response = emailAuthService.sendAuthEmail(form);
+        SendAuthEmailResponse response = emailAuthService.sendAuthEmail(form, "http://localhost:8081/users/email-auths");
         //then
         ArgumentCaptor<EmailAuth> authCaptor = ArgumentCaptor.forClass(EmailAuth.class);
         verify(emailAuthRepository, times(1)).save(authCaptor.capture());
@@ -89,7 +84,7 @@ class EmailAuthServiceTest {
         given(cipherManager.encrypt(anyString())).willReturn("cipherManagerEncrypted");
         given(userRepository.existsByEmail(anyString())).willReturn(true);
         //when
-        UserException e = assertThrows(UserException.class, () -> emailAuthService.sendAuthEmail(form));
+        UserException e = assertThrows(UserException.class, () -> emailAuthService.sendAuthEmail(form, "http://localhost:8081/users/email-auths"));
         //then
         assertEquals(e.getError(), Error.ALREADY_REGISTER_EMAIL);
     }

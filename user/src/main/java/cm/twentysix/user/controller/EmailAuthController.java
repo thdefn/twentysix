@@ -18,7 +18,7 @@ public class EmailAuthController {
 
     @PostMapping
     public ResponseEntity<Void> sendAuthEmail(@RequestBody @Valid SendAuthEmailForm form, HttpServletRequest request) {
-        SendAuthEmailResponse response = emailAuthService.sendAuthEmail(form);
+        SendAuthEmailResponse response = emailAuthService.sendAuthEmail(form, request.getRequestURL().toString());
         HttpSession httpSession = request.getSession();
         httpSession.setAttribute("SESSION_ID", response.sessionId());
         return ResponseEntity.ok().build();

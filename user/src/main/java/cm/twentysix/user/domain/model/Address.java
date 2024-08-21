@@ -22,7 +22,7 @@ public class Address extends BaseTimeEntity {
     @Column(columnDefinition = "bit(1) default 0")
     private boolean isDefault;
 
-    @Column(length = 13, nullable = false)
+    @Column(length = 130, nullable = false)
     private String phone;
 
     @Column(length = 5, nullable = false)

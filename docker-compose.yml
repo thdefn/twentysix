@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile-test
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - brand-service
+      - order-service
+      - payment-service
+      - product-service
+    networks:
+      - app-network
+
+  brand-service:
+    build:
+      context: ./brand
+      dockerfile: Dockerfile-test
+    environment:
+      DB_URL: ${BRAND_DB_URL}
+      DB_PASSWORD: ${DB_PASSWORD}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+    networks:
+      - app-network
+
+  user-service:
+    build:
+      context: ./user
+      dockerfile: Dockerfile-test
+    environment:
+      DB_URL: ${USER_DB_URL}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      MAILGUN_URL: ${MAILGUN_URL}
+      MAILGUN_KEY: ${MAILGUN_KEY}
+      KAFKA_BROKERS: ${KAFKA_BROKERS}
+    networks:
+      - app-network
+
+  product-service:
+    build:
+      context: ./product
+      dockerfile: Dockerfile-test
+    environment:
+      DB_URL: ${PRODUCT_DB_URL}
+      KAFKA_BROKERS: ${KAFKA_BROKERS}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+    networks:
+      - app-network
+
+  payment-service:
+    build:
+      context: ./payment
+      dockerfile: Dockerfile-test
+    environment:
+      DB_URL: ${PAYMENT_DB_URL}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAFKA_BROKERS: ${KAFKA_BROKERS}
+      TOSS_PAYMENT_SECRET: ${TOSS_PAYMENT_SECRET}
+    networks:
+      - app-network
+
+  order-service:
+    build:
+      context: ./payment
+      dockerfile: Dockerfile-test
+    environment:
+      DB_URL: ${ORDER_DB_URL}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAFKA_BROKERS: ${KAFKA_BROKERS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

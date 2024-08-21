@@ -23,20 +23,18 @@ import static cm.twentysix.user.exception.Error.*;
 @RequiredArgsConstructor
 @Service
 public class EmailAuthService {
-    @Value("${server.url}")
-    private String serverUrl;
     private final MailgunClient mailgunClient;
     private final EmailAuthRedisRepository emailAuthRepository;
     private final UserRepository userRepository;
     private final CipherManager cipherManager;
 
-    public SendAuthEmailResponse sendAuthEmail(SendAuthEmailForm form) {
+    public SendAuthEmailResponse sendAuthEmail(SendAuthEmailForm form, String serverUrl) {
         String encryptedEmail = cipherManager.encrypt(form.email());
         if (userRepository.existsByEmail(encryptedEmail))
             throw new UserException(ALREADY_REGISTER_EMAIL);
 
         String code = generateRandomCode();
-        String authenticationLink = getAuthLink(form.email(), code);
+        String authenticationLink = getAuthLink(form.email(), code, serverUrl);
         String emailBody = getEmailBody(authenticationLink);
 
         EmailAuth emailAuth = emailAuthRepository.save(EmailAuth.of(form.email(), code));
@@ -50,9 +48,9 @@ public class EmailAuthService {
         return body.replace("$1", link);
     }
 
-    private String getAuthLink(String email, String code) {
+    private String getAuthLink(String email, String code, String serverUrl) {
         StringBuilder sb = new StringBuilder(serverUrl);
-        sb.append("/email-auths/verify")
+        sb.append("/verify")
                 .append("?email=").append(email)
                 .append("&code=").append(code);
         return sb.toString();

@@ -37,6 +37,6 @@ public class MockPaymentClient implements PaymentClient {
 
     @Override
     public String cancel(String paymentKey, PaymentCancelForm form) {
-        return "canceld";
+        return "cancelled";
     }
 }

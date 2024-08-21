@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +38,7 @@ class EmailAuthControllerTest {
     @DisplayName("인증 메일 발송_성공")
     void sendAuthEmail_success() throws Exception {
         SendAuthEmailForm form = new SendAuthEmailForm("abcde@naver.com");
-        given(emailAuthService.sendAuthEmail(any())).willReturn(new SendAuthEmailResponse("randomuid"));
+        given(emailAuthService.sendAuthEmail(any(), anyString())).willReturn(new SendAuthEmailResponse("randomuid"));
         mockMvc.perform(post("/users/email-auths")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(form)
@@ -50,7 +51,7 @@ class EmailAuthControllerTest {
     @DisplayName("인증 메일 발송_실패")
     void sendAuthEmail_fail() throws Exception {
         SendAuthEmailForm form = new SendAuthEmailForm("abcdenaver.com");
-        given(emailAuthService.sendAuthEmail(any())).willReturn(new SendAuthEmailResponse("randomuid"));
+        given(emailAuthService.sendAuthEmail(any(), anyString())).willReturn(new SendAuthEmailResponse("randomuid"));
         mockMvc.perform(post("/users/email-auths")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(form)

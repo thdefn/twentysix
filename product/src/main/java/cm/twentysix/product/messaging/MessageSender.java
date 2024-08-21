@@ -1,6 +1,6 @@
 package cm.twentysix.product.messaging;
 
-import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.dto.StockCheckFailedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -14,7 +14,7 @@ public class MessageSender {
 
     private final StreamBridge streamBridge;
 
-    public boolean sendProductOrderFailedEvent(ProductOrderFailedEvent event) {
-        return streamBridge.send("product-order-failed-out-0", MessageBuilder.withPayload(event).build());
+    public boolean sendProductOrderFailedEvent(StockCheckFailedEvent event) {
+        return streamBridge.send("stock-check-failed-out-0", MessageBuilder.withPayload(event).build());
     }
 }

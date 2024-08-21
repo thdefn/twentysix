@@ -24,7 +24,7 @@ spring:
           uri: http://payment-service:8085
           predicates:
             - Path=/checkout/**
-            - Path=/confirm
+            - Path=/products/**
         - id: product-service
           uri: http://product-service:8083
           predicates:

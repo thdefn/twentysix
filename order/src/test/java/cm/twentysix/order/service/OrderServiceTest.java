@@ -201,9 +201,9 @@ class OrderServiceTest {
     }
 
     @Test
-    void handleProductOrderFailedEvent_success() {
+    void handleStockCheckFailedEvent_success() {
         //given
-        ProductOrderFailedEvent event = new ProductOrderFailedEvent("2032032003030-afsfdasfdsfdsafdl2");
+        StockCheckFailedEvent event = new StockCheckFailedEvent("2032032003030-afsfdasfdsfdsafdl2");
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
@@ -219,15 +219,15 @@ class OrderServiceTest {
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         //when
-        orderService.handleProductOrderFailedEvent(event);
+        orderService.handleStockCheckFailedEvent(event);
         //then
         assertEquals(order.getStatus(), OrderStatus.CHECK_FAIL);
     }
 
     @Test
-    void handleProductOrderFailedEvent_fail_PROCESSING_ORDER_NOT_FOUND() {
+    void handleStockCheckFailedEvent_fail_PROCESSING_ORDER_NOT_FOUND() {
         //given
-        ProductOrderFailedEvent event = new ProductOrderFailedEvent("2032032003030-afsfdasfdsfdsafdl2");
+        StockCheckFailedEvent event = new StockCheckFailedEvent("2032032003030-afsfdasfdsfdsafdl2");
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
@@ -243,7 +243,7 @@ class OrderServiceTest {
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
         //when
-        OrderException e = assertThrows(OrderException.class, () -> orderService.handleProductOrderFailedEvent(event));
+        OrderException e = assertThrows(OrderException.class, () -> orderService.handleStockCheckFailedEvent(event));
         //then
         assertEquals(e.getError(), Error.PROCESSING_ORDER_NOT_FOUND);
     }

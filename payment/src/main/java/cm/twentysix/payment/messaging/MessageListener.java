@@ -1,7 +1,7 @@
 package cm.twentysix.payment.messaging;
 
 import cm.twentysix.payment.dto.OrderCancelledEvent;
-import cm.twentysix.payment.dto.ProductOrderFailedEvent;
+import cm.twentysix.payment.dto.StockCheckFailedEvent;
 import cm.twentysix.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +20,9 @@ import static cm.twentysix.payment.constant.CancelReason.STOCK_SHORTAGE;
 public class MessageListener {
     private final PaymentService paymentService;
 
-    @Bean(name = "product-order-failed")
-    public Consumer<ProductOrderFailedEvent> productOrderFailedEventConsumer() {
-        return productOrderFailedEvent -> paymentService.cancelOrBlockPayment(productOrderFailedEvent.orderId(), STOCK_SHORTAGE.message);
+    @Bean(name = "stock-check-failed")
+    public Consumer<StockCheckFailedEvent> stockCheckFailedEventConsumer() {
+        return stockCheckFailedEvent -> paymentService.cancelOrBlockPayment(stockCheckFailedEvent.orderId(), STOCK_SHORTAGE.message);
     }
 
     @Bean(name = "order-cancelled")

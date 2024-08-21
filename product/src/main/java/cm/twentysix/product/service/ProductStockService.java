@@ -2,7 +2,7 @@ package cm.twentysix.product.service;
 
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.dto.ProductStockResponse;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
@@ -27,7 +27,7 @@ public class ProductStockService {
         if (checkAndUpdateProductStock(products, productIdQuantity))
             productRepository.saveAll(products);
         else
-            messageSender.sendProductOrderFailedEvent(ProductOrderFailedEvent.of(orderId));
+            messageSender.sendProductOrderFailedEvent(StockCheckFailedEvent.of(orderId));
     }
 
 

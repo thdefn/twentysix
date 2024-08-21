@@ -3,12 +3,12 @@ package cm.twentysix.product.dto;
 import lombok.Builder;
 
 @Builder
-public record ProductOrderFailedEvent(
+public record StockCheckFailedEvent(
         String orderId
 ) {
 
-    public static ProductOrderFailedEvent of(String orderId) {
-        return ProductOrderFailedEvent.builder()
+    public static StockCheckFailedEvent of(String orderId) {
+        return StockCheckFailedEvent.builder()
                 .orderId(orderId)
                 .build();
     }

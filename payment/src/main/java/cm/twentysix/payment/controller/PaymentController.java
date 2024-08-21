@@ -8,15 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/payments")
 public class PaymentController {
     private final PaymentService paymentService;
 
-    @PostMapping(value = "/confirm")
+    @PostMapping
     public ResponseEntity<Void> confirm(@Valid @RequestBody PaymentForm form) {
         paymentService.confirm(form);
         return ResponseEntity.ok().build();

@@ -1,7 +1,7 @@
 package cm.twentysix.order.messaging;
 
 import cm.twentysix.order.dto.PaymentFinalizedEvent;
-import cm.twentysix.order.dto.ProductOrderFailedEvent;
+import cm.twentysix.order.dto.StockCheckFailedEvent;
 import cm.twentysix.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +16,9 @@ import java.util.function.Consumer;
 public class MessageListener {
     private final OrderService orderService;
 
-    @Bean(name = "product-order-failed")
-    public Consumer<ProductOrderFailedEvent> productOrderFailedEventConsumer() {
-        return orderService::handleProductOrderFailedEvent;
+    @Bean(name = "stock-check-failed")
+    public Consumer<StockCheckFailedEvent> stockCheckFailedEventConsumer() {
+        return orderService::handleStockCheckFailedEvent;
     }
 
     @Bean(name = "payment-finalized")

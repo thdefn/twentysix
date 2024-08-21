@@ -3,7 +3,7 @@ package cm.twentysix.product.service;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.ProductOrderFailedEvent;
+import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.dto.ProductStockResponse;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
@@ -87,9 +87,9 @@ class ProductStockServiceTest {
         //when
         productStockService.checkProductStock(orderedProductQuantity, "12345");
         //then
-        ArgumentCaptor<ProductOrderFailedEvent> productOrderFailedEventCaptor = ArgumentCaptor.forClass(ProductOrderFailedEvent.class);
+        ArgumentCaptor<StockCheckFailedEvent> productOrderFailedEventCaptor = ArgumentCaptor.forClass(StockCheckFailedEvent.class);
         verify(messageSender, times(1)).sendProductOrderFailedEvent(productOrderFailedEventCaptor.capture());
-        ProductOrderFailedEvent event = productOrderFailedEventCaptor.getValue();
+        StockCheckFailedEvent event = productOrderFailedEventCaptor.getValue();
         assertEquals(event.orderId(), "12345");
     }
 

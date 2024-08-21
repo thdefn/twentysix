@@ -18,14 +18,14 @@ spring:
       okhttp:
         enabled: true
     function:
-      definition: product-order-failed;order-cancelled
+      definition: stock-check-failed;order-cancelled
     stream:
       kafka:
         binder:
           brokers: ${KAFKA_BROKERS}
       bindings:
-        product-order-failed-in-0:
-          destination: product-order-failed-events
+        stock-check-failed-in-0:
+          destination: stock-check-failed-events
           group: payment-group
           content-type: application/json
         payment-finalized-out-0:

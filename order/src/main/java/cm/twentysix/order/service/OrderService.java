@@ -72,7 +72,6 @@ public class OrderService {
         try {
             Order order = orderFuture.get();
             orderRepository.save(order);
-            eventPublisher.publishEvent(OrderEvent.of(order));
             CompletableFuture.runAsync(() -> cartService.removeOrderedCartItem(form, userId));
             return ReceiveOrderResponse.of(orderId);
         } catch (InterruptedException e) {
@@ -91,7 +90,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void handleProductOrderFailedEvent(ProductOrderFailedEvent event) {
+    public void handleStockCheckFailedEvent(StockCheckFailedEvent event) {
         Order order = orderRepository.findByOrderId(event.orderId())
                 .stream().findFirst()
                 .filter(o -> o.getStatus().isOrderProcessingStatus())
@@ -109,9 +108,9 @@ public class OrderService {
 
         if (event.isSuccess()) {
             order.placed();
+            eventPublisher.publishEvent(OrderEvent.of(order));
         } else {
             order.paymentFail();
-            messageSender.sendOrderFailedEvent(OrderFailedEvent.of(order));
         }
     }
 

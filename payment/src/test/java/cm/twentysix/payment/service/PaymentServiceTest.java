@@ -217,7 +217,7 @@ class PaymentServiceTest {
     @Test
     void handleProductOrderFailedEvent_success_WhenStatusPENDING() {
         //given
-        ProductOrderFailedEvent event = new ProductOrderFailedEvent("any-order-id");
+        StockCheckFailedEvent event = new StockCheckFailedEvent("any-order-id");
         Payment payment = Payment.builder()
                 .amount(10000)
                 .orderName("any-order-name")
@@ -236,7 +236,7 @@ class PaymentServiceTest {
     @Test
     void handleProductOrderFailedEvent_success_WhenStatusCOMPLETE() {
         //given
-        ProductOrderFailedEvent event = new ProductOrderFailedEvent("any-order-id");
+        StockCheckFailedEvent event = new StockCheckFailedEvent("any-order-id");
         Payment payment = Payment.builder()
                 .amount(10000)
                 .orderName("any-order-name")
@@ -257,7 +257,7 @@ class PaymentServiceTest {
     @Test
     void handleProductOrderFailedEvent_success() {
         //given
-        ProductOrderFailedEvent event = new ProductOrderFailedEvent("any-order-id");
+        StockCheckFailedEvent event = new StockCheckFailedEvent("any-order-id");
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.empty());
         //when

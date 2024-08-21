@@ -1,3 +1,5 @@
+### Infrastructure Setup
+`docker-compose -f ./infra/docker-compose-infra.yml up -d`
 
 ### Convention
 #### Branch Strategy

@@ -1,0 +1,11 @@
+FROM openjdk:22
+ARG JAR_FILE=gateway/build/libs/gateway-0.0.1-SNAPSHOT.jar
+
+ARG REDIS_PASSWORD
+ARG REDIS_HOST
+
+ENV REDIS_PASSWORD=${REDIS_PASSWORD}
+ENV REDIS_HOST=${REDIS_HOST}
+
+COPY ${JAR_FILE} /app.jar
+ENTRYPOINT ["java","-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=test","-jar","/app.jar"]

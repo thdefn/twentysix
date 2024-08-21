@@ -1,0 +1,35 @@
+spring:
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      timeout: 600ms
+      host: ${REDIS_HOST}
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://user-service:8081
+          predicates:
+            - Path=/users/**
+        - id: brand-service
+          uri: http://brand-service:8082
+          predicates:
+            - Path=/brands/**
+        - id: order-service
+          uri: http://order-service:8084
+          predicates:
+            - Path=/orders/**
+            - Path=/carts/**
+        - id: payment-service
+          uri: http://payment-service:8085
+          predicates:
+            - Path=/checkout/**
+            - Path=/confirm
+        - id: product-service
+          uri: http://product-service:8083
+          predicates:
+            - Path=/products/**
+jwt:
+  key: Z2lsZG9uZ211LWp3dC1zZWNyZXQta2V5Cg==
+server:
+  port: 8080

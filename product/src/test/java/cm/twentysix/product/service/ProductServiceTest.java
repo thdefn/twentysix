@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -343,6 +344,7 @@ class ProductServiceTest {
                         .thumbnailPath("12345.jpg")
                         .bodyImagePath("78910.jpg")
                         .price(10000)
+                        .orderingOpensAt(LocalDateTime.parse(orderingBeginAt))
                         .discount(10)
                         .name("강아지 눈물 티슈")
                         .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
@@ -365,6 +367,7 @@ class ProductServiceTest {
                         .bodyImagePath("78910.jpg")
                         .price(5000)
                         .discount(0)
+                        .orderingOpensAt(LocalDateTime.parse(orderingBeginAt))
                         .name("스탠리 텀블러")
                         .productInfo(ProductInfo.from("스탠리", "중국", "02-000-0000"))
                         .quantity(100)
@@ -423,6 +426,7 @@ class ProductServiceTest {
                         .quantity(1000)
                         .deliveryFee(0)
                         .likes(Set.of(2L))
+                        .orderingOpensAt(LocalDateTime.parse(orderingBeginAt))
                         .lastModifiedAt(LocalDateTime.MIN)
                         .categories(List.of(CategoryInfo.builder()
                                 .id("12efad").name("강아지 용품")
@@ -459,6 +463,7 @@ class ProductServiceTest {
                 .price(10000)
                 .discount(10)
                 .name("강아지 눈물 티슈")
+                .orderingOpensAt(LocalDateTime.parse(orderingBeginAt))
                 .productInfo(ProductInfo.from("돌봄", "중국", "010-1111-1234"))
                 .quantity(1000)
                 .deliveryFee(0)

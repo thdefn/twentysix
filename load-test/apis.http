@@ -1,0 +1,172 @@
+### 브랜드
+
+
+###
+POST http://localhost:8080/brands
+Content-Type: application/json
+X-USER-ID: 11
+
+{
+  "name": "아이캔더",
+  "legalName": "주식회사 캔더스",
+  "registrationNumber": "232-86-00066",
+  "deliveryFee" : 3500,
+  "freeDeliveryInfimum" : 50000,
+  "introduction": "우리와 함께 사는 반려동물이 언제 어디서든 더욱 편안하고, 안전하며, 행복하게 살도록 하는 것을 목표로 하는 브랜드입니다"
+}
+
+###
+PUT http://localhost:8080/brands/1
+Content-Type: application/json
+X-USER-ID: 11
+
+{
+  "name": "아이캔더",
+  "legalName": "주식회사 캔더스",
+  "registrationNumber": "232-86-00066",
+  "deliveryFee" : 3500,
+  "freeDeliveryInfimum" : 50000,
+  "introduction": "우리와 함께 사는 반려동물이 언제 어디서든 더욱 편안하고, 안전하며, 행복하게 살도록 하는 것을 목표로 하는 브랜드입니다"
+}
+
+
+### 상품
+
+###
+POST http://localhost:8083/products
+Content-Type: application/json
+X-USER-ID: 11
+
+{
+  "brandId": 4,
+  "categoryId": "66ba11c4ab906f11f7ff0002",
+  "name" : "메달리스트 고트스킨 스니커즈 white",
+  "manufacturer" : "AUTRY",
+  "countryOfManufacture": "터키",
+  "contact" : "1599-5012",
+  "quantity" : 300,
+  "price" : 206815,
+  "amount" : 300,
+  "discount" : 0,
+  "deliveryFee" : 0
+}
+
+###
+GET http://localhost:8083/products
+
+<> 2024-08-19T203323.200.json
+
+###
+GET http://localhost:8083/products/66c437d4552c0f20d08e947f/stock
+
+
+###
+DELETE http://localhost:8083/products/66c3261f7fdc777118594b83
+X-USER-ID: 11
+
+### 주문
+
+
+###
+POST http://localhost:8084/orders
+Content-Type: application/json
+X-USER-ID: 11
+
+{
+  "products": [
+    {
+      "id" : "66c326847fdc777118594b84",
+      "quantity" : 1
+    }
+  ],
+  "shouldSaveNewAddress": false,
+  "shouldDeleteCartItem": false,
+  "receiver": {
+    "isDefault": true,
+    "name": "송송이",
+    "address": "서울특별시 성북구 보문로 34로",
+    "zipCode": "11234",
+    "phone": "010-2223-1111"
+  }
+}
+
+###
+DELETE http://localhost:8084/orders/20240819153444776-66bf7b40a6b04ad697bf0c562e04e8a6
+Content-Type: application/json
+X-USER-ID: 11
+
+
+###
+POST http://localhost:8084/carts
+Content-Type: application/json
+X-USER-ID: 6
+
+{
+  "id": "66bed58b8237e8130822b7af",
+  "quantity": 2
+}
+
+
+
+###
+DELETE http://localhost:8084/carts
+Content-Type: application/json
+X-USER-ID: 6
+
+{
+  "productIds": ["66bb476ae299df68f46382da"]
+}
+
+###
+PUT http://localhost:8084/carts
+Content-Type: application/json
+X-USER-ID: 6
+
+{
+  "id": "66bed4403dd6c51a491ca4f6",
+  "quantity": 4
+}
+
+
+### 유저
+
+###
+GET http://localhost:8080/users/logout?type=ALL
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMSIsInJvbGUiOiJTRUxMRVIiLCJleHAiOjE3MjM1MzA4MTN9.WX-kh9uMOiBMWgNwXpPetWGCN4yhkszIobDz_FhZrck
+
+
+###
+POST http://localhost:8081/users/login
+Content-Type: application/json
+
+{
+  "email": "thdefn@gmail.com",
+  "password": "abcdaefad123&Q"
+}
+
+###
+POST http://localhost:8081/users/email-auths
+Content-Type: application/json
+
+{
+  "email": "twentysixcm26@gmail.com"
+}
+
+
+###
+GET http://localhost:8080/users/email-auths/verify?email=thdefn@gmail.com&code=02fa869b7cc14987a830ee987aceb532
+
+###
+POST http://localhost:8081/users/signup
+Content-Type: application/json
+
+{
+  "email": "twentysixcm26@gmail.com",
+  "password": "abcdaefad123&Q",
+  "phone": "010-1221-1232",
+  "name": "hihi",
+  "address": "서울 특별시 성북구 혜화동",
+  "zipCode": "11111",
+  "userType": "CUSTOMER"
+}

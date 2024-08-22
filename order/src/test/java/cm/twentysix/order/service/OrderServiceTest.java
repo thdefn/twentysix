@@ -256,30 +256,6 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
-                .products(new HashMap<>())
-                .deliveryFees(new HashMap<>())
-                .receiver(OrderReceiver.builder()
-                        .name("송송이")
-                        .address("서울 특별시 성북구 보문로")
-                        .zipCode("11112")
-                        .phone("010-1111-1111")
-                        .build())
-                .status(OrderStatus.PAYMENT_PENDING)
-                .build();
-        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
-        //when
-        orderService.handlePaymentFinalizedEvent(event);
-        //then
-        assertEquals(order.getStatus(), OrderStatus.ORDER_PLACED);
-    }
-
-    @Test
-    void handlePaymentFinalizedEvent_success_WhenPaymentIsFail() {
-        //given
-        PaymentFinalizedEvent event = new PaymentFinalizedEvent("2032032003030-afsfdasfdsfdsafdl2", false);
-        Order order = Order.builder()
-                .orderId("2032032003030-afsfdasfdsfdsafdl2")
-                .userId(1L)
                 .products(Map.of(
                         "1234", OrderProduct.builder().quantity(2).build(),
                         "2345", OrderProduct.builder().quantity(1).build(),
@@ -298,13 +274,37 @@ class OrderServiceTest {
         //when
         orderService.handlePaymentFinalizedEvent(event);
         //then
-        ArgumentCaptor<OrderFailedEvent> orderFailedEventCaptor = ArgumentCaptor.forClass(OrderFailedEvent.class);
-        verify(messageSender, times(1)).sendOrderFailedEvent(orderFailedEventCaptor.capture());
-        OrderFailedEvent orderFailedEvent = orderFailedEventCaptor.getValue();
-        Map<String, Integer> productQuantityMap = orderFailedEvent.productQuantity();
+        ArgumentCaptor<OrderEvent> orderEventCaptor = ArgumentCaptor.forClass(OrderEvent.class);
+        verify(applicationEventPublisher, times(1)).publishEvent(orderEventCaptor.capture());
+        OrderEvent orderEvent = orderEventCaptor.getValue();
+        Map<String, Integer> productQuantityMap = orderEvent.productQuantity();
         assertEquals(productQuantityMap.get("1234"), 2);
         assertEquals(productQuantityMap.get("2345"), 1);
         assertEquals(productQuantityMap.get("3456"), 1);
+        assertEquals(order.getStatus(), OrderStatus.ORDER_PLACED);
+    }
+
+    @Test
+    void handlePaymentFinalizedEvent_success_WhenPaymentIsFail() {
+        //given
+        PaymentFinalizedEvent event = new PaymentFinalizedEvent("2032032003030-afsfdasfdsfdsafdl2", false);
+        Order order = Order.builder()
+                .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                .userId(1L)
+                .products(new HashMap<>())
+                .deliveryFees(new HashMap<>())
+                .receiver(OrderReceiver.builder()
+                        .name("송송이")
+                        .address("서울 특별시 성북구 보문로")
+                        .zipCode("11112")
+                        .phone("010-1111-1111")
+                        .build())
+                .status(OrderStatus.PAYMENT_PENDING)
+                .build();
+        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        //when
+        orderService.handlePaymentFinalizedEvent(event);
+        //then
         assertEquals(order.getStatus(), OrderStatus.PAYMENT_FAIL);
     }
 

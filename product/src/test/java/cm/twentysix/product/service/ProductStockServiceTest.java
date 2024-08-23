@@ -1,10 +1,11 @@
 package cm.twentysix.product.service;
 
+import cm.twentysix.product.cache.ProductItemResponseGlobalCacheRepository;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.dto.ProductStockResponse;
+import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
 import cm.twentysix.product.messaging.MessageSender;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.*;
 class ProductStockServiceTest {
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private ProductItemResponseGlobalCacheRepository productItemResponseGlobalCacheRepository;
     @Mock
     private MessageSender messageSender;
     @InjectMocks

@@ -1,9 +1,10 @@
 package cm.twentysix.product.service;
 
 import cm.twentysix.product.domain.model.Product;
+import cm.twentysix.product.cache.ProductItemResponseGlobalCacheRepository;
 import cm.twentysix.product.domain.repository.ProductRepository;
-import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.dto.ProductStockResponse;
+import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
 import cm.twentysix.product.messaging.MessageSender;
@@ -13,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class ProductStockService {
     private final ProductRepository productRepository;
     private final MessageSender messageSender;
+    private final ProductItemResponseGlobalCacheRepository productItemResponseGlobalCacheRepository;
 
 
     @Transactional
@@ -38,6 +41,7 @@ public class ProductStockService {
                 return false;
             p.minusQuantity(requiredQuantity);
         }
+        CompletableFuture.runAsync(() -> productItemResponseGlobalCacheRepository.putAll(products));
         return true;
     }
 
@@ -49,6 +53,7 @@ public class ProductStockService {
             int quantityToAdded = productIdQuantity.get(p.getId());
             p.addQuantity(quantityToAdded);
         }
+        CompletableFuture.runAsync(() -> productItemResponseGlobalCacheRepository.putAll(products));
         productRepository.saveAll(products);
     }
 

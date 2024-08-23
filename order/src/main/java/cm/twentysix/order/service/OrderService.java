@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static cm.twentysix.order.exception.Error.ORDER_CONTAIN_CLOSING_PRODUCT;
+import static cm.twentysix.order.exception.Error.STOCK_SHORTAGE;
 
 @Service
 @Slf4j
@@ -52,8 +53,10 @@ public class OrderService {
         CompletableFuture<List<ProductItemResponse>> productFuture =
                 CompletableFuture.supplyAsync(() -> productGrpcClient.findProductItems(productIdQuantityMap.keySet().stream().toList()))
                         .thenApply(products -> {
-                            for (ProductItemResponse product : products)
+                            for (ProductItemResponse product : products) {
+                                validAvailableProductQuantity(product.getQuantity(), productIdQuantityMap.get(product.getId()));
                                 validProductIsOpen(product.getOrderingOpensAt(), requestedAt);
+                            }
                             return products;
                         });
 
@@ -82,6 +85,11 @@ public class OrderService {
                 throw (OrderException) cause;
             } else throw new RuntimeException(e);
         }
+    }
+
+    private void validAvailableProductQuantity(int obtainedQuantity, int requestedQuantity) {
+        if (requestedQuantity > obtainedQuantity)
+            throw new OrderException(STOCK_SHORTAGE);
     }
 
     private void validProductIsOpen(String orderingOpensAt, LocalDateTime requestedAt) {

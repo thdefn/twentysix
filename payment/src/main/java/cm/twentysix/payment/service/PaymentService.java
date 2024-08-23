@@ -15,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static cm.twentysix.OrderProto.OrderInfoResponse;
-import static cm.twentysix.payment.exception.Error.PAYMENT_FAILED;
-import static cm.twentysix.payment.exception.Error.STOCK_SHORTAGE;
+import static cm.twentysix.payment.exception.Error.*;
 
 @RequiredArgsConstructor
 @Service
@@ -39,20 +38,31 @@ public class PaymentService {
     @Transactional
     public void confirm(PaymentForm form) {
         Payment payment = paymentRepository.findByOrderId(form.orderId())
-                .stream().findFirst()
-                .filter(p -> PaymentStatus.PENDING.equals(p.getStatus()))
-                .orElseThrow(() -> new PaymentException(STOCK_SHORTAGE));
+                .orElseThrow(() -> new PaymentException(NOT_FOUND_PAYMENT));
+
+        validatePendingPayment(payment);
 
         PaymentResponse response = paymentClient.confirm(form);
-        if ("DONE" .equals(response.status())) {
+        if ("DONE".equals(response.status())) {
             payment.confirmPayment(response);
             payment.complete(response);
             messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(response.orderId(), true));
-        } else if ("ABORTED" .equals(response.status())) {
+        } else if ("ABORTED".equals(response.status())) {
             applicationEventPublisher.publishEvent(PaymentAbortedEvent.of(response));
             throw new PaymentException(PAYMENT_FAILED);
         }
         // TODO : 429 500 토스 측에서 에러 났을 때 핸들링
+    }
+
+    private static void validatePendingPayment(Payment payment) {
+        if (PaymentStatus.BLOCK.equals(payment.getStatus()))
+            throw new PaymentException(STOCK_SHORTAGE);
+
+        if (PaymentStatus.COMPLETE.equals(payment.getStatus()))
+            throw new PaymentException(ALREADY_PAID_ORDER);
+
+        if (PaymentStatus.CANCEL.equals(payment.getStatus()))
+            throw new PaymentException(CANCELLED_ORDER);
     }
 
     @Transactional

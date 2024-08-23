@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum Error {
+    CANCELLED_ORDER(HttpStatus.BAD_REQUEST, "Cancelled order"),
+    ALREADY_PAID_ORDER(HttpStatus.BAD_REQUEST, "Already paid order"),
     PAYMENT_FAILED(HttpStatus.PRECONDITION_FAILED, "Payment failed"),
     NOT_FOUND_PAYMENT(HttpStatus.BAD_REQUEST, "해당하는 결제 건이 없습니다."),
     STOCK_SHORTAGE(HttpStatus.CONFLICT, "Order failed due to insufficient stock"),

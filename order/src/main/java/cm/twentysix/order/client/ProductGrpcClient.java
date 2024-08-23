@@ -1,19 +1,18 @@
 package cm.twentysix.order.client;
 
 import cm.twentysix.ProductServiceGrpc;
+import cm.twentysix.order.cache.ProductItemResponseGlobalCacheRepository;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static cm.twentysix.ProductProto.*;
@@ -21,12 +20,12 @@ import static cm.twentysix.ProductProto.*;
 @Component
 @Slf4j
 public class ProductGrpcClient {
-    private final CacheManager cacheManager;
     private final ProductServiceGrpc.ProductServiceBlockingStub productServiceBlockingStub;
     private final ManagedChannel managedChannel;
+    private final ProductItemResponseGlobalCacheRepository productItemResponseGlobalCacheRepository;
 
-    public ProductGrpcClient(CacheManager cacheManager, @Value("${grpc.client.product.host}") String host, @Value("${grpc.client.product.port}") int port) {
-        this.cacheManager = cacheManager;
+    public ProductGrpcClient(ProductItemResponseGlobalCacheRepository productItemResponseGlobalCacheRepository, @Value("${grpc.client.product.host}") String host, @Value("${grpc.client.product.port}") int port) {
+        this.productItemResponseGlobalCacheRepository = productItemResponseGlobalCacheRepository;
         managedChannel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
@@ -34,45 +33,36 @@ public class ProductGrpcClient {
     }
 
     public ProductItemResponse findProductItem(String productId) {
-        Cache cache = cacheManager.getCache("productInfos");
-        if (cache != null) {
-            Optional<ProductItemResponse> maybeProductItem = Optional.ofNullable(cache.get(productId, ProductItemResponse.class));
-            if (maybeProductItem.isPresent())
-                return maybeProductItem.get();
-        }
-
-        ProductItemResponse response = productServiceBlockingStub.getProductItem(
+        Optional<ProductItemResponse> maybeProductItemResponse = productItemResponseGlobalCacheRepository.get(productId);
+        return maybeProductItemResponse.orElseGet(() -> productServiceBlockingStub.getProductItem(
                 ProductItemRequest.newBuilder()
-                        .setId(productId).build());
-        CompletableFuture.runAsync(() -> cache.put(productId, response));
-        return response;
+                        .setId(productId).build()));
     }
 
     public List<ProductItemResponse> findProductItems(List<String> productIds) {
-        Cache cache = cacheManager.getCache("productInfos");
-        List<String> idsToFetch = new ArrayList<>();
-        List<ProductItemResponse> productInfos = new ArrayList<>();
+        List<ProductItemResponse> response = new ArrayList<>();
 
-        if (cache != null) {
-            for (String productId : productIds) {
-                Optional<ProductItemResponse> maybeProductInfo = Optional.ofNullable(cache.get(productId, ProductItemResponse.class));
-                if (maybeProductInfo.isPresent()) {
-                    ProductItemResponse productInfo = maybeProductInfo.get();
-                    productInfos.add(productInfo);
-                } else idsToFetch.add(productId);
-            }
-        }
+        List<String> missingIds = findCachedProductInfosAndIdentifyMissingIds(response, productIds);
 
-        if (!idsToFetch.isEmpty()) {
+        if (!missingIds.isEmpty()) {
             List<ProductItemResponse> fetched = getProductItems(productIds).getProductsList();
-            productInfos.addAll(fetched);
-
-            CompletableFuture.runAsync(() -> {
-                fetched.forEach(productInfo -> cache.put(productInfo.getId(), productInfo));
-            });
+            response.addAll(fetched);
         }
 
-        return productInfos;
+        return response;
+    }
+
+    private List<String> findCachedProductInfosAndIdentifyMissingIds(List<ProductItemResponse> response, List<String> productIds) {
+        List<String> missingIds = new ArrayList<>();
+
+        Map<String, ProductItemResponse> cached = productItemResponseGlobalCacheRepository.getAll(productIds);
+        for (String productId : productIds) {
+            if (cached.containsKey(productId))
+                response.add(cached.get(productId));
+            else missingIds.add(productId);
+        }
+
+        return missingIds;
     }
 
     private ProductItemsResponse getProductItems(List<String> productIds) {

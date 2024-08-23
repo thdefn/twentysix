@@ -22,6 +22,7 @@ message ProductItemResponse {
   int32 price = 7;
   int32 discountedPrice = 8;
   string orderingOpensAt = 9;
+  int32 quantity = 10;
 }
 
 message ProductItemsRequest {

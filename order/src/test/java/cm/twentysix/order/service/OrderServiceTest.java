@@ -4,7 +4,10 @@ import cm.twentysix.BrandProto;
 import cm.twentysix.ProductProto;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
-import cm.twentysix.order.domain.model.*;
+import cm.twentysix.order.domain.model.Order;
+import cm.twentysix.order.domain.model.OrderProduct;
+import cm.twentysix.order.domain.model.OrderReceiver;
+import cm.twentysix.order.domain.model.OrderStatus;
 import cm.twentysix.order.domain.repository.OrderRepository;
 import cm.twentysix.order.dto.*;
 import cm.twentysix.order.exception.Error;
@@ -82,6 +85,7 @@ class OrderServiceTest {
                                 .setPrice(30000)
                                 .setName("모달 잠옷 여성")
                                 .setBrandName("JAJU")
+                                .setQuantity(1)
                                 .setBrandId(1L)
                                 .setOrderingOpensAt(LocalDateTime.MIN.toString())
                                 .build()
@@ -146,6 +150,7 @@ class OrderServiceTest {
                                 .setPrice(30000)
                                 .setName("모달 잠옷 여성")
                                 .setBrandName("JAJU")
+                                .setQuantity(1)
                                 .setOrderingOpensAt(LocalDateTime.MIN.toString())
                                 .setBrandId(1L)
                                 .build()
@@ -172,6 +177,36 @@ class OrderServiceTest {
     }
 
     @Test
+    void receiveOrder_fail_STOCK_SHORTAGE() {
+        //given
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("123456", 2)
+        );
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
+        given(productGrpcClient.findProductItems(anyList())).willReturn(
+                List.of(
+                        ProductProto.ProductItemResponse.newBuilder()
+                                .setId("123456")
+                                .setDiscountedPrice(27000)
+                                .setDiscount(10)
+                                .setThumbnail("so-cute.jpg")
+                                .setPrice(30000)
+                                .setName("모달 잠옷 여성")
+                                .setQuantity(1)
+                                .setBrandName("JAJU")
+                                .setBrandId(1L)
+                                .setOrderingOpensAt(LocalDateTime.MAX.toString())
+                                .build()
+                )
+        );
+        //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
+        //then
+        assertEquals(e.getError(), Error.STOCK_SHORTAGE);
+    }
+
+    @Test
     void receiveOrder_fail_ORDER_CONTAIN_CLOSING_PRODUCT() {
         //given
         List<OrderProductItemForm> items = List.of(
@@ -188,13 +223,14 @@ class OrderServiceTest {
                                 .setThumbnail("so-cute.jpg")
                                 .setPrice(30000)
                                 .setName("모달 잠옷 여성")
+                                .setQuantity(1)
                                 .setBrandName("JAJU")
                                 .setBrandId(1L)
                                 .setOrderingOpensAt(LocalDateTime.MAX.toString())
                                 .build()
                 )
         );
-       //when
+        //when
         OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
         //then
         assertEquals(e.getError(), Error.ORDER_CONTAIN_CLOSING_PRODUCT);
@@ -419,7 +455,6 @@ class OrderServiceTest {
         //then
         assertEquals(e.getError(), Error.NOT_USERS_ORDER);
     }
-
 
 
 }

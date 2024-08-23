@@ -3,8 +3,8 @@ version: '3.8'
 services:
   api-gateway:
     build:
-      context: ./gateway
-      dockerfile: Dockerfile-test
+      context: .
+      dockerfile: ./gateway/Dockerfile-test
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_HOST: ${REDIS_HOST}
@@ -21,8 +21,8 @@ services:
 
   brand-service:
     build:
-      context: ./brand
-      dockerfile: Dockerfile-test
+      context: .
+      dockerfile: ./brand/Dockerfile-test
     ports:
       - "8082:8082"
     environment:
@@ -32,12 +32,12 @@ services:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
     networks:
-      - app-network
+      - ts-network
 
   user-service:
     build:
-      context: ./user
-      dockerfile: Dockerfile-test
+      context: .
+      dockerfile: ./user/Dockerfile-test
     ports:
       - "8081:8081"
     environment:
@@ -49,12 +49,12 @@ services:
       MAILGUN_KEY: ${MAILGUN_KEY}
       KAFKA_BROKERS: ${KAFKA_BROKERS}
     networks:
-      - app-network
+      - ts-network
 
   product-service:
     build:
-      context: ./product
-      dockerfile: Dockerfile-test
+      context: .
+      dockerfile: ./product/Dockerfile-test
     ports:
       - "8083:8083"
     environment:
@@ -64,12 +64,12 @@ services:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
     networks:
-      - app-network
+      - ts-network
 
   payment-service:
     build:
-      context: ./payment
-      dockerfile: Dockerfile-test
+      context: .
+      dockerfile: ./payment/Dockerfile-test
     ports:
       - "8085:8085"
     environment:
@@ -78,12 +78,12 @@ services:
       KAFKA_BROKERS: ${KAFKA_BROKERS}
       TOSS_PAYMENT_SECRET: ${TOSS_PAYMENT_SECRET}
     networks:
-      - app-network
+      - ts-network
 
   order-service:
     build:
-      context: ./order
-      dockerfile: Dockerfile-test
+      context: .
+      dockerfile: ./order/Dockerfile-test
     ports:
       - "8084:8084"
     environment:
@@ -93,9 +93,9 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_HOST: ${REDIS_HOST}
     networks:
-      - app-network
+      - ts-network
 
 networks:
-  app-network:
-    driver: bridge
+  ts-network:
+    external: true
 

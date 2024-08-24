@@ -87,7 +87,6 @@ class ProductServiceTest {
         Product product = productCaptor.getValue();
         assertEquals(product.getUserId(), 1L);
         assertEquals(product.getThumbnailPath(), "afsdfasfsdafasd.jpg");
-        assertEquals(product.getThumbnailPath(), "afsdfasfsdafasd.jpg");
         assertEquals(product.getPrice(), form.price());
         assertEquals(product.getDiscount(), form.discount());
         assertEquals(product.getName(), form.name());
@@ -139,7 +138,6 @@ class ProductServiceTest {
         productService.updateProduct("123456yl", thumbnail, descriptionImage, form, 1L);
         //then
         assertEquals(product.getUserId(), 1L);
-        assertEquals(product.getThumbnailPath(), "afsdfasfsdafasd.jpg");
         assertEquals(product.getThumbnailPath(), "afsdfasfsdafasd.jpg");
         assertEquals(product.getPrice(), form.price());
         assertEquals(product.getDiscount(), form.discount());

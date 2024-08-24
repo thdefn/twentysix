@@ -1,7 +1,7 @@
 package cm.twentysix.order.client;
 
 import cm.twentysix.ProductServiceGrpc;
-import cm.twentysix.order.cache.ProductItemResponseGlobalCacheRepository;
+import cm.twentysix.order.cache.global.ProductItemResponseGlobalCacheRepository;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;

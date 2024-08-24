@@ -2,6 +2,7 @@ package cm.twentysix.order.service;
 
 import cm.twentysix.BrandProto;
 import cm.twentysix.ProductProto;
+import cm.twentysix.order.cache.local.ReservedProductStockLocalCacheRepository;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.Order;
@@ -49,6 +50,8 @@ class OrderServiceTest {
     private CartService cartService;
     @Mock
     private MessageSender messageSender;
+    @Mock
+    private ReservedProductStockLocalCacheRepository reservedProductStockLocalCacheRepository;
     @InjectMocks
     private OrderService orderService;
 
@@ -93,6 +96,7 @@ class OrderServiceTest {
         );
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
+        given(reservedProductStockLocalCacheRepository.checkAndReserveStock(anyString(), anyInt(), anyInt())).willReturn(true);
         //when
         ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
@@ -158,6 +162,7 @@ class OrderServiceTest {
         );
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
+        given(reservedProductStockLocalCacheRepository.checkAndReserveStock(anyString(), anyInt(), anyInt())).willReturn(true);
         //when
         ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
@@ -196,10 +201,11 @@ class OrderServiceTest {
                                 .setQuantity(1)
                                 .setBrandName("JAJU")
                                 .setBrandId(1L)
-                                .setOrderingOpensAt(LocalDateTime.MAX.toString())
+                                .setOrderingOpensAt(LocalDateTime.MIN.toString())
                                 .build()
                 )
         );
+        given(reservedProductStockLocalCacheRepository.checkAndReserveStock(anyString(), anyInt(), anyInt())).willReturn(false);
         //when
         OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
         //then

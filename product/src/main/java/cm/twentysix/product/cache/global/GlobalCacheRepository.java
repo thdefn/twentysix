@@ -1,4 +1,4 @@
-package cm.twentysix.product.cache;
+package cm.twentysix.product.cache.global;
 
 import java.time.Duration;
 

@@ -1,7 +1,6 @@
 package cm.twentysix.order.config;
 
-import cm.twentysix.ProductProto.ProductItemResponse;
-import cm.twentysix.order.client.RedisClient;
+import cm.twentysix.order.cache.local.LocalCacheKey;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +13,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.Map;
 
 @EnableCaching
 @Configuration
@@ -24,6 +24,7 @@ public class CacheConfig {
                 .fromConnectionFactory(redisConnectionFactory)
                 .cacheDefaults(defaultRedisCacheConfiguration()
                         .entryTtl(Duration.ofMinutes(10)))
+                .withInitialCacheConfigurations(initialCacheConfigurations())
                 .build();
     }
 
@@ -37,5 +38,13 @@ public class CacheConfig {
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair
                                 .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+    }
+
+    private Map<String, RedisCacheConfiguration> initialCacheConfigurations() {
+        return Map.of(
+                LocalCacheKey.RESERVED_PRODUCT_STOCK.name(),
+                defaultRedisCacheConfiguration()
+                        .entryTtl(LocalCacheKey.RESERVED_PRODUCT_STOCK.duration)
+        );
     }
 }

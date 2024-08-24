@@ -1,6 +1,6 @@
 package cm.twentysix.product.service;
 
-import cm.twentysix.product.cache.ProductItemResponseGlobalCacheRepository;
+import cm.twentysix.product.cache.global.ProductItemResponseGlobalCacheRepository;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;

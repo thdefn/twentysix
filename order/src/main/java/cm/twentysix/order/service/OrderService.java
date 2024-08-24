@@ -2,6 +2,7 @@ package cm.twentysix.order.service;
 
 import cm.twentysix.BrandProto.BrandInfo;
 import cm.twentysix.ProductProto.ProductItemResponse;
+import cm.twentysix.order.cache.local.ReservedProductStockLocalCacheRepository;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.Order;
@@ -22,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static cm.twentysix.order.exception.Error.ORDER_CONTAIN_CLOSING_PRODUCT;
@@ -38,6 +38,7 @@ public class OrderService {
     private final ProductGrpcClient productGrpcClient;
     private final CartService cartService;
     private final MessageSender messageSender;
+    private final ReservedProductStockLocalCacheRepository reservedProductStockLocalCacheRepository;
 
     @Transactional
     public ReceiveOrderResponse receiveOrder(CreateOrderForm form, Long userId, LocalDateTime requestedAt) {
@@ -54,8 +55,8 @@ public class OrderService {
                 CompletableFuture.supplyAsync(() -> productGrpcClient.findProductItems(productIdQuantityMap.keySet().stream().toList()))
                         .thenApply(products -> {
                             for (ProductItemResponse product : products) {
-                                validAvailableProductQuantity(product.getQuantity(), productIdQuantityMap.get(product.getId()));
                                 validProductIsOpen(product.getOrderingOpensAt(), requestedAt);
+                                validAvailableProductStock(product.getId(), product.getQuantity(), productIdQuantityMap.get(product.getId()));
                             }
                             return products;
                         });
@@ -77,9 +78,7 @@ public class OrderService {
             orderRepository.save(order);
             CompletableFuture.runAsync(() -> cartService.removeOrderedCartItem(form, userId));
             return ReceiveOrderResponse.of(orderId);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             Throwable cause = e.getCause();
             if (cause instanceof OrderException) {
                 throw (OrderException) cause;
@@ -87,8 +86,8 @@ public class OrderService {
         }
     }
 
-    private void validAvailableProductQuantity(int obtainedQuantity, int requestedQuantity) {
-        if (requestedQuantity > obtainedQuantity)
+    private void validAvailableProductStock(String productId, int fetchedQuantity, int requestedQuantity) {
+        if (!reservedProductStockLocalCacheRepository.checkAndReserveStock(productId, fetchedQuantity, requestedQuantity))
             throw new OrderException(STOCK_SHORTAGE);
     }
 

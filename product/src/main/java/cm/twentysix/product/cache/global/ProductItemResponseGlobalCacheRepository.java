@@ -1,4 +1,4 @@
-package cm.twentysix.product.cache;
+package cm.twentysix.product.cache.global;
 
 import cm.twentysix.ProductProto.ProductItemResponse;
 import cm.twentysix.product.client.RedisClient;
@@ -14,7 +14,7 @@ public class ProductItemResponseGlobalCacheRepository extends GlobalCacheReposit
     private final RedisClient<ProductItemResponse> redisClient;
 
     protected ProductItemResponseGlobalCacheRepository(RedisClient<ProductItemResponse> redisClient) {
-        super(GlobalCacheKey.PRODUCT);
+        super(GlobalCacheKey.PRODUCT_ITEM_RESPONSE);
         this.redisClient = redisClient;
     }
 

@@ -1,4 +1,4 @@
-package cm.twentysix.order.cache;
+package cm.twentysix.order.cache.global;
 
 import java.time.Duration;
 
@@ -9,11 +9,11 @@ public abstract class GlobalCacheRepository {
         this.globalCacheKey = globalCacheKey;
     }
 
-    String getCacheKey(String id) {
+    protected String getCacheKey(String id) {
         return globalCacheKey.name() + id;
     }
 
-    Duration getCacheDuration() {
+    protected Duration getCacheDuration() {
         return globalCacheKey.duration;
     }
 }

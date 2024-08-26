@@ -2,7 +2,7 @@ package cm.twentysix.order.service;
 
 import cm.twentysix.BrandProto.BrandInfo;
 import cm.twentysix.ProductProto.ProductItemResponse;
-import cm.twentysix.order.cache.local.ReservedProductStockLocalCacheRepository;
+import cm.twentysix.order.cache.global.ReservedProductStockGlobalCacheRepository;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.Order;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +39,7 @@ public class OrderService {
     private final ProductGrpcClient productGrpcClient;
     private final CartService cartService;
     private final MessageSender messageSender;
-    private final ReservedProductStockLocalCacheRepository reservedProductStockLocalCacheRepository;
+    private final ReservedProductStockGlobalCacheRepository reservedProductStockGlobalCacheRepository;
 
     @Transactional
     public ReceiveOrderResponse receiveOrder(CreateOrderForm form, Long userId, LocalDateTime requestedAt) {
@@ -54,10 +55,12 @@ public class OrderService {
         CompletableFuture<List<ProductItemResponse>> productFuture =
                 CompletableFuture.supplyAsync(() -> productGrpcClient.findProductItems(productIdQuantityMap.keySet().stream().toList()))
                         .thenApply(products -> {
+                            Map<String, Integer> maybeFetchedQuantityMap = new HashMap<>();
                             for (ProductItemResponse product : products) {
                                 validProductIsOpen(product.getOrderingOpensAt(), requestedAt);
-                                validAvailableProductStock(product.getId(), product.getQuantity(), productIdQuantityMap.get(product.getId()));
+                                maybeFetchedQuantityMap.put(product.getId(), product.getQuantity());
                             }
+                            checkProductStockAndUpdate(productIdQuantityMap, maybeFetchedQuantityMap);
                             return products;
                         });
 
@@ -86,9 +89,20 @@ public class OrderService {
         }
     }
 
-    private void validAvailableProductStock(String productId, int fetchedQuantity, int requestedQuantity) {
-        if (!reservedProductStockLocalCacheRepository.checkAndReserveStock(productId, fetchedQuantity, requestedQuantity))
-            throw new OrderException(STOCK_SHORTAGE);
+    private void checkProductStockAndUpdate(Map<String, Integer> productIdRequestedQuantityMap, Map<String, Integer> maybeFetchedQuantityMap) {
+        Map<String, Integer> productIdCachedQuantityMap =
+                reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(
+                        productIdRequestedQuantityMap.keySet().stream().toList(), maybeFetchedQuantityMap);
+
+        for (String productId : productIdCachedQuantityMap.keySet()) {
+            int havingQuantity = productIdCachedQuantityMap.get(productId);
+            int requestedQuantity = productIdRequestedQuantityMap.get(productId);
+            if (requestedQuantity > havingQuantity)
+                throw new OrderException(STOCK_SHORTAGE);
+            productIdCachedQuantityMap.put(productId, havingQuantity - requestedQuantity);
+        }
+        reservedProductStockGlobalCacheRepository.putAll(productIdCachedQuantityMap);
+
     }
 
     private void validProductIsOpen(String orderingOpensAt, LocalDateTime requestedAt) {

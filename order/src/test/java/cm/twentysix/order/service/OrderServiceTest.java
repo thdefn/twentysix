@@ -2,7 +2,7 @@ package cm.twentysix.order.service;
 
 import cm.twentysix.BrandProto;
 import cm.twentysix.ProductProto;
-import cm.twentysix.order.cache.local.ReservedProductStockLocalCacheRepository;
+import cm.twentysix.order.cache.global.ReservedProductStockGlobalCacheRepository;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.Order;
@@ -51,7 +51,7 @@ class OrderServiceTest {
     @Mock
     private MessageSender messageSender;
     @Mock
-    private ReservedProductStockLocalCacheRepository reservedProductStockLocalCacheRepository;
+    private ReservedProductStockGlobalCacheRepository reservedProductStockGlobalCacheRepository;
     @InjectMocks
     private OrderService orderService;
 
@@ -59,10 +59,13 @@ class OrderServiceTest {
 
     LocalDateTime now = LocalDateTime.now();
 
+    Map<String, Integer> reservedProductStockCacheData = new HashMap<>();
+
     @BeforeEach
     void init() {
         mockIdUtil = mockStatic(IdUtil.class);
         when(IdUtil.generate()).thenReturn("2032032003030-afsfdasfdsfdsafdl2");
+        reservedProductStockCacheData.put("123456", 1);
     }
 
     @AfterEach
@@ -96,7 +99,7 @@ class OrderServiceTest {
         );
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
-        given(reservedProductStockLocalCacheRepository.checkAndReserveStock(anyString(), anyInt(), anyInt())).willReturn(true);
+        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyList(), anyMap())).willReturn(reservedProductStockCacheData);
         //when
         ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
@@ -162,7 +165,7 @@ class OrderServiceTest {
         );
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
-        given(reservedProductStockLocalCacheRepository.checkAndReserveStock(anyString(), anyInt(), anyInt())).willReturn(true);
+        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyList(), anyMap())).willReturn(reservedProductStockCacheData);
         //when
         ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
@@ -198,14 +201,14 @@ class OrderServiceTest {
                                 .setThumbnail("so-cute.jpg")
                                 .setPrice(30000)
                                 .setName("모달 잠옷 여성")
-                                .setQuantity(1)
+                                .setQuantity(2)
                                 .setBrandName("JAJU")
                                 .setBrandId(1L)
                                 .setOrderingOpensAt(LocalDateTime.MIN.toString())
                                 .build()
                 )
         );
-        given(reservedProductStockLocalCacheRepository.checkAndReserveStock(anyString(), anyInt(), anyInt())).willReturn(false);
+        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyList(), anyMap())).willReturn(reservedProductStockCacheData);
         //when
         OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
         //then

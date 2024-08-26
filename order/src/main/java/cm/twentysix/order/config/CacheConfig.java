@@ -1,6 +1,5 @@
 package cm.twentysix.order.config;
 
-import cm.twentysix.order.cache.local.LocalCacheKey;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -41,10 +40,6 @@ public class CacheConfig {
     }
 
     private Map<String, RedisCacheConfiguration> initialCacheConfigurations() {
-        return Map.of(
-                LocalCacheKey.RESERVED_PRODUCT_STOCK.name(),
-                defaultRedisCacheConfiguration()
-                        .entryTtl(LocalCacheKey.RESERVED_PRODUCT_STOCK.duration)
-        );
+        return Map.of();
     }
 }

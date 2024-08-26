@@ -22,6 +22,13 @@ public class RedisClient<T> {
         });
     }
 
+    public void addValuesIfAbsent(Map<String, T> keyValueMap, Duration duration) {
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            keyValueMap.forEach((k, v) -> redisTemplate.opsForValue().setIfAbsent(k, v, duration));
+            return null;
+        });
+    }
+
     public void addValue(String key, T value, Duration duration) {
         redisTemplate.opsForValue().set(key, value, duration);
     }

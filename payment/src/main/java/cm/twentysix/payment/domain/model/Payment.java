@@ -66,7 +66,7 @@ public class Payment extends BaseTimeEntity {
 
 
     @Builder
-    public Payment(String orderId, String paymentKey, String orderName, Integer amount, PaymentMethod method, String methodDetail, LocalDateTime requestedAt, LocalDateTime approvedAt, Long userId, PaymentStatus status) {
+    public Payment(String orderId, String paymentKey, String orderName, Integer amount, PaymentMethod method, String methodDetail, LocalDateTime requestedAt, LocalDateTime approvedAt, Long userId, PaymentStatus status, Map<String, Integer> productQuantity) {
         this.orderId = orderId;
         this.paymentKey = paymentKey;
         this.orderName = orderName;
@@ -77,6 +77,7 @@ public class Payment extends BaseTimeEntity {
         this.approvedAt = approvedAt;
         this.userId = userId;
         this.status = status;
+        this.productQuantity = productQuantity;
     }
 
     public void updateOrderInfo(OrderInfoResponse orderInfo) {

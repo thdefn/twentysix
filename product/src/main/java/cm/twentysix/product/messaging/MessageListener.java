@@ -13,21 +13,15 @@ import java.util.function.Consumer;
 @Component
 @RequiredArgsConstructor
 public class MessageListener {
-    private final ProductStockFacade inventoryFacade;
-
-    @Bean(name = "order")
-    public Consumer<OrderEvent> orderEventConsumer() {
-        return orderEvent -> inventoryFacade.handleOrder(orderEvent.productQuantity(), orderEvent.orderId());
-    }
-
+    private final ProductStockFacade productStockFacade;
     @Bean(name = "order-failed")
     public Consumer<OrderFailedEvent> orderFailedEventConsumer() {
-        return orderFailedEvent -> inventoryFacade.rollbackOrder(orderFailedEvent.productQuantity());
+        return orderFailedEvent -> productStockFacade.rollbackOrder(orderFailedEvent.productQuantity());
     }
 
     @Bean(name = "order-cancelled")
     public Consumer<OrderCancelledEvent> orderCancelledEventConsumer() {
-        return orderCancelledEvent -> inventoryFacade.rollbackOrder(orderCancelledEvent.productQuantity());
+        return orderCancelledEvent -> productStockFacade.rollbackOrder(orderCancelledEvent.productQuantity());
     }
 
 }

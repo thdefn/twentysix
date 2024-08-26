@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_package = "cm.twentysix";
+option java_outer_classname = "ProductProto";
+
+service ProductService {
+  rpc CheckAndUpdateProductStock (CheckProductStockRequest) returns (CheckProductStockResponse);
+}
+
+message CheckProductStockRequest {
+  string orderId = 1;
+  repeated ProductIdQuantity productQuantity = 2;
+}
+
+message CheckProductStockResponse {
+  bool isSuccess = 1;
+}
+
+message ProductIdQuantity {
+  string productId = 1;
+  int32 quantity = 2;
+}
+

@@ -48,6 +48,13 @@ public class GlobalExceptionHandler {
                 .body(new ExceptionResponse<>(e.getError().name(), e.getError().message));
     }
 
+    @ExceptionHandler(ProductException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleProductException(ProductException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), e.getError(), e.getError().message);
+        return ResponseEntity.status(e.getError().httpStatus)
+                .body(new ExceptionResponse<>(e.getError().name(), e.getError().message));
+    }
+
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ExceptionResponse<String>> handleMissingRequestHeaderException(MissingRequestHeaderException e) {

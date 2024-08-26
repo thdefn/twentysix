@@ -3,8 +3,10 @@ package cm.twentysix.payment.handler;
 import cm.twentysix.payment.domain.model.Payment;
 import cm.twentysix.payment.domain.model.PaymentStatus;
 import cm.twentysix.payment.domain.repository.PaymentRepository;
+import cm.twentysix.payment.dto.OrderFailedEvent;
 import cm.twentysix.payment.dto.PaymentAbortedEvent;
 import cm.twentysix.payment.dto.PaymentFinalizedEvent;
+import cm.twentysix.payment.dto.PaymentConditionFailedEvent;
 import cm.twentysix.payment.exception.Error;
 import cm.twentysix.payment.exception.PaymentException;
 import cm.twentysix.payment.messaging.MessageSender;
@@ -13,8 +15,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import static cm.twentysix.payment.exception.Error.MESSAGE_SEND_ERROR;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,20 @@ public class PaymentEventHandler {
 
         payment.confirmPayment(event.response());
         payment.cancel();
-        if (!messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(event.response().orderId(), false)))
-            throw new RuntimeException(MESSAGE_SEND_ERROR.message);
+        messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(event.response().orderId(), false));
+        messageSender.sendOrderFailedEvent(OrderFailedEvent.from(payment));
+    }
+
+    @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handlePaymentConditionFailedEvent(PaymentConditionFailedEvent event) {
+        Payment payment = paymentRepository.findByOrderId(event.orderId())
+                .stream().findFirst()
+                .filter(p -> PaymentStatus.PENDING.equals(p.getStatus()))
+                .orElseThrow(() -> new PaymentException(Error.NOT_FOUND_PAYMENT));
+
+        payment.block();
+        if(event.shouldNotifyFailed())
+            messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(event.orderId(), false));
     }
 }

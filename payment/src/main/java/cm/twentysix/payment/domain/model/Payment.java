@@ -1,14 +1,21 @@
 package cm.twentysix.payment.domain.model;
 
+import cm.twentysix.OrderProto;
 import cm.twentysix.OrderProto.OrderInfoResponse;
 import cm.twentysix.payment.dto.PaymentResponse;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static cm.twentysix.OrderProto.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -51,6 +58,10 @@ public class Payment extends BaseTimeEntity {
     @Column
     private Long userId;
 
+    @Type(JsonType.class)
+    @Column(name = "products", columnDefinition = "json")
+    private Map<String, Integer> productQuantity;
+
     // TODO: cancel 관련
 
 
@@ -72,6 +83,8 @@ public class Payment extends BaseTimeEntity {
         this.userId = orderInfo.getUserId();
         this.orderName = orderInfo.getOrderName();
         this.amount = orderInfo.getPaymentAmount();
+        this.productQuantity = orderInfo.getProductQuantityList()
+                .stream().collect(Collectors.toMap(ProductQuantity::getProductId, ProductQuantity::getQuantity));
     }
 
     public static Payment of(String orderId, PaymentStatus status) {

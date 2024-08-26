@@ -1,5 +1,6 @@
 package cm.twentysix.payment.messaging;
 
+import cm.twentysix.payment.dto.OrderFailedEvent;
 import cm.twentysix.payment.dto.PaymentFinalizedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,10 @@ public class MessageSender {
 
     public boolean sendPaymentFinalizedEvent(PaymentFinalizedEvent event) {
         return streamBridge.send("payment-finalized-out-0", MessageBuilder.withPayload(event).build());
+    }
+
+    public boolean sendOrderFailedEvent(OrderFailedEvent event) {
+        return streamBridge.send("order-failed-out-0", MessageBuilder.withPayload(event).build());
     }
 
 }

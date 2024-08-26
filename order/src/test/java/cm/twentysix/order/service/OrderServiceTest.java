@@ -319,13 +319,6 @@ class OrderServiceTest {
         //when
         orderService.handlePaymentFinalizedEvent(event);
         //then
-        ArgumentCaptor<OrderEvent> orderEventCaptor = ArgumentCaptor.forClass(OrderEvent.class);
-        verify(applicationEventPublisher, times(1)).publishEvent(orderEventCaptor.capture());
-        OrderEvent orderEvent = orderEventCaptor.getValue();
-        Map<String, Integer> productQuantityMap = orderEvent.productQuantity();
-        assertEquals(productQuantityMap.get("1234"), 2);
-        assertEquals(productQuantityMap.get("2345"), 1);
-        assertEquals(productQuantityMap.get("3456"), 1);
         assertEquals(order.getStatus(), OrderStatus.ORDER_PLACED);
     }
 

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum Error {
+    STOCK_SHORTAGE(HttpStatus.CONFLICT, "재고 부족으로 주문에 실패했습니다."),
     MESSAGE_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "메세지 퍼블리싱에 문제가 발생했습니다. "),
     NOT_BRAND_ADMIN(HttpStatus.NOT_FOUND, "브랜드 관리자가 아닙니다."),
     GRPC_COMMUNICATION_ERROR(HttpStatus.BAD_REQUEST, "grpc 통신 중 문제가 발생했습니다."),

@@ -34,7 +34,6 @@ import static cm.twentysix.order.exception.Error.STOCK_SHORTAGE;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ApplicationEventPublisher eventPublisher;
     private final BrandGrpcClient brandGrpcClient;
     private final ProductGrpcClient productGrpcClient;
     private final CartService cartService;
@@ -102,7 +101,6 @@ public class OrderService {
             productIdCachedQuantityMap.put(productId, havingQuantity - requestedQuantity);
         }
         reservedProductStockGlobalCacheRepository.putAll(productIdCachedQuantityMap);
-
     }
 
     private void validProductIsOpen(String orderingOpensAt, LocalDateTime requestedAt) {
@@ -112,9 +110,10 @@ public class OrderService {
 
     @Transactional
     public void handleStockCheckFailedEvent(StockCheckFailedEvent event) {
+        log.error(event.orderId());
         Order order = orderRepository.findByOrderId(event.orderId())
                 .stream().findFirst()
-                .filter(o -> o.getStatus().isOrderProcessingStatus())
+                .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
                 .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
 
         order.checkFail();
@@ -127,12 +126,8 @@ public class OrderService {
                 .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
                 .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
 
-        if (event.isSuccess()) {
-            order.placed();
-            eventPublisher.publishEvent(OrderEvent.of(order));
-        } else {
-            order.paymentFail();
-        }
+        if (event.isSuccess()) order.placed();
+        else order.paymentFail();
     }
 
 

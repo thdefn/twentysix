@@ -1,7 +1,9 @@
 package cm.twentysix.payment.service;
 
 import cm.twentysix.OrderProto;
+import cm.twentysix.ProductProto;
 import cm.twentysix.payment.client.OrderGrpcClient;
+import cm.twentysix.payment.client.ProductGrpcClient;
 import cm.twentysix.payment.client.TossPaymentClient;
 import cm.twentysix.payment.constant.CancelReason;
 import cm.twentysix.payment.domain.model.Payment;
@@ -11,6 +13,7 @@ import cm.twentysix.payment.domain.repository.PaymentRepository;
 import cm.twentysix.payment.dto.*;
 import cm.twentysix.payment.exception.Error;
 import cm.twentysix.payment.exception.PaymentException;
+import cm.twentysix.payment.exception.ProductException;
 import cm.twentysix.payment.messaging.MessageSender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +47,8 @@ class PaymentServiceTest {
     private MessageSender messageSender;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+    @Mock
+    private ProductGrpcClient productGrpcClient;
     @InjectMocks
     private PaymentService paymentService;
 
@@ -52,6 +60,14 @@ class PaymentServiceTest {
                         .setOrderName("강아지 나시 외 1건")
                         .setPaymentAmount(10000)
                         .setOrderId("20240101033323212-hashhashhash")
+                        .addAllProductQuantity(
+                                List.of(
+                                        OrderProto.ProductQuantity.newBuilder()
+                                                .setQuantity(1)
+                                                .setProductId("12345")
+                                                .build()
+                                )
+                        )
                         .setUserId(1L)
                         .build());
         given(paymentRepository.findByOrderId(anyString()))
@@ -93,6 +109,14 @@ class PaymentServiceTest {
                         .setPaymentAmount(10000)
                         .setOrderId("20240101033323212-hashhashhash")
                         .setUserId(1L)
+                        .addAllProductQuantity(
+                                List.of(
+                                        OrderProto.ProductQuantity.newBuilder()
+                                                .setQuantity(1)
+                                                .setProductId("12345")
+                                                .build()
+                                )
+                        )
                         .build());
         Payment payment = Payment.builder()
                 .amount(10000)
@@ -132,10 +156,15 @@ class PaymentServiceTest {
                 .orderName("any-order-name")
                 .userId(1L)
                 .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
                 .status(PaymentStatus.PENDING)
                 .build();
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
+        given(productGrpcClient.checkProductStockRequest(any(), anyString()))
+                .willReturn(ProductProto.CheckProductStockResponse.newBuilder()
+                                .setIsSuccess(true)
+                                .build());
         PaymentResponse response = PaymentResponse.builder()
                 .paymentKey("any-payment-key")
                 .totalAmount(10000)
@@ -163,6 +192,30 @@ class PaymentServiceTest {
     }
 
     @Test
+    void confirm_fail_STOCK_SHORTAGE() {
+        //given
+        PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
+        Payment payment = Payment.builder()
+                .amount(10000)
+                .orderName("any-order-name")
+                .userId(1L)
+                .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
+                .status(PaymentStatus.PENDING)
+                .build();
+        given(paymentRepository.findByOrderId(anyString()))
+                .willReturn(Optional.of(payment));
+        given(productGrpcClient.checkProductStockRequest(anyMap(), anyString()))
+                .willReturn(ProductProto.CheckProductStockResponse.newBuilder()
+                        .setIsSuccess(false)
+                        .build());
+        //when
+        ProductException e = assertThrows(ProductException.class, () -> paymentService.confirm(form));
+        //then
+        assertEquals(e.getError(), Error.STOCK_SHORTAGE);
+    }
+
+    @Test
     void confirm_fail_PAYMENT_FAILED() {
         //given
         PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
@@ -171,10 +224,15 @@ class PaymentServiceTest {
                 .orderName("any-order-name")
                 .userId(1L)
                 .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
                 .status(PaymentStatus.PENDING)
                 .build();
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
+        given(productGrpcClient.checkProductStockRequest(any(), anyString()))
+                .willReturn(ProductProto.CheckProductStockResponse.newBuilder()
+                        .setIsSuccess(true)
+                        .build());
         PaymentResponse response = PaymentResponse.builder()
                 .paymentKey("any-payment-key")
                 .totalAmount(10000)
@@ -196,33 +254,17 @@ class PaymentServiceTest {
         assertEquals(e.getError(), Error.PAYMENT_FAILED);
     }
 
-    @Test
-    void confirm_fail_STOCK_SHORTAGE() {
-        //given
-        PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
-        Payment payment = Payment.builder()
-                .amount(10000)
-                .orderName("any-order-name")
-                .userId(1L)
-                .orderId("any-order-id")
-                .status(PaymentStatus.BLOCK)
-                .build();
-        given(paymentRepository.findByOrderId(anyString()))
-                .willReturn(Optional.of(payment));
-        PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
-        //then
-        assertEquals(e.getError(), Error.STOCK_SHORTAGE);
-    }
 
     @Test
     void handleProductOrderFailedEvent_success_WhenStatusPENDING() {
         //given
-        StockCheckFailedEvent event = new StockCheckFailedEvent("any-order-id");
+        OrderCancelledEvent event = new OrderCancelledEvent("any-order-id", new HashMap<>());
         Payment payment = Payment.builder()
                 .amount(10000)
                 .orderName("any-order-name")
                 .userId(1L)
                 .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
                 .status(PaymentStatus.PENDING)
                 .build();
         given(paymentRepository.findByOrderId(anyString()))
@@ -236,13 +278,14 @@ class PaymentServiceTest {
     @Test
     void handleProductOrderFailedEvent_success_WhenStatusCOMPLETE() {
         //given
-        StockCheckFailedEvent event = new StockCheckFailedEvent("any-order-id");
+        OrderCancelledEvent event = new OrderCancelledEvent("any-order-id", new HashMap<>());
         Payment payment = Payment.builder()
                 .amount(10000)
                 .orderName("any-order-name")
                 .userId(1L)
                 .paymentKey("any-payment-key")
                 .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
                 .status(PaymentStatus.COMPLETE)
                 .build();
         given(paymentRepository.findByOrderId(anyString()))
@@ -257,7 +300,7 @@ class PaymentServiceTest {
     @Test
     void handleProductOrderFailedEvent_success() {
         //given
-        StockCheckFailedEvent event = new StockCheckFailedEvent("any-order-id");
+        OrderCancelledEvent event = new OrderCancelledEvent("any-order-id", new HashMap<>());
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.empty());
         //when

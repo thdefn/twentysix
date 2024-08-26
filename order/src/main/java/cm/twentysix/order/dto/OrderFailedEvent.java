@@ -11,10 +11,10 @@ public record OrderFailedEvent(
         String orderId,
         Map<String, Integer> productQuantity
 ) {
-    public static OrderFailedEvent of(Order order) {
+    public static OrderFailedEvent from(Order order) {
         return OrderFailedEvent.builder()
                 .productQuantity(order.getProducts().entrySet().stream().collect(Collectors.toMap(
-                        idProductEntry -> idProductEntry.getKey(),
+                        Map.Entry::getKey,
                         idProductEntry -> idProductEntry.getValue().getQuantity()
                 )))
                 .orderId(order.getOrderId())

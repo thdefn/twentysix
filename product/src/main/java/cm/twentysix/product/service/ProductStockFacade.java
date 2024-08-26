@@ -21,10 +21,12 @@ public class ProductStockFacade {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void handleOrder(Map<String, Integer> productIdQuantity, String orderId) {
-        if (!checkAndDecreaseStock(productIdQuantity))
+    public boolean handleOrder(Map<String, Integer> productIdQuantity, String orderId) {
+        boolean isSuccess = checkAndDecreaseStock(productIdQuantity);
+        if (!isSuccess)
             messageSender.sendProductOrderFailedEvent(StockCheckFailedEvent.of(orderId));
         applicationEventPublisher.publishEvent(ProductStockUpdateEvent.of(productIdQuantity.keySet()));
+        return isSuccess;
     }
 
     private boolean checkAndDecreaseStock(Map<String, Integer> productIdQuantity) {

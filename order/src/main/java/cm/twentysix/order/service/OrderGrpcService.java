@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,12 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
                     .setPaymentAmount(order.getPaymentAmount())
                     .setUserId(order.getUserId())
                     .setOrderName(order.getOrderName())
+                    .addAllProductQuantity(order.getProducts().entrySet().stream()
+                            .map(entry -> OrderProto.ProductQuantity.newBuilder()
+                                            .setProductId(entry.getKey())
+                                            .setQuantity(entry.getValue().getQuantity())
+                                            .build())
+                            .collect(Collectors.toList()))
                     .build();
 
             responseObserver.onNext(response);

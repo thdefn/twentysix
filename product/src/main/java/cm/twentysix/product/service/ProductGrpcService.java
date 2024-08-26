@@ -1,5 +1,6 @@
 package cm.twentysix.product.service;
 
+import cm.twentysix.ProductProto;
 import cm.twentysix.ProductServiceGrpc;
 import cm.twentysix.product.cache.global.ProductItemResponseGlobalCacheRepository;
 import cm.twentysix.product.domain.model.Product;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static cm.twentysix.ProductProto.*;
 import static cm.twentysix.product.exception.Error.PRODUCT_NOT_FOUND;
@@ -25,6 +27,7 @@ import static cm.twentysix.product.exception.Error.PRODUCT_NOT_FOUND;
 public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBase {
     private final ProductRepository productRepository;
     private final ProductItemResponseGlobalCacheRepository productItemResponseGlobalCacheRepository;
+    private final ProductStockFacade productStockFacade;
 
     @Override
     public void getProductItem(ProductItemRequest request, StreamObserver<ProductItemResponse> responseObserver) {
@@ -90,5 +93,31 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
                     Status.INTERNAL.withDescription(HttpStatus.INTERNAL_SERVER_ERROR.name()).asRuntimeException()
             );
         }
+    }
+
+    @Override
+    public void checkAndUpdateProductStock(CheckProductStockRequest request, StreamObserver<CheckProductStockResponse> responseObserver) {
+        try {
+            boolean isSuccess = productStockFacade.handleOrder(
+                    request.getProductQuantityList().stream()
+                            .collect(Collectors.toMap(
+                                    ProductIdQuantity::getProductId, ProductIdQuantity::getQuantity)), request.getOrderId());
+
+            CheckProductStockResponse response = CheckProductStockResponse.newBuilder()
+                    .setIsSuccess(isSuccess)
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        } catch (ProductException e) {
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException()
+            );
+        } catch (Exception e) {
+            responseObserver.onError(
+                    Status.INTERNAL.withDescription(HttpStatus.INTERNAL_SERVER_ERROR.name()).asRuntimeException()
+            );
+        }
+
     }
 }

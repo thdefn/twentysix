@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ProductStockFacadeTest {
     @Autowired
     private ProductStockFacade productStockFacade;
@@ -37,7 +40,8 @@ class ProductStockFacadeTest {
     private ApplicationEventPublisher applicationEventPublisher;
     private Product savedA;
     private Product savedB;
-    private Map<String, Integer> productIdQuantityMap;
+    private Map<String, Integer> productIdQuantityMapA;
+    private Map<String, Integer> productIdQuantityMapB;
 
     @BeforeEach
     void setUp() {
@@ -50,13 +54,15 @@ class ProductStockFacadeTest {
                 .quantity(50)
                 .orderingOpensAt(LocalDateTime.now()).build();
         productRepository.saveAll(List.of(savedA, savedB));
-        productIdQuantityMap = Map.of(savedA.getId(), 1, savedB.getId(), 1);
+        productIdQuantityMapA = Map.of(savedA.getId(), 1, savedB.getId(), 1);
+        productIdQuantityMapB = Map.of(savedB.getId(), 1, savedA.getId(), 1);
         nonLockProductStockFacade = new NonLockProductStockFacade(productStockService, messageSender, applicationEventPublisher);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws InterruptedException {
         productRepository.deleteAll(List.of(savedA, savedB));
+        Thread.sleep(10);
     }
 
     @Test
@@ -69,7 +75,7 @@ class ProductStockFacadeTest {
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    productStockFacade.handleOrder(productIdQuantityMap, "orderid");
+                    productStockFacade.handleOrder(productIdQuantityMapA, "orderid");
                 } finally {
                     latch.countDown();
                 }
@@ -99,7 +105,7 @@ class ProductStockFacadeTest {
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    nonLockProductStockFacade.handleOrder(productIdQuantityMap, "orderid");
+                    nonLockProductStockFacade.handleOrder(productIdQuantityMapA, "orderid");
                 } finally {
                     latch.countDown();
                 }
@@ -130,7 +136,7 @@ class ProductStockFacadeTest {
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    productStockFacade.rollbackOrder(productIdQuantityMap);
+                    productStockFacade.rollbackOrder(productIdQuantityMapA);
                 } finally {
                     latch.countDown();
                 }
@@ -160,7 +166,7 @@ class ProductStockFacadeTest {
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    nonLockProductStockFacade.rollbackOrder(productIdQuantityMap);
+                    nonLockProductStockFacade.rollbackOrder(productIdQuantityMapA);
                 } finally {
                     latch.countDown();
                 }
@@ -178,6 +184,69 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertNotEquals(200, persistProductA.getQuantity());
         assertNotEquals(150, persistProductB.getQuantity());
+
+    }
+
+    @Test
+    void handleOrderDeadLockSituation_distributedLockAppliedTest_100ConcurrentUsers() throws InterruptedException {
+        //given
+        int numberOfThreads = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        //when
+        for (int i = 0; i < numberOfThreads; i++) {
+            Map<String, Integer> productIdQuantityMap = (i % 2 == 0) ? productIdQuantityMapA : productIdQuantityMapB;
+            executorService.submit(() -> {
+                try {
+                    productStockFacade.handleOrder(productIdQuantityMap, "orderid");
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+        //then
+        Product persistProductA = productRepository.findById(savedA.getId())
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
+
+        Product persistProductB = productRepository.findById(savedB.getId())
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
+
+        System.out.println("final quantity productA : " + persistProductA.getQuantity());
+        System.out.println("final quantity productB : " + persistProductB.getQuantity());
+        assertEquals(50, persistProductA.getQuantity());
+        assertEquals(0, persistProductB.getQuantity());
+    }
+
+    @Test
+    void handleOrderDeadLockSituation_distributedLockNotAppliedTest_100ConcurrentUsers() throws InterruptedException {
+        //given
+        int numberOfThreads = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        //when
+        for (int i = 0; i < numberOfThreads; i++) {
+            Map<String, Integer> productIdQuantityMap = (i % 2 == 0) ? productIdQuantityMapA : productIdQuantityMapB;
+            executorService.submit(() -> {
+                try {
+                    nonLockProductStockFacade.handleOrder(productIdQuantityMap, "orderid");
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+        //then
+        Product persistProductA = productRepository.findById(savedA.getId())
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
+
+        Product persistProductB = productRepository.findById(savedB.getId())
+                .orElseThrow(() -> new ProductException(Error.PRODUCT_NOT_FOUND));
+
+        System.out.println("final quantity productA : " + persistProductA.getQuantity());
+        System.out.println("final quantity productB : " + persistProductB.getQuantity());
+        assertNotEquals(50, persistProductA.getQuantity());
+        assertNotEquals(0, persistProductB.getQuantity());
 
     }
 

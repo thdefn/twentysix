@@ -16,8 +16,13 @@ message OrderInfoResponse {
   string orderName = 2;
   int32 paymentAmount = 3;
   int64 userId = 4;
+  repeated ProductQuantity productQuantity = 5;
 }
 
+message ProductQuantity {
+  string productId = 1;
+  int32 quantity = 2;
+}
 
 
 

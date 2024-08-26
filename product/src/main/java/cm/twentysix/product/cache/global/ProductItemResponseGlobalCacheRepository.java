@@ -10,22 +10,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
-public class ProductItemResponseGlobalCacheRepository extends GlobalCacheRepository {
-    private final RedisClient<ProductItemResponse> redisClient;
+public class ProductItemResponseGlobalCacheRepository extends GlobalCacheRepository<ProductItemResponse, ProductItemResponse> {
 
     protected ProductItemResponseGlobalCacheRepository(RedisClient<ProductItemResponse> redisClient) {
-        super(GlobalCacheKey.PRODUCT_ITEM_RESPONSE);
-        this.redisClient = redisClient;
+        super(GlobalCacheKey.PRODUCT_ITEM_RESPONSE, redisClient);
     }
 
     public void put(Product product) {
-        redisClient.addValue(getCacheKey(product.getId()), toProductItemResponse(product), getCacheDuration());
+        put(product.getId(), toProductItemResponse(product));
     }
 
     public void putAll(List<Product> products) {
         Map<String, ProductItemResponse> keyValues =
                 products.stream().collect(Collectors.toMap(product -> getCacheKey(product.getId()), this::toProductItemResponse));
-        redisClient.addValues(keyValues, getCacheDuration());
+        putAll(keyValues);
     }
 
     private ProductItemResponse toProductItemResponse(Product product) {

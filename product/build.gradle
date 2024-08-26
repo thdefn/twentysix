@@ -49,6 +49,8 @@ dependencies {
     implementation 'org.hibernate:hibernate-validator:8.0.1.Final'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.aspectj:aspectjrt'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.35.0'
 }
 
 dependencyManagement {

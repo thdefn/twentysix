@@ -1,6 +1,6 @@
 package cm.twentysix.product.controller;
 
-import cm.twentysix.product.service.ProductStockService;
+import cm.twentysix.product.service.ProductStockFacade;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +22,8 @@ class ProductStockControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
-    private ProductStockService productStockService;
-    
+    private ProductStockFacade productStockFacade;
+
     @Test
     void retrieveProductStock_success() throws Exception {
         //given

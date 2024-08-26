@@ -5,24 +5,19 @@ import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.ProductStockResponse;
-import cm.twentysix.product.dto.StockCheckFailedEvent;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
 import cm.twentysix.product.messaging.MessageSender;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -31,10 +26,6 @@ import static org.mockito.Mockito.*;
 class ProductStockServiceTest {
     @Mock
     private ProductRepository productRepository;
-    @Mock
-    private ProductItemResponseGlobalCacheRepository productItemResponseGlobalCacheRepository;
-    @Mock
-    private MessageSender messageSender;
     @InjectMocks
     private ProductStockService productStockService;
 
@@ -70,45 +61,56 @@ class ProductStockServiceTest {
     @Test
     void checkProductStock_success() {
         //given
-        Map<String, Integer> orderedProductQuantity = Map.of("1", 1, "2", 2);
-        List<Product> products = List.of(mockProductA, mockProductB);
-        given(productRepository.findByIdInAndIsDeletedFalse(any())).willReturn(products);
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.of(mockProductA));
         //when
-        productStockService.checkProductStock(orderedProductQuantity, "12345");
+        boolean success = productStockService.checkAndDecreaseStock("1", 1);
         //then
         verify(mockProductA, times(1)).minusQuantity(1);
-        verify(mockProductB, times(1)).minusQuantity(2);
-        verify(productRepository, times(1)).saveAll(anyCollection());
+        assertTrue(success);
     }
 
     @Test
-    void checkProductStock_success_ProductStockShortage() {
+    void checkProductStock_success_checkFail() {
         //given
-        Map<String, Integer> orderedProductQuantity = Map.of("1", 1, "2", 3);
-        List<Product> products = List.of(mockProductA, mockProductB);
-        given(productRepository.findByIdInAndIsDeletedFalse(any())).willReturn(products);
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.of(mockProductA));
         //when
-        productStockService.checkProductStock(orderedProductQuantity, "12345");
+        boolean success = productStockService.checkAndDecreaseStock("1", 2);
         //then
-        ArgumentCaptor<StockCheckFailedEvent> productOrderFailedEventCaptor = ArgumentCaptor.forClass(StockCheckFailedEvent.class);
-        verify(messageSender, times(1)).sendProductOrderFailedEvent(productOrderFailedEventCaptor.capture());
-        StockCheckFailedEvent event = productOrderFailedEventCaptor.getValue();
-        assertEquals(event.orderId(), "12345");
+        verify(mockProductA, times(0)).minusQuantity(anyInt());
+        assertFalse(success);
     }
+
+    @Test
+    void checkProductStock_fail_PRODUCT_NOT_FOUND() {
+        //given
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.empty());
+        //when
+        ProductException e = assertThrows(ProductException.class, () -> productStockService.checkAndDecreaseStock("1", 1));
+        //then
+        assertEquals(e.getError(), Error.PRODUCT_NOT_FOUND);
+    }
+
 
     @Test
     void restoreProductStock_success() {
         //given
-        Map<String, Integer> productQuantity = Map.of("1", 1, "2", 3);
-        List<Product> products = List.of(mockProductA, mockProductB);
-        given(productRepository.findByIdInAndIsDeletedFalse(any())).willReturn(products);
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.of(mockProductA));
         //when
-        productStockService.restoreProductStock(productQuantity);
+        productStockService.restoreProductStock("1", 2);
         //then
-        verify(mockProductA, times(1)).addQuantity(1);
-        verify(mockProductB, times(1)).addQuantity(3);
-        verify(productRepository, times(1)).saveAll(anyCollection());
+        verify(mockProductA, times(1)).addQuantity(anyInt());
     }
+
+    @Test
+    void restoreProductStock_fail_PRODUCT_NOT_FOUND() {
+        //given
+        given(productRepository.findByIdAndIsDeletedFalse(anyString())).willReturn(Optional.empty());
+        //when
+        ProductException e = assertThrows(ProductException.class, () -> productStockService.restoreProductStock("1", 1));
+        //then
+        assertEquals(e.getError(), Error.PRODUCT_NOT_FOUND);
+    }
+
 
     @Test
     void retrieveProductStock_success() {

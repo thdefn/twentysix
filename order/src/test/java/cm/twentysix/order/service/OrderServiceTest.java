@@ -25,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -57,15 +59,18 @@ class OrderServiceTest {
 
     static MockedStatic<IdUtil> mockIdUtil;
 
-    LocalDateTime now = LocalDateTime.now();
+    private LocalDateTime now = LocalDateTime.now();
 
-    Map<String, Integer> reservedProductStockCacheData = new HashMap<>();
+    private Map<String, Integer> reservedProductStockCacheData = new HashMap<>();
+
+    private Order mockOrderA;
 
     @BeforeEach
     void init() {
         mockIdUtil = mockStatic(IdUtil.class);
         when(IdUtil.generate()).thenReturn("2032032003030-afsfdasfdsfdsafdl2");
         reservedProductStockCacheData.put("123456", 1);
+        mockOrderA = mock(Order.class);
     }
 
     @AfterEach
@@ -388,11 +393,11 @@ class OrderServiceTest {
                         .zipCode("11112")
                         .phone("010-1111-1111")
                         .build())
-                .status(OrderStatus.PAYMENT_PENDING)
+                .status(OrderStatus.ORDER_PLACED)
                 .build();
-        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        given(orderRepository.findById(anyLong())).willReturn(Optional.of(order));
         //when
-        orderService.cancelOrder("2032032003030-afsfdasfdsfdsafdl2", 1L);
+        orderService.cancelOrder(1L, 1L);
         //then
         ArgumentCaptor<OrderCancelledEvent> orderCancelledEventCaptor = ArgumentCaptor.forClass(OrderCancelledEvent.class);
         verify(messageSender, times(1)).sendOrderCancelledEvent(orderCancelledEventCaptor.capture());
@@ -405,7 +410,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void cancelOrder_fail_PROCESSING_ORDER_NOT_FOUND() {
+    void cancelOrder_fail_ORDER_IN_PREPARATION_NOT_FOUND() {
         //given
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
@@ -424,11 +429,11 @@ class OrderServiceTest {
                         .build())
                 .status(OrderStatus.PAYMENT_FAIL)
                 .build();
-        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        given(orderRepository.findById(anyLong())).willReturn(Optional.of(order));
         //when
-        OrderException e = assertThrows(OrderException.class, () -> orderService.cancelOrder("2032032003030-afsfdasfdsfdsafdl2", 1L));
+        OrderException e = assertThrows(OrderException.class, () -> orderService.cancelOrder(1L, 1L));
         //then
-        assertEquals(e.getError(), Error.PROCESSING_ORDER_NOT_FOUND);
+        assertEquals(e.getError(), Error.ORDER_IN_PREPARATION_NOT_FOUND);
     }
 
     @Test
@@ -451,11 +456,138 @@ class OrderServiceTest {
                         .build())
                 .status(OrderStatus.ORDER_PLACED)
                 .build();
-        given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        given(orderRepository.findById(anyLong())).willReturn(Optional.of(order));
         //when
-        OrderException e = assertThrows(OrderException.class, () -> orderService.cancelOrder("2032032003030-afsfdasfdsfdsafdl2", 1L));
+        OrderException e = assertThrows(OrderException.class, () -> orderService.cancelOrder(1L, 1L));
         //then
         assertEquals(e.getError(), Error.NOT_USERS_ORDER);
+    }
+
+    @Test
+    void returnOrder_success() {
+        //given
+        given(mockOrderA.getUserId()).willReturn(1L);
+        given(mockOrderA.isReturnAllowed()).willReturn(true);
+        given(orderRepository.findById(anyLong())).willReturn(Optional.of(mockOrderA));
+        //when
+        orderService.returnOrder(1L, 1L);
+        //then
+        verify(mockOrderA, times(1)).acceptReturn();
+    }
+
+    @Test
+    void returnOrder_fail_ORDER_RETURN_NOT_ALLOWED() {
+        //given
+        given(mockOrderA.isReturnAllowed()).willReturn(false);
+        given(orderRepository.findById(anyLong())).willReturn(Optional.of(mockOrderA));
+        //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.returnOrder(1L, 1L));
+        //then
+        assertEquals(e.getError(), Error.ORDER_RETURN_NOT_ALLOWED);
+    }
+
+
+    @Test
+    void returnOrder_fail_NOT_USERS_ORDER() {
+        //given
+        given(mockOrderA.getUserId()).willReturn(2L);
+        given(mockOrderA.isReturnAllowed()).willReturn(true);
+        given(orderRepository.findById(anyLong())).willReturn(Optional.of(mockOrderA));
+        //when
+        OrderException e = assertThrows(OrderException.class, () -> orderService.returnOrder(1L, 1L));
+        //then
+        assertEquals(e.getError(), Error.NOT_USERS_ORDER);
+    }
+
+    @Test
+    void retrieveMyOrder_success() {
+        //given
+        List<Order> orders = List.of(
+                Order.builder()
+                        .orderId("2032032003030-afsfdasfdsfdsafdl2")
+                        .userId(2L)
+                        .products(Map.of(
+                                "1234", OrderProduct.builder()
+                                        .quantity(2)
+                                        .brandId(1L)
+                                        .brandName("마리떼 키즈")
+                                        .thumbnail("/2024/08/22/301a8a541cf14f81a3ba11c3cdd07843_20240822194539.jpg?width=700")
+                                        .name("ENFANT CLASSIC LOGO COLLAR KNIT PULLOVER camel")
+                                        .amount(53900)
+                                        .build()
+                        ))
+                        .deliveryFees(Map.of(1L, 2500))
+                        .receiver(OrderReceiver.builder()
+                                .name("송송이")
+                                .address("서울 특별시 성북구 보문로")
+                                .zipCode("11112")
+                                .phone("010-1111-1111")
+                                .build())
+                        .status(OrderStatus.ORDER_COMPLETED)
+                        .build(),
+                Order.builder()
+                        .orderId("2032032003030-afsfdasfdsfdsafdl3")
+                        .userId(2L)
+                        .products(Map.of(
+                                "4321", OrderProduct.builder()
+                                        .quantity(1)
+                                        .brandId(2L)
+                                        .brandName("메종드알로하")
+                                        .thumbnail("/2022/05/27/161c46b9cde74272b2d9616859f820fa_20220527185027.jpg?width=700")
+                                        .name("Throw Me! 던져서 뿌리는 종이릴 꽃가루")
+                                        .amount(10000)
+                                        .build()
+                        ))
+                        .deliveryFees(Map.of(2L, 3000))
+                        .receiver(OrderReceiver.builder()
+                                .name("송송이")
+                                .address("서울 특별시 성북구 보문로")
+                                .zipCode("11112")
+                                .phone("010-1111-1111")
+                                .build())
+                        .status(OrderStatus.ORDER_PLACED)
+                        .build()
+        );
+        given(orderRepository.findByUserIdOrderByIdDesc(anyLong(), any()))
+                .willReturn(new SliceImpl<>(orders));
+        //when
+        Slice<OrderItem> response = orderService.retrieveMyOrder(0, 10, 2L);
+        //then
+        assertEquals(response.getContent().size(), 2);
+
+        OrderItem item = response.getContent().getFirst();
+        assertEquals(item.orderNumber(), "2032032003030-afsfdasfdsfdsafdl2");
+        assertEquals(item.brands().size(), 1);
+        assertEquals(item.status(), OrderStatus.ORDER_COMPLETED);
+
+        OrderBrandItem orderBrandItem = item.brands().getFirst();
+        assertEquals(orderBrandItem.brandId(), 1L);
+        assertEquals(orderBrandItem.deliveryFee(), 2500);
+
+        BrandProductItem brandProductItem = orderBrandItem.products().getFirst();
+        assertEquals(brandProductItem.brandId(), 1L);
+        assertEquals(brandProductItem.brandName(), "마리떼 키즈");
+        assertEquals(brandProductItem.name(), "ENFANT CLASSIC LOGO COLLAR KNIT PULLOVER camel");
+        assertEquals(brandProductItem.quantity(), 2);
+        assertEquals(brandProductItem.amount(), 53900);
+        assertEquals(brandProductItem.thumbnail(), "/2024/08/22/301a8a541cf14f81a3ba11c3cdd07843_20240822194539.jpg?width=700");
+
+        item = response.getContent().getLast();
+        assertEquals(item.orderNumber(), "2032032003030-afsfdasfdsfdsafdl3");
+        assertEquals(item.brands().size(), 1);
+        assertEquals(item.status(), OrderStatus.ORDER_PLACED);
+
+        orderBrandItem = item.brands().getFirst();
+        assertEquals(orderBrandItem.brandId(), 2L);
+        assertEquals(orderBrandItem.deliveryFee(), 3000);
+
+        brandProductItem = orderBrandItem.products().getFirst();
+        assertEquals(brandProductItem.brandId(), 2L);
+        assertEquals(brandProductItem.brandName(), "메종드알로하");
+        assertEquals(brandProductItem.name(), "Throw Me! 던져서 뿌리는 종이릴 꽃가루");
+        assertEquals(brandProductItem.quantity(), 1);
+        assertEquals(brandProductItem.amount(), 10000);
+        assertEquals(brandProductItem.thumbnail(), "/2022/05/27/161c46b9cde74272b2d9616859f820fa_20220527185027.jpg?width=700");
     }
 
 

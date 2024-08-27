@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,8 +37,8 @@ class OrderControllerTest {
         List<OrderProductItemForm> items = List.of(
                 new OrderProductItemForm("123456", 1)
         );
-        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(false,"송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
-        CreateOrderForm form = new CreateOrderForm(items, true,true, receiver);
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(false, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
         //when
         //then
         mockMvc.perform(post("/orders")
@@ -56,7 +57,7 @@ class OrderControllerTest {
         List<OrderProductItemForm> items = List.of(
                 new OrderProductItemForm("1", 0)
         );
-        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(false,"송", "           ", "1212", "010-");
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(false, "송", "           ", "1212", "010-");
         CreateOrderForm form = new CreateOrderForm(items, true, true, receiver);
         //when
         //then
@@ -75,5 +76,45 @@ class OrderControllerTest {
                         jsonPath("$.message.['receiver.phone']").value("전화 번호 형식이 아닙니다.")
                 );
     }
+
+    @Test
+    void cancelOrder_success() throws Exception {
+        //given
+        //when
+        //then
+        mockMvc.perform(post("/orders/{orderId}/cancel", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-USER-ID", 1L)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void returnOrder_success() throws Exception {
+        //given
+        //when
+        //then
+        mockMvc.perform(post("/orders/{orderId}/return", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-USER-ID", 1L)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void retrieveMyOrder_success() throws Exception {
+        //given
+        //when
+        //then
+        mockMvc.perform(get("/orders/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-USER-ID", 1L)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
 
 }

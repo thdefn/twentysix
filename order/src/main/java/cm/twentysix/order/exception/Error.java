@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 public enum Error {
+    ORDER_RETURN_NOT_ALLOWED(HttpStatus.NOT_FOUND, "반품 가능한 주문이 없습니다."),
     ORDER_IN_PREPARATION_NOT_FOUND(HttpStatus.NOT_FOUND, "준비중이거나 접수된 주문이 없습니다."),
     STOCK_SHORTAGE(HttpStatus.CONFLICT, "재고 부족으로 주문에 실패했습니다."),
     ORDER_CONTAIN_CLOSING_PRODUCT(HttpStatus.BAD_REQUEST, "구매 불가능한 상품이 포함되어 있습니다."),

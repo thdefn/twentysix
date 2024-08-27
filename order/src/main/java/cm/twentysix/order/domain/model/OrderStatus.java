@@ -7,7 +7,7 @@ public enum OrderStatus {
 
 
     public boolean isPreparationStatus() {
-        return IN_TRANSIT.equals(this) || ORDER_PLACED.equals(this);
+        return ORDER_PLACED.equals(this);
     }
 
 }

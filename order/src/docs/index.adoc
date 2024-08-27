@@ -1,0 +1,127 @@
+= Order API Documentation
+:toc: left
+:toc-title: Contents
+:toclevels: 1
+:sectnums:
+:sectnumlevels: 1
+
+
+== 장바구니 아이템 추가
+=== Request
+[snip]
+include::{snippets}/cart-controller-test/add-cart-item_success/http-request.adoc[]
+
+=== Response
+==== success
+[snip]
+include::{snippets}/cart-controller-test/add-cart-item_success/http-response.adoc[]
+==== error
+[snip]
+include::{snippets}/cart-controller-test/add-cart-item_fail_request_argument_not_valid/http-response.adoc[]
+
+
+
+== 장바구니 아이템 수량 변경
+
+=== Request
+[snip]
+include::{snippets}/cart-controller-test/change-cart-item-quantity_success/http-request.adoc[]
+
+=== Response
+==== success
+[snip]
+include::{snippets}/cart-controller-test/change-cart-item-quantity_success/http-response.adoc[]
+==== error
+[snip]
+include::{snippets}/cart-controller-test/change-cart-item-quantity_fail_request_argument_not_valid/http-response.adoc[]
+[snip]
+include::{snippets}/cart-controller-test/change-cart-item-quantity_fail_item_does_not_exist/http-response.adoc[]
+
+
+== 장바구니 아이템 삭제
+
+=== Request
+[snip]
+include::{snippets}/cart-controller-test/delete-cart-item_success/http-request.adoc[]
+
+=== Response
+==== success
+[snip]
+include::{snippets}/cart-controller-test/delete-cart-item_success/http-response.adoc[]
+==== fail
+[snip]
+include::{snippets}/cart-controller-test/delete-cart-item_fail_request_argument_not_valid/http-response.adoc[]
+[snip]
+include::{snippets}/cart-controller-test/delete-cart-item_fail_item_does_not_exist/http-response.adoc[]
+
+
+
+== 장바구니 아이템 조회
+
+=== Request
+[snip]
+include::{snippets}/cart-controller-test/retrieve-cart_success/http-request.adoc[]
+
+=== Response
+[snip]
+include::{snippets}/cart-controller-test/retrieve-cart_success/http-response.adoc[]
+
+
+== 주문 생성
+
+=== Request
+[snip]
+include::{snippets}/order-controller-test/receive-order_success/http-request.adoc[]
+
+=== Response
+==== success
+[snip]
+include::{snippets}/order-controller-test/receive-order_success/http-response.adoc[]
+
+==== error
+[snip]
+include::{snippets}/order-controller-test/receive-order_fail_request_argument_not_valid/http-response.adoc[]
+[snip]
+include::{snippets}/order-controller-test/receive-order_fail_stock_shortage/http-response.adoc[]
+[snip]
+include::{snippets}/order-controller-test/receive-order_fail_order_contain_closing_product/http-response.adoc[]
+
+
+== 주문 취소
+
+=== Request
+[snip]
+include::{snippets}/order-controller-test/cancel-order_success/http-request.adoc[]
+
+=== Response
+==== success
+[snip]
+include::{snippets}/order-controller-test/cancel-order_success/http-response.adoc[]
+==== error
+include::{snippets}/order-controller-test/cancel-order_fail_not_users_order/http-response.adoc[]
+include::{snippets}/order-controller-test/cancel-order_fail_order_in_preparation_not_found/http-response.adoc[]
+
+== 주문 반품
+
+=== Request
+[snip]
+include::{snippets}/order-controller-test/return-order_success/http-request.adoc[]
+
+=== Response
+==== success
+[snip]
+include::{snippets}/order-controller-test/return-order_success/http-response.adoc[]
+==== error
+include::{snippets}/order-controller-test/return-order_fail_not_users_order/http-response.adoc[]
+include::{snippets}/order-controller-test/return-order_fail_order_return_not_allowed/http-response.adoc[]
+
+== 주문 조회
+
+=== Request
+[snip]
+include::{snippets}/order-controller-test/retrieve-my-order_success/http-request.adoc[]
+
+=== Response
+[snip]
+include::{snippets}/order-controller-test/retrieve-my-order_success/http-response.adoc[]
+

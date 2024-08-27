@@ -148,6 +148,7 @@ public class OrderService {
         messageSender.sendOrderCancelledEvent(OrderCancelledEvent.from(order));
     }
 
+    @Transactional
     public void returnOrder(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId)
                 .stream().findFirst()
@@ -161,7 +162,7 @@ public class OrderService {
     }
 
     public Slice<OrderItem> retrieveMyOrder(int page, int size, Long userId) {
-        return orderRepository.findByUserId(userId, PageRequest.of(page, size))
+        return orderRepository.findByUserIdOrderByIdDesc(userId, PageRequest.of(page, size))
                 .map(order -> OrderItem.from(order, getOrderBrandItems(order.getProducts(), order.getDeliveryFees())));
     }
 

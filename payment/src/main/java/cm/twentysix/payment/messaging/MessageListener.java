@@ -22,6 +22,6 @@ public class MessageListener {
 
     @Bean(name = "order-cancelled")
     public Consumer<OrderCancelledEvent> orderCancelledEventConsumer() {
-        return orderCancelledEvent -> paymentService.cancelOrBlockPayment(orderCancelledEvent.orderId(), CUSTOMER_DECISION.message);
+        return orderCancelledEvent -> paymentService.cancelPayment(orderCancelledEvent.orderId(), CUSTOMER_DECISION.message);
     }
 }

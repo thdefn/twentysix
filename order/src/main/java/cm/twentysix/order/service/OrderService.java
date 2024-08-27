@@ -135,8 +135,8 @@ public class OrderService {
     public void cancelOrder(String orderId, Long userId) {
         Order order = orderRepository.findByOrderId(orderId)
                 .stream().findFirst()
-                .filter(o -> o.getStatus().isOrderProcessingStatus())
-                .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
+                .filter(o -> o.getStatus().isPreparationStatus())
+                .orElseThrow(() -> new OrderException(Error.ORDER_IN_PREPARATION_NOT_FOUND));
 
         if (!order.getUserId().equals(userId))
             throw new OrderException(Error.NOT_USERS_ORDER);

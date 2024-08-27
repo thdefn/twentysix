@@ -270,7 +270,7 @@ class PaymentServiceTest {
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
         //when
-        paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
+        paymentService.cancelPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
         assertEquals(payment.getStatus(), PaymentStatus.BLOCK);
     }
@@ -291,7 +291,7 @@ class PaymentServiceTest {
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
         //when
-        paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
+        paymentService.cancelPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
         verify(tossPaymentClient, times(1)).cancel(eq("any-payment-key"), any());
         assertEquals(payment.getStatus(), PaymentStatus.CANCEL);
@@ -304,7 +304,7 @@ class PaymentServiceTest {
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.empty());
         //when
-        paymentService.cancelOrBlockPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
+        paymentService.cancelPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
         //then
         ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
         verify(paymentRepository, times(1)).save(paymentCaptor.capture());

@@ -83,15 +83,14 @@ public class PaymentService {
     }
 
     @Transactional
-    public void cancelOrBlockPayment(String orderId, String cancelReason) {
+    public void cancelPayment(String orderId, String cancelReason) {
         Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseGet(() -> Payment.of(orderId, PaymentStatus.BLOCK));
+                .stream().findFirst()
+                .filter(p -> PaymentStatus.COMPLETE.equals(p.getStatus()))
+                .orElseThrow(() -> new PaymentException(NOT_FOUND_PAYMENT));
 
-        if (PaymentStatus.COMPLETE.equals(payment.getStatus())) {
-            paymentClient.cancel(payment.getPaymentKey(), PaymentCancelForm.of(cancelReason));
-            payment.cancel();
-        } else payment.block();
-        paymentRepository.save(payment);
+        paymentClient.cancel(payment.getPaymentKey(), PaymentCancelForm.of(cancelReason));
+        payment.cancel();
     }
 
 }

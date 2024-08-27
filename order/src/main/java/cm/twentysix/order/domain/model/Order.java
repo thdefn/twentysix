@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,5 +135,13 @@ public class Order extends BaseTimeEntity {
 
     public void cancel() {
         status = OrderStatus.CANCEL;
+    }
+
+    public void acceptReturn() {
+        status = OrderStatus.BEING_RETURNED;
+    }
+
+    public boolean isReturnAllowed() {
+        return OrderStatus.DELIVERED.equals(status) && LocalDateTime.now().isBefore(updatedAt.plusDays(1));
     }
 }

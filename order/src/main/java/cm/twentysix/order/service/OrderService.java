@@ -6,6 +6,7 @@ import cm.twentysix.order.cache.global.ReservedProductStockGlobalCacheRepository
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
 import cm.twentysix.order.domain.model.Order;
+import cm.twentysix.order.domain.model.OrderProduct;
 import cm.twentysix.order.domain.model.OrderStatus;
 import cm.twentysix.order.domain.repository.OrderRepository;
 import cm.twentysix.order.dto.*;
@@ -15,12 +16,14 @@ import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -132,11 +135,11 @@ public class OrderService {
 
 
     @Transactional
-    public void cancelOrder(String orderId, Long userId) {
-        Order order = orderRepository.findByOrderId(orderId)
+    public void cancelOrder(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
                 .stream().findFirst()
-                .filter(o -> o.getStatus().isOrderProcessingStatus())
-                .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
+                .filter(o -> o.getStatus().isPreparationStatus())
+                .orElseThrow(() -> new OrderException(Error.ORDER_IN_PREPARATION_NOT_FOUND));
 
         if (!order.getUserId().equals(userId))
             throw new OrderException(Error.NOT_USERS_ORDER);
@@ -144,4 +147,38 @@ public class OrderService {
         order.cancel();
         messageSender.sendOrderCancelledEvent(OrderCancelledEvent.from(order));
     }
+
+    @Transactional
+    public void returnOrder(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
+                .stream().findFirst()
+                .filter(Order::isReturnAllowed)
+                .orElseThrow(() -> new OrderException(Error.ORDER_RETURN_NOT_ALLOWED));
+
+        if (!order.getUserId().equals(userId))
+            throw new OrderException(Error.NOT_USERS_ORDER);
+
+        order.acceptReturn();
+    }
+
+    public Slice<OrderItem> retrieveMyOrder(int page, int size, Long userId) {
+        return orderRepository.findByUserIdOrderByIdDesc(userId, PageRequest.of(page, size))
+                .map(order -> OrderItem.from(order, getOrderBrandItems(order.getProducts(), order.getDeliveryFees())));
+    }
+
+    private List<OrderBrandItem> getOrderBrandItems(Map<String, OrderProduct> products, Map<Long, Integer> brands) {
+        Map<Long, OrderBrandItem> orderBrandItemMap = new LinkedHashMap<>();
+        for (String productId : products.keySet()) {
+            OrderProduct orderProduct = products.get(productId);
+            Long brandId = orderProduct.getBrandId();
+            if (!orderBrandItemMap.containsKey(brandId))
+                orderBrandItemMap.put(brandId, OrderBrandItem.of(brandId, brands.get(brandId)));
+            OrderBrandItem orderBrandItem = orderBrandItemMap.get(brandId);
+            orderBrandItem.addProduct(productId, orderProduct);
+        }
+        return orderBrandItemMap.values().stream().toList();
+    }
+
+
+
 }

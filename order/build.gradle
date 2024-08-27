@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'com.google.protobuf' version '0.9.4'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 group = 'cm.twentysix'
@@ -51,6 +52,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-protobuf'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	testImplementation('org.springframework.restdocs:spring-restdocs-mockmvc')
 }
 
 dependencyManagement {
@@ -73,6 +75,12 @@ protobuf {
 			grpc {}
 		}
 	}
+}
+
+
+asciidoctor {
+	sourceDir = file('src/docs/asciidoc')
+	outputDir = file('build/docs/asciidoc')
 }
 
 

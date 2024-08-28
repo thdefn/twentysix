@@ -18,22 +18,21 @@ spring:
       okhttp:
         enabled: true
     function:
-      definition: stock-check-failed;order-cancelled
+      definition: order-cancelled
     stream:
       kafka:
         binder:
           brokers: ${KAFKA_BROKERS}
       bindings:
-        stock-check-failed-in-0:
-          destination: stock-check-failed-events
-          group: payment-group
-          content-type: application/json
         payment-finalized-out-0:
           destination: payment-finalized-events
           content-type: application/json
         order-cancelled-in-0:
           destination: order-cancelled-events
           group: payment-group
+          content-type: application/json
+        order-failed-out-0:
+          destination: order-failed-events
           content-type: application/json
 server:
   port: 8085
@@ -47,6 +46,9 @@ grpc:
     order:
       host: order-service
       port: 9005
+    product:
+      host: product-service
+      port: 9001
 
 logging:
   level:

@@ -17,13 +17,20 @@ def main():
         db_url = os.getenv('DB_URL')
         db_password = os.getenv('DB_PASSWORD')
 
-        producer = get_kafka_producer()
+        if not db_url:
+            raise ValueError("DB_URL environment variable is not set or is empty.")
+
+
+        db_url = db_url.replace("jdbc:mysql://", "")
+        host_port, database = db_url.split("/", 1)
+        host, port = host_port.split(":")
 
         connection = pymysql.connect(
-            host=db_url,
+            host=host,
+            port=int(port),
             user="root",
             password=db_password,
-            database='26cm-order')
+            database=database)
 
         with connection.cursor() as cursor:
             cursor.execute(

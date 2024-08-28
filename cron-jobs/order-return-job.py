@@ -14,6 +14,7 @@ def main():
     producer = None
 
     try:
+        producer = get_kafka_producer()
         db_url = os.getenv('DB_URL')
         db_password = os.getenv('DB_PASSWORD')
 

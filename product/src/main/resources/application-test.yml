@@ -31,7 +31,8 @@ spring:
           destination: order-cancelled-events
           group: product-group
           content-type: application/json
-
+  cache:
+    type: caffeine
 cloud:
   aws:
     s3:

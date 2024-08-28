@@ -4,19 +4,7 @@ option java_package = "cm.twentysix";
 option java_outer_classname = "BrandProto";
 
 service BrandService {
-  rpc GetBrand (BrandRequest) returns (BrandResponse);
   rpc GetBrandDetail (BrandDetailRequest) returns (BrandDetailResponse);
-}
-
-message BrandRequest {
-  int64 id = 1;
-}
-
-message BrandResponse {
-  int64 id = 1;
-  string name = 2;
-  int64 userId = 3;
-  int32 freeDeliveryInfimum = 4;
 }
 
 message BrandDetailRequest {
@@ -31,4 +19,5 @@ message BrandDetailResponse {
   string introduction = 5;
   string registrationNumber = 6;
   int32 freeDeliveryInfimum = 7;
+  int64 userId = 8;
 }

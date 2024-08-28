@@ -32,6 +32,7 @@ message BrandDetailResponse {
   string introduction = 5;
   string registrationNumber = 6;
   int32 freeDeliveryInfimum = 7;
+  int64 userId = 8;
 }
 
 message BrandInfosRequest {

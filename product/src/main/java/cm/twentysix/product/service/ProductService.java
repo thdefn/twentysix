@@ -32,7 +32,7 @@ public class ProductService {
 
     public void createProduct(MultipartFile thumbnail, MultipartFile descriptionImage, CreateProductForm form, Long userId) {
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
-        BrandProto.BrandResponse response = brandGrpcClient.getBrandInfo(form.brandId());
+        BrandProto.BrandDetailResponse response = brandGrpcClient.getBrandDetail(form.brandId());
         if (!userId.equals(response.getUserId()))
             throw new ProductException(Error.NOT_PRODUCT_ADMIN);
 
@@ -51,7 +51,7 @@ public class ProductService {
             throw new ProductException(Error.ALREADY_DELETED_PRODUCT);
 
         List<CategoryInfoDto> categoryInfoDtos = categoryService.retrieveBelongingCategories(form.categoryId());
-        BrandProto.BrandResponse response = brandGrpcClient.getBrandInfo(product.getProductBrand().getId());
+        BrandProto.BrandDetailResponse response = brandGrpcClient.getBrandDetail(product.getProductBrand().getId());
 
         String thumbnailPath = fileStorageClient.upload(thumbnail, FileDomain.PRODUCT);
         String descriptionPath = fileStorageClient.upload(descriptionImage, FileDomain.PRODUCT);

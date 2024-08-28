@@ -1,6 +1,7 @@
 package cm.twentysix.product.domain.model;
 
 import cm.twentysix.BrandProto;
+import cm.twentysix.BrandProto.BrandDetailResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +16,7 @@ public class ProductBrand {
         this.name = name;
     }
 
-    public static ProductBrand from(BrandProto.BrandResponse brand) {
+    public static ProductBrand from(BrandDetailResponse brand) {
         return ProductBrand.builder()
                 .id(brand.getId())
                 .name(brand.getName())

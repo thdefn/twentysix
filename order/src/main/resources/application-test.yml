@@ -46,6 +46,9 @@ spring:
       password: ${REDIS_PASSWORD}
       timeout: 600ms
       host: ${REDIS_HOST}
+  cache:
+    type: caffeine
+
 server:
   port: 8084
 

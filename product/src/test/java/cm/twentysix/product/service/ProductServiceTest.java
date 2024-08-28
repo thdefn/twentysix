@@ -77,7 +77,7 @@ class ProductServiceTest {
         MultipartFile descriptionImage = new MockMultipartFile("abc.jpg", "abcd".getBytes());
         CreateProductForm form = new CreateProductForm(1L, "123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500, null);
         given(categoryService.retrieveBelongingCategories(form.categoryId())).willReturn(categoryInfoDtos);
-        given(brandGrpcClient.getBrandInfo(anyLong())).willReturn(BrandProto.BrandResponse.newBuilder().setId(1L).setName("뉴발란스").setUserId(1L).build());
+        given(brandGrpcClient.getBrandDetail(anyLong())).willReturn(BrandProto.BrandDetailResponse.newBuilder().setId(1L).setName("뉴발란스").setUserId(1L).build());
         given(fileStorageClient.upload((MultipartFile) any(), any())).willReturn("afsdfasfsdafasd.jpg");
         //when
         productService.createProduct(thumbnail, descriptionImage, form, 1L);
@@ -110,7 +110,7 @@ class ProductServiceTest {
         MultipartFile thumbnail = new MockMultipartFile("abc.jpg", "abcd".getBytes());
         MultipartFile descriptionImage = new MockMultipartFile("abc.jpg", "abcd".getBytes());
         UpdateProductForm form = new UpdateProductForm("123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500, orderingBeginAt);
-        given(brandGrpcClient.getBrandInfo(anyLong())).willReturn(BrandProto.BrandResponse.newBuilder().setId(1L).setName("뉴발란스").setUserId(1L).build());
+        given(brandGrpcClient.getBrandDetail(anyLong())).willReturn(BrandProto.BrandDetailResponse.newBuilder().setId(1L).setName("뉴발란스").setUserId(1L).build());
         Product product = Product.builder()
                 .thumbnailPath("12345.jpg")
                 .bodyImagePath("78910.jpg")

@@ -57,6 +57,7 @@ public class BrandGrpcService extends BrandServiceGrpc.BrandServiceImplBase {
                     .setIntroduction(brand.getIntroduction())
                     .setRegistrationNumber(brand.getRegistrationNumber())
                     .setFreeDeliveryInfimum(brand.getFreeDeliveryInfimum())
+                    .setUserId(brand.getUserId())
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();

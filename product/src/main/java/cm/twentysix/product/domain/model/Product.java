@@ -1,6 +1,5 @@
 package cm.twentysix.product.domain.model;
 
-import cm.twentysix.BrandProto;
 import cm.twentysix.product.dto.CreateProductForm;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.service.dto.CategoryInfoDto;
@@ -16,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static cm.twentysix.BrandProto.BrandDetailResponse;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -58,7 +59,7 @@ public class Product extends BaseTimeDocument {
         this.orderingOpensAt = orderingOpensAt;
     }
 
-    public static Product of(CreateProductForm form, BrandProto.BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
+    public static Product of(CreateProductForm form, BrandDetailResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
         return Product.builder()
                 .price(form.price())
                 .quantity(form.quantity())
@@ -78,7 +79,7 @@ public class Product extends BaseTimeDocument {
                 .build();
     }
 
-    public void update(UpdateProductForm form, BrandProto.BrandResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
+    public void update(UpdateProductForm form, BrandDetailResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
         this.price = form.price();
         this.discount = form.discount();
         this.name = form.name();

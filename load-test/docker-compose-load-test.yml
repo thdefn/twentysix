@@ -3,7 +3,7 @@ version: '3.8'
 services:
   brand-service:
     build:
-      context: .
+      context: ../
       dockerfile: ./brand/Dockerfile-test
     ports:
       - "8082:8082"
@@ -18,7 +18,7 @@ services:
 
   user-service:
     build:
-      context: .
+      context: ../
       dockerfile: ./user/Dockerfile-test
     ports:
       - "8081:8081"
@@ -35,7 +35,7 @@ services:
 
   product-service:
     build:
-      context: .
+      context: ../
       dockerfile: ./product/Dockerfile-test
     ports:
       - "8083:8083"
@@ -45,12 +45,14 @@ services:
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
     networks:
       - ts-network
 
   payment-service:
     build:
-      context: .
+      context: ../
       dockerfile: ./payment/Dockerfile-test
     ports:
       - "8085:8085"
@@ -64,7 +66,7 @@ services:
 
   order-service:
     build:
-      context: .
+      context: ../
       dockerfile: ./order/Dockerfile-test
     ports:
       - "8084:8084"
@@ -74,6 +76,47 @@ services:
       KAFKA_BROKERS: ${KAFKA_BROKERS}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_HOST: ${REDIS_HOST}
+    networks:
+      - ts-network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - ts-network
+
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    command: ["--kafka.server=${KAFKA_BROKERS}"]
+    ports:
+      - "9308:9308"
+    networks:
+      - ts-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - kafka-exporter
+      - node-exporter
+    networks:
+      - ts-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
     networks:
       - ts-network
 

@@ -4,6 +4,10 @@ spring:
   data:
     mongodb:
       uri: ${DB_URL}
+    redis:
+      password: ${REDIS_PASSWORD}
+      timeout: 600ms
+      host: ${REDIS_HOST}
   cloud:
     function:
       definition: order;order-failed;order-cancelled

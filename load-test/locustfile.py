@@ -4,14 +4,24 @@ from locust import HttpUser, between, task
 class WebsiteUser(HttpUser):
     wait_time = between(1, 2)  # 각 작업 사이의 대기 시간 (1~2초)
     user_count = 0
+    MAX_USERS = 10000
+    test_completed = False
 
     def on_start(self):
         WebsiteUser.user_count += 1
         self.user_id = WebsiteUser.user_count  # 1부터 시작하는 유저 ID 할당
         self.order_id = None  # 초기화
 
+        if WebsiteUser.user_count > WebsiteUser.MAX_USERS:
+            self.test_completed = True
+            print("Reached 10,000 users. Stopping the test.")
+            self.environment.runner.quit()
+
     @task
     def create_order(self):
+        if self.test_completed:
+            return  # Test is completed, so skip the task
+
         user_id = str(self.user_id)  # HttpUser의 user_id 속성 사용
 
         headers = {
@@ -22,7 +32,7 @@ class WebsiteUser(HttpUser):
                                           json={
                                               "products": [
                                                   {
-                                                      "id": "66c437d4552c0f20d08e947f",
+                                                      "id": "66c436bb552c0f20d08e947e",
                                                       "quantity": 1
                                                   }
                                               ],
@@ -42,10 +52,13 @@ class WebsiteUser(HttpUser):
             self.order_id = order_response.json().get("orderId")
             print(f"Order created with ID: {self.order_id}")
         else:
-            print("Failed to create order")
+            print(f"Failed to create order, status code: {order_response.status_code}")
 
     @task
     def checkout_and_pay(self):
+        if self.test_completed:
+            return  # Test is completed, so skip the task
+
         if self.order_id:
             user_id = str(self.user_id)  # HttpUser의 user_id 속성 사용
 
@@ -62,10 +75,10 @@ class WebsiteUser(HttpUser):
                                                 headers=headers)
 
             if checkout_response.status_code == 200:
-                payment_response = self.client.post(f"http://localhost:8085/payments",
+                payment_response = self.client.post("http://localhost:8085/payments",
                                                     json={
                                                         "orderId": self.order_id,
-                                                        "amount": "206815",
+                                                        "amount": "58500",
                                                         "paymentKey": self.order_id
                                                     }, headers=headers)
                 if payment_response.status_code == 200:
@@ -76,4 +89,5 @@ class WebsiteUser(HttpUser):
                 print(f"Checkout failed for order ID: {self.order_id}")
         else:
             print("Order ID not available for checkout and payment")
+
 

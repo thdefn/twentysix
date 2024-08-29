@@ -334,7 +334,11 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .orderId("2032032003030-afsfdasfdsfdsafdl2")
                 .userId(1L)
-                .products(new HashMap<>())
+                .products(Map.of(
+                        "1234", OrderProduct.builder().quantity(2).build(),
+                        "2345", OrderProduct.builder().quantity(1).build(),
+                        "3456", OrderProduct.builder().quantity(1).build()
+                ))
                 .deliveryFees(new HashMap<>())
                 .receiver(OrderReceiver.builder()
                         .name("송송이")
@@ -345,10 +349,15 @@ class OrderServiceTest {
                 .status(OrderStatus.PAYMENT_PENDING)
                 .build();
         given(orderRepository.findByOrderId(anyString())).willReturn(Optional.of(order));
+        Map<String, Integer> productIdCachedQuantityMap = new HashMap<>();
+        productIdCachedQuantityMap.put("1234", 3);
+        given(reservedProductStockGlobalCacheRepository.getAll(anyList())).willReturn(productIdCachedQuantityMap);
+
         //when
         orderService.handlePaymentFinalizedEvent(event);
         //then
         assertEquals(order.getStatus(), OrderStatus.PAYMENT_FAIL);
+        verify(reservedProductStockGlobalCacheRepository, times(1)).incrementStock(anyMap());
     }
 
     @Test
@@ -396,6 +405,8 @@ class OrderServiceTest {
                 .status(OrderStatus.ORDER_PLACED)
                 .build();
         given(orderRepository.findById(anyLong())).willReturn(Optional.of(order));
+        Map<String, Integer> productIdCachedQuantityMap = new HashMap<>();
+        given(reservedProductStockGlobalCacheRepository.getAll(anyList())).willReturn(productIdCachedQuantityMap);
         //when
         orderService.cancelOrder(1L, 1L);
         //then
@@ -407,6 +418,7 @@ class OrderServiceTest {
         assertEquals(productQuantityMap.get("2345"), 1);
         assertEquals(productQuantityMap.get("3456"), 1);
         assertEquals(order.getStatus(), OrderStatus.CANCEL);
+        verify(reservedProductStockGlobalCacheRepository, times(0)).incrementStock(anyMap());
     }
 
     @Test
@@ -468,11 +480,17 @@ class OrderServiceTest {
         //given
         given(mockOrderA.getUserId()).willReturn(1L);
         given(mockOrderA.isReturnAllowed()).willReturn(true);
+        given(mockOrderA.getProductIdQuantityMap()).willReturn(
+                Map.of("1234", 5));
         given(orderRepository.findById(anyLong())).willReturn(Optional.of(mockOrderA));
+        Map<String, Integer> productIdCachedQuantityMap = new HashMap<>();
+        productIdCachedQuantityMap.put("1234", 3);
+        given(reservedProductStockGlobalCacheRepository.getAll(anyList())).willReturn(productIdCachedQuantityMap);
         //when
         orderService.returnOrder(1L, 1L);
         //then
         verify(mockOrderA, times(1)).acceptReturn();
+        verify(reservedProductStockGlobalCacheRepository, times(1)).incrementStock(anyMap());
     }
 
     @Test

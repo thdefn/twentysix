@@ -168,6 +168,66 @@ class PaymentServiceTest {
     }
 
     @Test
+    void confirm_fail_BLOCKED_ORDER() {
+        //given
+        PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
+        Payment payment = Payment.builder()
+                .amount(10000)
+                .orderName("any-order-name")
+                .userId(1L)
+                .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
+                .status(PaymentStatus.BLOCK)
+                .build();
+        given(paymentRepository.findByOrderId(anyString()))
+                .willReturn(Optional.of(payment));
+        //when
+        PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
+        //then
+        assertEquals(e.getError(), Error.BLOCKED_ORDER);
+    }
+
+    @Test
+    void confirm_fail_CANCELLED_ORDER() {
+        //given
+        PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
+        Payment payment = Payment.builder()
+                .amount(10000)
+                .orderName("any-order-name")
+                .userId(1L)
+                .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
+                .status(PaymentStatus.CANCEL)
+                .build();
+        given(paymentRepository.findByOrderId(anyString()))
+                .willReturn(Optional.of(payment));
+        //when
+        PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
+        //then
+        assertEquals(e.getError(), Error.CANCELLED_ORDER);
+    }
+
+    @Test
+    void confirm_fail_ALREADY_PAID_ORDER() {
+        //given
+        PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
+        Payment payment = Payment.builder()
+                .amount(10000)
+                .orderName("any-order-name")
+                .userId(1L)
+                .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
+                .status(PaymentStatus.COMPLETE)
+                .build();
+        given(paymentRepository.findByOrderId(anyString()))
+                .willReturn(Optional.of(payment));
+        //when
+        PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
+        //then
+        assertEquals(e.getError(), Error.ALREADY_PAID_ORDER);
+    }
+
+    @Test
     void confirm_fail_STOCK_SHORTAGE() {
         //given
         PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");

@@ -59,9 +59,12 @@ GET http://localhost:8083/products
 ###
 GET http://localhost:8083/products/66c437d4552c0f20d08e947f/stock
 
+###
+GET http://localhost:8083/products/66c437d4552c0f20d08e947f
+
 
 ###
-DELETE http://localhost:8083/products/66c3261f7fdc777118594b83
+DELETE http://localhost:8083/products/66cf02164e0ebf23b67ea040
 X-USER-ID: 11
 
 ### 주문
@@ -75,7 +78,7 @@ X-USER-ID: 11
 {
   "products": [
     {
-      "id" : "66c326847fdc777118594b84",
+      "id" : "66c437d4552c0f20d08e947f",
       "quantity" : 1
     }
   ],

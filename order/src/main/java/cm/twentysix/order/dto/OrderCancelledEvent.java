@@ -13,10 +13,7 @@ public record OrderCancelledEvent(
 ) {
     public static OrderCancelledEvent from(Order order) {
         return OrderCancelledEvent.builder()
-                .productQuantity(order.getProducts().entrySet().stream().collect(Collectors.toMap(
-                        idProductEntry -> idProductEntry.getKey(),
-                        idProductEntry -> idProductEntry.getValue().getQuantity()
-                )))
+                .productQuantity(order.getProductIdQuantityMap())
                 .orderId(order.getOrderId())
                 .build();
     }

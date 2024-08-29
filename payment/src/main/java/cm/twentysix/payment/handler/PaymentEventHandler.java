@@ -45,7 +45,5 @@ public class PaymentEventHandler {
                 .orElseThrow(() -> new PaymentException(Error.NOT_FOUND_PAYMENT));
 
         payment.block();
-        if(event.shouldNotifyFailed())
-            messageSender.sendPaymentFinalizedEvent(PaymentFinalizedEvent.of(event.orderId(), false));
     }
 }

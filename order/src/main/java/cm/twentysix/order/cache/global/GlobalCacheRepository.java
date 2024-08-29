@@ -3,6 +3,7 @@ package cm.twentysix.order.cache.global;
 import cm.twentysix.order.client.RedisClient;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,5 +59,12 @@ public abstract class GlobalCacheRepository<T, V extends T> {
                         .collect(Collectors.toMap(
                                 entry -> getCacheKey(entry.getKey()), Map.Entry::getValue));
         redisClient.addValues(cacheKeyValue, getCacheDuration());
+    }
+
+    public void putAllIfAbsent(Map<String, V> keyValueMap){
+        Map<String, T> cacheKeyValue = keyValueMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> getCacheKey(entry.getKey()), Map.Entry::getValue));
+        redisClient.addValuesIfAbsent(cacheKeyValue, getCacheDuration());
     }
 }

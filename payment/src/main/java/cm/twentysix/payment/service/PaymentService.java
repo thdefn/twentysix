@@ -7,11 +7,9 @@ import cm.twentysix.payment.domain.model.Payment;
 import cm.twentysix.payment.domain.model.PaymentStatus;
 import cm.twentysix.payment.domain.repository.PaymentRepository;
 import cm.twentysix.payment.dto.*;
-import cm.twentysix.payment.exception.Error;
 import cm.twentysix.payment.exception.PaymentException;
 import cm.twentysix.payment.exception.ProductException;
 import cm.twentysix.payment.messaging.MessageSender;
-import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -36,7 +34,7 @@ public class PaymentService {
 
     public RequiredPaymentResponse getRequiredPayment(String orderId) {
         Optional<Payment> maybePayment = paymentRepository.findByOrderId(orderId);
-        if(maybePayment.isPresent())
+        if (maybePayment.isPresent())
             return RequiredPaymentResponse.from(maybePayment.get());
         Payment payment = Payment.of(orderId, PaymentStatus.PENDING);
         OrderInfoResponse orderInfo = orderGrpcClient.getOrderInfo(orderId);
@@ -54,9 +52,6 @@ public class PaymentService {
             validateConcurrency(payment);
 
             checkProductStock(payment);
-        } catch (PaymentException e) {
-            applicationEventPublisher.publishEvent(PaymentConditionFailedEvent.of(form.orderId(), true));
-            throw e;
         } catch (ProductException e) {
             applicationEventPublisher.publishEvent(PaymentConditionFailedEvent.of(form.orderId(), false));
             throw e;
@@ -76,7 +71,7 @@ public class PaymentService {
         // TODO : 429 500 토스 측에서 에러 났을 때 핸들링
     }
 
-    private void validateConcurrency(Payment payment){
+    private void validateConcurrency(Payment payment) {
         payment.trying();
         paymentRepository.save(payment);
     }
@@ -91,9 +86,12 @@ public class PaymentService {
 
         if (PaymentStatus.CANCEL.equals(payment.getStatus()))
             throw new PaymentException(CANCELLED_ORDER);
+
+        if (PaymentStatus.BLOCK.equals(payment.getStatus()))
+            throw new PaymentException(BLOCKED_ORDER);
     }
 
-    private void checkProductStock(Payment payment){
+    private void checkProductStock(Payment payment) {
         if (!productGrpcClient.checkProductStockRequest(payment.getProductQuantity(), payment.getOrderId()).getIsSuccess())
             throw new ProductException(STOCK_SHORTAGE);
     }

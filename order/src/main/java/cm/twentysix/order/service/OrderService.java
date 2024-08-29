@@ -101,9 +101,8 @@ public class OrderService {
             int requestedQuantity = productIdRequestedQuantityMap.get(productId);
             if (requestedQuantity > havingQuantity)
                 throw new OrderException(STOCK_SHORTAGE);
-            productIdCachedQuantityMap.put(productId, havingQuantity - requestedQuantity);
         }
-        reservedProductStockGlobalCacheRepository.putAll(productIdCachedQuantityMap);
+        reservedProductStockGlobalCacheRepository.decrementStock(productIdRequestedQuantityMap);
     }
 
     private void validProductIsOpen(String orderingOpensAt, LocalDateTime requestedAt) {
@@ -113,7 +112,6 @@ public class OrderService {
 
     @Transactional
     public void handleStockCheckFailedEvent(StockCheckFailedEvent event) {
-        log.error(event.orderId());
         Order order = orderRepository.findByOrderId(event.orderId())
                 .stream().findFirst()
                 .filter(o -> OrderStatus.PAYMENT_PENDING.equals(o.getStatus()))
@@ -130,7 +128,23 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
 
         if (event.isSuccess()) order.placed();
-        else order.paymentFail();
+        else {
+            order.paymentFail();
+            restoreReservedStockIfPresent(order.getProductIdQuantityMap());
+        }
+    }
+
+    private void restoreReservedStockIfPresent(Map<String, Integer> productIdRestoredQuantityMap){
+        Map<String, Integer> productIdCachedQuantityMap =
+        reservedProductStockGlobalCacheRepository.getAll(productIdRestoredQuantityMap.keySet().stream().toList());
+        if(productIdCachedQuantityMap.isEmpty())
+            return;
+        Map<String, Integer> productIdIncrementQuantityMap = new HashMap<>();
+        for (String productId : productIdCachedQuantityMap.keySet()){
+            int incrementQuantity = productIdRestoredQuantityMap.get(productId);
+            productIdIncrementQuantityMap.put(productId, incrementQuantity);
+        }
+        reservedProductStockGlobalCacheRepository.incrementStock(productIdIncrementQuantityMap);
     }
 
 
@@ -145,6 +159,7 @@ public class OrderService {
             throw new OrderException(Error.NOT_USERS_ORDER);
 
         order.cancel();
+        restoreReservedStockIfPresent(order.getProductIdQuantityMap());
         messageSender.sendOrderCancelledEvent(OrderCancelledEvent.from(order));
     }
 
@@ -159,6 +174,7 @@ public class OrderService {
             throw new OrderException(Error.NOT_USERS_ORDER);
 
         order.acceptReturn();
+        restoreReservedStockIfPresent(order.getProductIdQuantityMap());
     }
 
     public Slice<OrderItem> retrieveMyOrder(int page, int size, Long userId) {

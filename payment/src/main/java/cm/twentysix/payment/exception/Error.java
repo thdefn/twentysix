@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum Error {
     INVALID_CONCURRENT_ACCESS(HttpStatus.BAD_REQUEST, "Concurrent access not allowed"),
     CANCELLED_ORDER(HttpStatus.BAD_REQUEST, "Cancelled order"),
+    BLOCKED_ORDER(HttpStatus.BAD_REQUEST, "Blocked order"),
     ALREADY_PAID_ORDER(HttpStatus.BAD_REQUEST, "Already paid order"),
     PAYMENT_FAILED(HttpStatus.PRECONDITION_FAILED, "Payment failed"),
     NOT_FOUND_PAYMENT(HttpStatus.BAD_REQUEST, "해당하는 결제 건이 없습니다."),

@@ -2,8 +2,10 @@ package cm.twentysix.payment.exception;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,8 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cm.twentysix.payment.exception.Error.GRPC_COMMUNICATION_ERROR;
-import static cm.twentysix.payment.exception.Error.REQUEST_ARGUMENT_NOT_VALID;
+import static cm.twentysix.payment.exception.Error.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -32,6 +33,13 @@ public class GlobalExceptionHandler {
         log.info(LOG_FORMAT, e.getClass().getSimpleName(), GRPC_COMMUNICATION_ERROR, errorMessage);
         return ResponseEntity.status(httpStatus)
                 .body(new ExceptionResponse<>(GRPC_COMMUNICATION_ERROR.name(), errorMessage));
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleOptimisticLockingFailureException(OptimisticLockingFailureException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), INVALID_CONCURRENT_ACCESS, INVALID_CONCURRENT_ACCESS.message);
+        return ResponseEntity.status(INVALID_CONCURRENT_ACCESS.httpStatus)
+                .body(new ExceptionResponse<>(INVALID_CONCURRENT_ACCESS.name(), e.getMessage()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

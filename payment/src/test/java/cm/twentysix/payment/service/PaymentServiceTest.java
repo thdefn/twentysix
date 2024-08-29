@@ -101,23 +101,8 @@ class PaymentServiceTest {
     }
 
     @Test
-    void getRequiredPayment_success_WhenStatusIsBLOCK() {
+    void getRequiredPayment_success_alreadyExists() {
         //given
-        given(orderGrpcClient.getOrderInfo(anyString())).willReturn(
-                OrderProto.OrderInfoResponse.newBuilder()
-                        .setOrderName("강아지 나시 외 1건")
-                        .setPaymentAmount(10000)
-                        .setOrderId("20240101033323212-hashhashhash")
-                        .setUserId(1L)
-                        .addAllProductQuantity(
-                                List.of(
-                                        OrderProto.ProductQuantity.newBuilder()
-                                                .setQuantity(1)
-                                                .setProductId("12345")
-                                                .build()
-                                )
-                        )
-                        .build());
         Payment payment = Payment.builder()
                 .amount(10000)
                 .orderName("any-order-name")
@@ -127,19 +112,10 @@ class PaymentServiceTest {
                 .build();
         given(paymentRepository.findByOrderId(anyString()))
                 .willReturn(Optional.of(payment));
-        given(paymentRepository.save(any())).willReturn(payment);
         //when
         RequiredPaymentResponse response = paymentService.getRequiredPayment("20240101033323212-hashhashhash");
         //then
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-        Payment saved = paymentCaptor.getValue();
-        assertEquals(saved.getOrderId(), "any-order-id");
-        assertEquals(saved.getUserId(), 1L);
-        assertEquals(saved.getStatus(), PaymentStatus.BLOCK);
-        assertEquals(saved.getOrderName(), "강아지 나시 외 1건");
-        assertEquals(saved.getAmount(), 10000);
-
+        verify(paymentRepository, times(0)).save(any());
         assertEquals(response.amount(), payment.getAmount());
         assertEquals(response.orderName(), payment.getOrderName());
         assertTrue(response.isBlocked());
@@ -256,27 +232,7 @@ class PaymentServiceTest {
 
 
     @Test
-    void handleProductOrderFailedEvent_success_WhenStatusPENDING() {
-        //given
-        OrderCancelledEvent event = new OrderCancelledEvent("any-order-id", new HashMap<>());
-        Payment payment = Payment.builder()
-                .amount(10000)
-                .orderName("any-order-name")
-                .userId(1L)
-                .orderId("any-order-id")
-                .productQuantity(Map.of("123", 1))
-                .status(PaymentStatus.PENDING)
-                .build();
-        given(paymentRepository.findByOrderId(anyString()))
-                .willReturn(Optional.of(payment));
-        //when
-        paymentService.cancelPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
-        //then
-        assertEquals(payment.getStatus(), PaymentStatus.BLOCK);
-    }
-
-    @Test
-    void handleProductOrderFailedEvent_success_WhenStatusCOMPLETE() {
+    void cancelPayment_success() {
         //given
         OrderCancelledEvent event = new OrderCancelledEvent("any-order-id", new HashMap<>());
         Payment payment = Payment.builder()
@@ -298,17 +254,24 @@ class PaymentServiceTest {
     }
 
     @Test
-    void handleProductOrderFailedEvent_success() {
+    void cancelPayment_fail() {
         //given
         OrderCancelledEvent event = new OrderCancelledEvent("any-order-id", new HashMap<>());
+        Payment payment = Payment.builder()
+                .amount(10000)
+                .orderName("any-order-name")
+                .userId(1L)
+                .paymentKey("any-payment-key")
+                .orderId("any-order-id")
+                .productQuantity(Map.of("123", 1))
+                .status(PaymentStatus.PENDING)
+                .build();
         given(paymentRepository.findByOrderId(anyString()))
-                .willReturn(Optional.empty());
+                .willReturn(Optional.of(payment));
         //when
-        paymentService.cancelPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message);
+        PaymentException e = assertThrows(PaymentException.class, () -> paymentService.cancelPayment(event.orderId(), CancelReason.STOCK_SHORTAGE.message));
         //then
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-        Payment saved = paymentCaptor.getValue();
-        assertEquals(saved.getStatus(), PaymentStatus.BLOCK);
+        assertEquals(e.getError(), Error.NOT_FOUND_PAYMENT);
     }
+
 }

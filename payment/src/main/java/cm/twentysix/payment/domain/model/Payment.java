@@ -62,6 +62,9 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "products", columnDefinition = "json")
     private Map<String, Integer> productQuantity;
 
+    @Version
+    private Integer version;
+
     // TODO: cancel 관련
 
 
@@ -101,6 +104,10 @@ public class Payment extends BaseTimeEntity {
 
     public void cancel() {
         status = PaymentStatus.CANCEL;
+    }
+
+    public void trying() {
+        status = PaymentStatus.TRYING;
     }
 
     public void confirmPayment(PaymentResponse response) {

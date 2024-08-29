@@ -13,10 +13,7 @@ public record OrderFailedEvent(
 ) {
     public static OrderFailedEvent from(Order order) {
         return OrderFailedEvent.builder()
-                .productQuantity(order.getProducts().entrySet().stream().collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        idProductEntry -> idProductEntry.getValue().getQuantity()
-                )))
+                .productQuantity(order.getProductIdQuantityMap())
                 .orderId(order.getOrderId())
                 .build();
     }

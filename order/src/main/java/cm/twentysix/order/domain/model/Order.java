@@ -144,4 +144,11 @@ public class Order extends BaseTimeEntity {
     public boolean isReturnAllowed() {
         return OrderStatus.DELIVERED.equals(status) && LocalDateTime.now().isBefore(updatedAt.plusDays(1));
     }
+
+    public Map<String, Integer> getProductIdQuantityMap() {
+        return getProducts().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().getQuantity()
+        ));
+    }
 }

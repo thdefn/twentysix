@@ -30,7 +30,7 @@ public class ReservedProductStockGlobalCacheRepository extends GlobalCacheReposi
         return cachedData;
     }
 
-    public Integer getOrFetchInfAbsent(String key, Integer fetchedStock) {
+    public Integer getOrFetchIfAbsent(String key, Integer fetchedStock) {
         Optional<Integer> maybeInteger = get(key, Integer.class);
         if (maybeInteger.isEmpty()) {
             put(key, fetchedStock);

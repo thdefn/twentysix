@@ -107,7 +107,7 @@ public class OrderService {
 
     private void validProductIsAvailable(ProductItemResponse productItem, Integer requestedQuantity, LocalDateTime requestedAt) {
         validProductIsOpen(productItem.getOrderingOpensAt(), requestedAt);
-        Integer havingQuantity = reservedProductStockGlobalCacheRepository.getOrFetchInfAbsent(productItem.getId(), productItem.getQuantity());
+        Integer havingQuantity = reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(productItem.getId(), productItem.getQuantity());
         if (requestedQuantity > havingQuantity)
             throw new OrderException(STOCK_SHORTAGE);
     }

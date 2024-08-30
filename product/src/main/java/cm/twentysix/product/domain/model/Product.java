@@ -39,9 +39,10 @@ public class Product extends BaseTimeDocument {
     private Long userId;
     private boolean isDeleted;
     private LocalDateTime orderingOpensAt;
+    private boolean isSpecial;
 
     @Builder
-    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer quantity, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo, LocalDateTime orderingOpensAt) {
+    public Product(String thumbnailPath, String bodyImagePath, Integer price, Integer discount, String name, Integer quantity, Integer deliveryFee, LocalDateTime lastModifiedAt, List<CategoryInfo> categories, Set<Long> likes, ProductBrand productBrand, Long userId, boolean isDeleted, ProductInfo productInfo, LocalDateTime orderingOpensAt, boolean isSpecial) {
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
         this.price = price;
@@ -57,9 +58,11 @@ public class Product extends BaseTimeDocument {
         this.userId = userId;
         this.isDeleted = isDeleted;
         this.orderingOpensAt = orderingOpensAt;
+        this.isSpecial = isSpecial;
     }
 
     public static Product of(CreateProductForm form, BrandDetailResponse brand, Long userId, List<CategoryInfoDto> categoryInfoDtos, String thumbnailPath, String bodyImagePath) {
+        LocalDateTime orderingOpensAt = form.parseOrderingOpensAt();
         return Product.builder()
                 .price(form.price())
                 .quantity(form.quantity())
@@ -75,7 +78,8 @@ public class Product extends BaseTimeDocument {
                 .userId(userId)
                 .thumbnailPath(thumbnailPath)
                 .bodyImagePath(bodyImagePath)
-                .orderingOpensAt(form.parseOrderingOpensAt())
+                .orderingOpensAt(orderingOpensAt)
+                .isSpecial(form.isSpecialProduct())
                 .build();
     }
 
@@ -93,6 +97,7 @@ public class Product extends BaseTimeDocument {
         this.thumbnailPath = thumbnailPath;
         this.bodyImagePath = bodyImagePath;
         this.orderingOpensAt = form.parseOrderingOpensAt();
+        this.isSpecial = form.isSpecialProduct();
     }
 
     public void delete() {

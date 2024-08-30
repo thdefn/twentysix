@@ -254,4 +254,62 @@ class CartServiceTest {
         verify(productGrpcClient, times(0)).findProductItems(anyList());
     }
 
+
+    @Test
+    void removeOrderedCartItem_success_WhenShouldDeleteCartItemIsTrue() {
+        //given
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("12345", 1)
+        );
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, false, true, receiver);
+        Cart cart = Cart.builder()
+                .userId(1L)
+                .items(new HashMap<>(Map.of("12345", CartProduct.builder()
+                                .brandId(1L)
+                                .quantity(1)
+                                .build(),
+                        "56789", CartProduct.builder()
+                                .brandId(1L)
+                                .quantity(2)
+                                .build()))).build();
+        given(cartRepository.findById(anyLong())).willReturn(Optional.of(cart));
+        //when
+        cartService.removeOrderedCartItem(form, 1L);
+        //then
+        assertEquals(cart.getItems().size(), 1);
+        assertTrue(cart.getItems().containsKey("56789"));
+        verify(cartRepository, times(1)).save(any());
+    }
+
+    @Test
+    void removeOrderedCartItem_success_WhenShouldDeleteCartItemIsFalse() {
+        //given
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("12345", 1)
+        );
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, false, false, receiver);
+        //when
+        cartService.removeOrderedCartItem(form, 1L);
+        //then
+        verify(cartRepository, times(0)).save(any());
+    }
+
+    @Test
+    void removeOrderedCartItem_success_WhenCartIsEmpty() {
+        //given
+        List<OrderProductItemForm> items = List.of(
+                new OrderProductItemForm("12345", 1)
+        );
+        CreateOrderForm.ReceiverForm receiver = new CreateOrderForm.ReceiverForm(true, "송송이", "서울특별시 성북구 보문로", "11112", "010-2222-2222");
+        CreateOrderForm form = new CreateOrderForm(items, false, true, receiver);
+        given(cartRepository.findById(anyLong())).willReturn(Optional.empty());
+        //when
+        cartService.removeOrderedCartItem(form, 1L);
+        //then
+        verify(cartRepository, times(0)).save(any());
+    }
+
+
 }

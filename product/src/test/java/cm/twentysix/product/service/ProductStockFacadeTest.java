@@ -44,7 +44,8 @@ class ProductStockFacadeTest {
     private Map<String, Integer> productIdQuantityMapB;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws InterruptedException {
+        Thread.sleep(300);
         savedA = Product.builder()
                 .name("MOCK_PRODUCT")
                 .quantity(100)
@@ -62,7 +63,7 @@ class ProductStockFacadeTest {
     @AfterEach
     void tearDown() throws InterruptedException {
         productRepository.deleteAll(List.of(savedA, savedB));
-        Thread.sleep(10);
+        Thread.sleep(300);
     }
 
     @Test

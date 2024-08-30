@@ -54,6 +54,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+	implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.2.0")
 }
 
 dependencyManagement {

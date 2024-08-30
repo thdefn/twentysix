@@ -48,6 +48,14 @@ public class RedisClient<T> {
         redisTemplate.opsForValue().set(key, value, duration);
     }
 
+    public void decrementValueBy(String key, Integer delta){
+        redisTemplate.opsForValue().decrement(key, delta);
+    }
+
+    public void incrementValueBy(String key, Integer delta){
+        redisTemplate.opsForValue().increment(key, delta);
+    }
+
     public void decrementValuesBy(Map<String, Integer> keyDelta){
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             keyDelta.forEach((k, v) -> redisTemplate.opsForValue().decrement(k,v));

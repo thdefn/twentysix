@@ -60,6 +60,8 @@ public class Cart implements Serializable {
             throw new CartException(Error.ITEM_DOES_NOT_EXIST);
         CartProduct product = items.get(productId);
         product.changeQuantity(quantity);
+        if (product.getQuantity() <= 0)
+            items.remove(productId);
 
     }
 
@@ -75,6 +77,12 @@ public class Cart implements Serializable {
 
     public void removeOrderedItems(List<OrderProductItemForm> orderedItem) {
         orderedItem.forEach(itemToBeRemoved ->
-                items.get(itemToBeRemoved.id()).decreaseQuantity(itemToBeRemoved.quantity()));
+                {
+                    CartProduct product = items.get(itemToBeRemoved.id());
+                    product.decreaseQuantity(itemToBeRemoved.quantity());
+                    if (product.getQuantity() <= 0)
+                        items.remove(itemToBeRemoved.id());
+                }
+        );
     }
 }

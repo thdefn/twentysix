@@ -44,4 +44,8 @@ public record UpdateProductForm(
             return LocalDateTime.now();
         }
     }
+
+    public boolean isSpecialProduct() {
+        return !parseOrderingOpensAt().isBefore(LocalDateTime.now());
+    }
 }

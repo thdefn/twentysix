@@ -61,6 +61,13 @@ public class GlobalExceptionHandler {
                 .body(new ExceptionResponse<>(HttpStatus.BAD_REQUEST.name(), e.getMessage()));
     }
 
+    @ExceptionHandler(CircuitBreakerException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleCircuitBreakerException(CircuitBreakerException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE.name(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ExceptionResponse<>(HttpStatus.SERVICE_UNAVAILABLE.name(), e.getMessage()));
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse<Map<String, String>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {

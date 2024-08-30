@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -94,8 +91,10 @@ public class CartService {
     public void removeOrderedCartItem(CreateOrderForm form, Long userId){
         if(!form.shouldDeleteCartItem())
             return;
-        Cart cart = cartRepository.findById(userId)
-                .orElseGet(() -> new Cart(userId));
+        Optional<Cart> maybeCart = cartRepository.findById(userId);
+        if(maybeCart.isEmpty())
+            return;
+        Cart cart = maybeCart.get();
         cart.removeOrderedItems(form.products());
         cartRepository.save(cart);
     }

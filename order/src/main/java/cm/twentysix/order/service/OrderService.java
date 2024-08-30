@@ -5,6 +5,7 @@ import cm.twentysix.ProductProto.ProductItemResponse;
 import cm.twentysix.order.cache.global.ReservedProductStockGlobalCacheRepository;
 import cm.twentysix.order.client.BrandGrpcClient;
 import cm.twentysix.order.client.ProductGrpcClient;
+import cm.twentysix.order.constant.CircuitBreakerDomain;
 import cm.twentysix.order.domain.model.Order;
 import cm.twentysix.order.domain.model.OrderProduct;
 import cm.twentysix.order.domain.model.OrderStatus;
@@ -14,6 +15,7 @@ import cm.twentysix.order.exception.Error;
 import cm.twentysix.order.exception.OrderException;
 import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -42,9 +44,12 @@ public class OrderService {
     private final CartService cartService;
     private final MessageSender messageSender;
     private final ReservedProductStockGlobalCacheRepository reservedProductStockGlobalCacheRepository;
+    private final CircuitBreakerService circuitBreakerService;
 
     @Transactional
     public ReceiveOrderResponse receiveOrder(CreateOrderForm form, Long userId, LocalDateTime requestedAt) {
+        circuitBreakerService.validateServiceAvailability(CircuitBreakerDomain.ORDER, form.getProductIds());
+
         String orderId = IdUtil.generate();
         CompletableFuture.runAsync(() -> {
             if (form.shouldSaveNewAddress())
@@ -57,12 +62,8 @@ public class OrderService {
         CompletableFuture<List<ProductItemResponse>> productFuture =
                 CompletableFuture.supplyAsync(() -> productGrpcClient.findProductItems(productIdQuantityMap.keySet().stream().toList()))
                         .thenApply(products -> {
-                            Map<String, Integer> maybeFetchedQuantityMap = new HashMap<>();
-                            for (ProductItemResponse product : products) {
-                                validProductIsOpen(product.getOrderingOpensAt(), requestedAt);
-                                maybeFetchedQuantityMap.put(product.getId(), product.getQuantity());
-                            }
-                            checkProductStockAndUpdate(productIdQuantityMap, maybeFetchedQuantityMap);
+                            for (ProductItemResponse product : products)
+                                validProductIsAvailableWithCircuitBreaker(product, productIdQuantityMap.get(product.getId()), requestedAt);
                             return products;
                         });
 
@@ -70,7 +71,6 @@ public class OrderService {
             List<Long> brandIds = products.stream().map(ProductItemResponse::getBrandId).collect(Collectors.toList());
             return CompletableFuture.supplyAsync(() -> brandGrpcClient.findBrandInfo(brandIds));
         });
-
 
         CompletableFuture<Order> orderFuture = productFuture.thenCombine(brandInfoFuture, (products, brandInfo) -> {
             Order order = Order.of(orderId, products, productIdQuantityMap, form.receiver(), userId);
@@ -81,7 +81,9 @@ public class OrderService {
         try {
             Order order = orderFuture.get();
             orderRepository.save(order);
-            CompletableFuture.runAsync(() -> cartService.removeOrderedCartItem(form, userId));
+            CompletableFuture
+                    .runAsync(() -> reservedProductStockGlobalCacheRepository.decrementStocks(productIdQuantityMap))
+                    .thenRunAsync(() -> cartService.removeOrderedCartItem(form, userId));
             return ReceiveOrderResponse.of(orderId);
         } catch (Exception e) {
             Throwable cause = e.getCause();
@@ -90,19 +92,24 @@ public class OrderService {
             } else throw new RuntimeException(e);
         }
     }
-
-    private void checkProductStockAndUpdate(Map<String, Integer> productIdRequestedQuantityMap, Map<String, Integer> maybeFetchedQuantityMap) {
-        Map<String, Integer> productIdCachedQuantityMap =
-                reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(
-                        productIdRequestedQuantityMap.keySet().stream().toList(), maybeFetchedQuantityMap);
-
-        for (String productId : productIdCachedQuantityMap.keySet()) {
-            int havingQuantity = productIdCachedQuantityMap.get(productId);
-            int requestedQuantity = productIdRequestedQuantityMap.get(productId);
-            if (requestedQuantity > havingQuantity)
-                throw new OrderException(STOCK_SHORTAGE);
+    private void validProductIsAvailableWithCircuitBreaker(ProductItemResponse product, Integer quantity, LocalDateTime requestedAt) {
+        CircuitBreaker circuitBreaker = circuitBreakerService.getOrCreateCircuitBreaker(CircuitBreakerDomain.ORDER, product.getId());
+        try {
+            CircuitBreaker.decorateCheckedRunnable(circuitBreaker, () -> {
+                validProductIsAvailable(product, quantity, requestedAt);
+            }).run();
+        } catch (Throwable e) {
+            if (e instanceof OrderException)
+                throw (OrderException) e;
+            throw new RuntimeException(e);
         }
-        reservedProductStockGlobalCacheRepository.decrementStock(productIdRequestedQuantityMap);
+    }
+
+    private void validProductIsAvailable(ProductItemResponse productItem, Integer requestedQuantity, LocalDateTime requestedAt) {
+        validProductIsOpen(productItem.getOrderingOpensAt(), requestedAt);
+        Integer havingQuantity = reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(productItem.getId(), productItem.getQuantity());
+        if (requestedQuantity > havingQuantity)
+            throw new OrderException(STOCK_SHORTAGE);
     }
 
     private void validProductIsOpen(String orderingOpensAt, LocalDateTime requestedAt) {
@@ -134,17 +141,17 @@ public class OrderService {
         }
     }
 
-    private void restoreReservedStockIfPresent(Map<String, Integer> productIdRestoredQuantityMap){
+    private void restoreReservedStockIfPresent(Map<String, Integer> productIdRestoredQuantityMap) {
         Map<String, Integer> productIdCachedQuantityMap =
-        reservedProductStockGlobalCacheRepository.getAll(productIdRestoredQuantityMap.keySet().stream().toList());
-        if(productIdCachedQuantityMap.isEmpty())
+                reservedProductStockGlobalCacheRepository.getAll(productIdRestoredQuantityMap.keySet().stream().toList());
+        if (productIdCachedQuantityMap.isEmpty())
             return;
         Map<String, Integer> productIdIncrementQuantityMap = new HashMap<>();
-        for (String productId : productIdCachedQuantityMap.keySet()){
+        for (String productId : productIdCachedQuantityMap.keySet()) {
             int incrementQuantity = productIdRestoredQuantityMap.get(productId);
             productIdIncrementQuantityMap.put(productId, incrementQuantity);
         }
-        reservedProductStockGlobalCacheRepository.incrementStock(productIdIncrementQuantityMap);
+        reservedProductStockGlobalCacheRepository.incrementStocks(productIdIncrementQuantityMap);
     }
 
 
@@ -194,7 +201,6 @@ public class OrderService {
         }
         return orderBrandItemMap.values().stream().toList();
     }
-
 
 
 }

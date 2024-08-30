@@ -15,6 +15,7 @@ import cm.twentysix.order.exception.Error;
 import cm.twentysix.order.exception.OrderException;
 import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,8 @@ class OrderServiceTest {
     private MessageSender messageSender;
     @Mock
     private ReservedProductStockGlobalCacheRepository reservedProductStockGlobalCacheRepository;
+    @Mock
+    private CircuitBreakerService circuitBreakerService;
     @InjectMocks
     private OrderService orderService;
 
@@ -102,9 +105,10 @@ class OrderServiceTest {
                                 .build()
                 )
         );
+        given(circuitBreakerService.getOrCreateCircuitBreaker(any(), anyString())).willReturn(CircuitBreaker.ofDefaults("123456"));
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
-        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyList(), anyMap())).willReturn(reservedProductStockCacheData);
+        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyString(), anyInt())).willReturn(1);
         //when
         ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
@@ -168,9 +172,10 @@ class OrderServiceTest {
                                 .build()
                 )
         );
+        given(circuitBreakerService.getOrCreateCircuitBreaker(any(), anyString())).willReturn(CircuitBreaker.ofDefaults("123456"));
         given(brandGrpcClient.findBrandInfo(anyList())).willReturn(Map.of(1L, BrandProto.BrandInfo.newBuilder()
                 .setName("JAJU").setDeliveryFee(3000).setId(1L).setFreeDeliveryInfimum(500000).build()));
-        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyList(), anyMap())).willReturn(reservedProductStockCacheData);
+        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyString(), anyInt())).willReturn(1);
         //when
         ReceiveOrderResponse response = orderService.receiveOrder(form, 1L, now);
         //then
@@ -213,7 +218,8 @@ class OrderServiceTest {
                                 .build()
                 )
         );
-        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyList(), anyMap())).willReturn(reservedProductStockCacheData);
+        given(circuitBreakerService.getOrCreateCircuitBreaker(any(), anyString())).willReturn(CircuitBreaker.ofDefaults("123456"));
+        given(reservedProductStockGlobalCacheRepository.getOrFetchIfAbsent(anyString(), anyInt())).willReturn(1);
         //when
         OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
         //then
@@ -244,6 +250,7 @@ class OrderServiceTest {
                                 .build()
                 )
         );
+        given(circuitBreakerService.getOrCreateCircuitBreaker(any(), anyString())).willReturn(CircuitBreaker.ofDefaults("123456"));
         //when
         OrderException e = assertThrows(OrderException.class, () -> orderService.receiveOrder(form, 1L, now));
         //then
@@ -357,7 +364,7 @@ class OrderServiceTest {
         orderService.handlePaymentFinalizedEvent(event);
         //then
         assertEquals(order.getStatus(), OrderStatus.PAYMENT_FAIL);
-        verify(reservedProductStockGlobalCacheRepository, times(1)).incrementStock(anyMap());
+        verify(reservedProductStockGlobalCacheRepository, times(1)).incrementStocks(anyMap());
     }
 
     @Test
@@ -418,7 +425,7 @@ class OrderServiceTest {
         assertEquals(productQuantityMap.get("2345"), 1);
         assertEquals(productQuantityMap.get("3456"), 1);
         assertEquals(order.getStatus(), OrderStatus.CANCEL);
-        verify(reservedProductStockGlobalCacheRepository, times(0)).incrementStock(anyMap());
+        verify(reservedProductStockGlobalCacheRepository, times(0)).incrementStocks(anyMap());
     }
 
     @Test
@@ -490,7 +497,7 @@ class OrderServiceTest {
         orderService.returnOrder(1L, 1L);
         //then
         verify(mockOrderA, times(1)).acceptReturn();
-        verify(reservedProductStockGlobalCacheRepository, times(1)).incrementStock(anyMap());
+        verify(reservedProductStockGlobalCacheRepository, times(1)).incrementStocks(anyMap());
     }
 
     @Test

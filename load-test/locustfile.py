@@ -1,38 +1,40 @@
 import random
-from locust import HttpUser, between, task
+from locust import HttpUser, task
+
 
 class WebsiteUser(HttpUser):
-    wait_time = between(1, 2)  # 각 작업 사이의 대기 시간 (1~2초)
     user_count = 0
     MAX_USERS = 10000
-    test_completed = False
 
     def on_start(self):
         WebsiteUser.user_count += 1
         self.user_id = WebsiteUser.user_count  # 1부터 시작하는 유저 ID 할당
         self.order_id = None  # 초기화
 
-        if WebsiteUser.user_count > WebsiteUser.MAX_USERS:
-            self.test_completed = True
-            print("Reached 10,000 users. Stopping the test.")
-            self.environment.runner.quit()
+        # 주문 및 결제 상태 추적 플래그
+        self.has_ordered = False
+        self.has_paid = False
 
     @task
-    def create_order(self):
-        if self.test_completed:
-            return  # Test is completed, so skip the task
+    def sequential_tasks(self):
+        if not self.has_ordered:
+            self.create_order()
+        elif not self.has_paid:
+            self.checkout_and_pay()
 
+    def create_order(self):
         user_id = str(self.user_id)  # HttpUser의 user_id 속성 사용
 
         headers = {
-            "X-USER-ID": user_id  # 헤더에 유저 ID 포함
+            "X-USER-ID": user_id,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
         }
 
         order_response = self.client.post("http://localhost:8084/orders",
                                           json={
                                               "products": [
                                                   {
-                                                      "id": "66c436bb552c0f20d08e947e",
+                                                      "id": "66d12353a6b72914dbd2bf1d",
                                                       "quantity": 1
                                                   }
                                               ],
@@ -54,16 +56,13 @@ class WebsiteUser(HttpUser):
         else:
             print(f"Failed to create order, status code: {order_response.status_code}")
 
-    @task
     def checkout_and_pay(self):
-        if self.test_completed:
-            return  # Test is completed, so skip the task
-
         if self.order_id:
             user_id = str(self.user_id)  # HttpUser의 user_id 속성 사용
 
             headers = {
-                "X-USER-ID": user_id  # 헤더에 유저 ID 포함
+                "X-USER-ID": user_id,
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
             }
 
             # 임의로 실패를 발생시킬 확률 (20%)
@@ -89,5 +88,6 @@ class WebsiteUser(HttpUser):
                 print(f"Checkout failed for order ID: {self.order_id}")
         else:
             print("Order ID not available for checkout and payment")
+        self.has_paid = True
 
 

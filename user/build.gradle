@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'com.epages.restdocs-api-spec' version '0.18.2'
 }
 
 group = 'cm.twentysix'
@@ -47,6 +48,8 @@ dependencies {
 	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'net.andreinc:mockneat:0.4.8'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.18.2'
 }
 
 dependencyManagement {
@@ -55,7 +58,16 @@ dependencyManagement {
 	}
 }
 
+openapi3 {
+	title = 'User API'
+	description = 'API for user service'
+	server = 'https://localhost:8080'
+	version = 'v1'
+	format = 'yaml'
+}
+
 tasks.named('test') {
+	outputs.dir file('build/generated-snippets')
 	useJUnitPlatform()
 }
 

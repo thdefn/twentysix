@@ -3,7 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'com.google.protobuf' version '0.9.4'
-	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'com.epages.restdocs-api-spec' version '0.18.2'
 }
 
 group = 'cm.twentysix'
@@ -52,6 +52,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-protobuf'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.18.2'
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 	implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
@@ -79,14 +80,18 @@ protobuf {
 	}
 }
 
-
-asciidoctor {
-	sourceDir = file('src/docs/asciidoc')
-	outputDir = file('build/docs/asciidoc')
+openapi3 {
+	title = 'Order API'
+	description = 'API for order service'
+	server = 'https://localhost:8080'
+	version = 'v1'
+	format = 'yaml'
 }
 
 
+
 tasks.named('test') {
+	outputs.dir file('build/generated-snippets')
 	useJUnitPlatform()
 }
 

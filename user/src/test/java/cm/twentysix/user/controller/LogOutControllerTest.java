@@ -1,23 +1,32 @@
 package cm.twentysix.user.controller;
 
+import cm.twentysix.user.exception.Error;
+import cm.twentysix.user.exception.UserException;
 import cm.twentysix.user.service.LogOutService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LogOutController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class LogOutControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -38,7 +47,10 @@ class LogOutControllerTest {
                         .param("type", "ALL")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -52,7 +64,10 @@ class LogOutControllerTest {
                         .cookie(cookie)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -67,7 +82,30 @@ class LogOutControllerTest {
                         .param("type", "ALLL")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
+    }
+
+    @Test
+    @DisplayName("로그아웃 실패-EMPTY_REFRESH_TOKEN")
+    void logout_fail_EMPTY_REFRESH_TOKEN() throws Exception {
+        //given
+        Cookie cookie = new Cookie("refreshToken", null);
+        doThrow(new UserException(Error.EMPTY_REFRESH_TOKEN))
+                .when(logOutService).logout(any(), anyString());
+        //when
+        //then
+        mockMvc.perform(get("/users/logout")
+                        .cookie(cookie)
+                        .param("type", "ALLL")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
     }
 
 }

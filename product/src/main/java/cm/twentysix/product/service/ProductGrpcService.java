@@ -64,7 +64,7 @@ public class ProductGrpcService extends ProductServiceGrpc.ProductServiceImplBas
     public void getProductItems(ProductItemsRequest request, StreamObserver<ProductItemsResponse> responseObserver) throws ProductException {
         try {
             List<Product> products = productRepository.findByIdInAndIsDeletedFalse(new HashSet<>(request.getIdsList()));
-            if (products.isEmpty())
+            if (products.size() < request.getIdsCount())
                 throw new ProductException(PRODUCT_NOT_FOUND);
             CompletableFuture.runAsync(() -> productItemResponseGlobalCacheRepository.putAll(products));
             List<ProductItemResponse> productItemResponses = products.stream().map(product -> ProductItemResponse.newBuilder()

@@ -139,8 +139,8 @@ class PaymentServiceTest {
                 .willReturn(Optional.of(payment));
         given(productGrpcClient.checkProductStockRequest(any(), anyString()))
                 .willReturn(ProductProto.CheckProductStockResponse.newBuilder()
-                                .setIsSuccess(true)
-                                .build());
+                        .setIsSuccess(true)
+                        .build());
         PaymentResponse response = PaymentResponse.builder()
                 .paymentKey("any-payment-key")
                 .totalAmount(10000)
@@ -185,6 +185,18 @@ class PaymentServiceTest {
         PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
         //then
         assertEquals(e.getError(), Error.BLOCKED_ORDER);
+    }
+
+    @Test
+    void confirm_fail_NOT_FOUND_PAYMENT() {
+        //given
+        PaymentForm form = new PaymentForm("any-order-id", "10000", "any-payment-key");
+        given(paymentRepository.findByOrderId(anyString()))
+                .willReturn(Optional.empty());
+        //when
+        PaymentException e = assertThrows(PaymentException.class, () -> paymentService.confirm(form));
+        //then
+        assertEquals(e.getError(), Error.NOT_FOUND_PAYMENT);
     }
 
     @Test

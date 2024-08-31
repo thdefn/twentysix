@@ -24,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +67,7 @@ class ProductServiceTest {
                     .build()
     );
 
-    String orderingBeginAt = LocalDateTime.of(2024,12,12,12,12,12).toString();
+    String orderingBeginAt = LocalDateTime.of(2024, 12, 12, 12, 12, 12).toString();
 
     @Test
     void createProduct_success() {
@@ -102,6 +101,19 @@ class ProductServiceTest {
         assertEquals(product.getProductBrand().getId(), 1L);
         assertEquals(product.getProductBrand().getName(), "뉴발란스");
         assertTrue(LocalDateTime.now().isAfter(product.getOrderingOpensAt()));
+    }
+
+    @Test
+    void createProduct_fail_NOT_PRODUCT_ADMIN() {
+        //given
+        MultipartFile thumbnail = new MockMultipartFile("abc.jpg", "abcd".getBytes());
+        MultipartFile descriptionImage = new MockMultipartFile("abc.jpg", "abcd".getBytes());
+        CreateProductForm form = new CreateProductForm(1L, "123edsf3fdsfdsa3560fdg", "NBGCEFW701 / 글로시 리본 더플백 (VIORET)", "(주)이랜드월드 뉴발란스 사업부", "중국", "뉴발란스 고객 상담실 (080-999-0456)", 69900, 200, 0, 2500, null);
+        given(brandGrpcClient.getBrandDetail(anyLong())).willReturn(BrandProto.BrandDetailResponse.newBuilder().setId(1L).setName("뉴발란스").setUserId(2L).build());
+        //when
+        ProductException e = assertThrows(ProductException.class, () -> productService.createProduct(thumbnail, descriptionImage, form, 1L));
+        //then
+        assertEquals(e.getError(), Error.NOT_PRODUCT_ADMIN);
     }
 
     @Test

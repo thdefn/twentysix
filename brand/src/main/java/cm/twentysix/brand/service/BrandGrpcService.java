@@ -75,7 +75,11 @@ public class BrandGrpcService extends BrandServiceGrpc.BrandServiceImplBase {
     @Override
     public void getBrandInfos(BrandProto.BrandInfosRequest request, StreamObserver<BrandProto.BrandInfosResponse> responseObserver) {
         try {
-            List<BrandProto.BrandInfo> brandInfos = brandRepository.findByIdIn(request.getIdsList())
+            List<Brand> brands = brandRepository.findByIdIn(request.getIdsList());
+            if (brands.size() < request.getIdsCount())
+                throw new BrandException(Error.BRAND_NOT_FOUND);
+
+            List<BrandProto.BrandInfo> brandInfos = brands
                     .stream().map(brand -> BrandProto.BrandInfo.newBuilder()
                             .setId(brand.getId())
                             .setName(brand.getName())

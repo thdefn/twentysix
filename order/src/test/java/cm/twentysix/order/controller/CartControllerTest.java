@@ -17,13 +17,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static cm.twentysix.order.exception.Error.ITEM_DOES_NOT_EXIST;
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,7 +54,7 @@ class CartControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -76,7 +76,7 @@ class CartControllerTest {
                         jsonPath("$.message.id").value("아이디는 비어있을 수 없습니다."),
                         jsonPath("$.message.quantity").value("수량은 1개 이상입니다.")
                 )
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -96,7 +96,7 @@ class CartControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -116,7 +116,7 @@ class CartControllerTest {
                 .andDo(print())
                 .andExpectAll(status().isBadRequest(),
                         jsonPath("$.message.productIds").exists())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -138,7 +138,7 @@ class CartControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -157,7 +157,7 @@ class CartControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -178,7 +178,7 @@ class CartControllerTest {
                 .andExpectAll(status().isBadRequest(),
                         jsonPath("$.message.id").value("아이디는 비어있을 수 없습니다."),
                         jsonPath("$.message.quantity").value("수량은 1000개 이하입니다."))
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -200,7 +200,7 @@ class CartControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -239,7 +239,7 @@ class CartControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }

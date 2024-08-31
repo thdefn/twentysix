@@ -4,20 +4,24 @@ import cm.twentysix.payment.dto.RequiredPaymentResponse;
 import cm.twentysix.payment.service.PaymentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = CheckoutController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class CheckoutControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -48,7 +52,10 @@ class CheckoutControllerTest {
                 .andExpect(model().attribute("userId", 1L))
                 .andExpect(model().attribute("orderName", "귀여운 데님 외 1건"))
                 .andExpect(model().attribute("isBlocked", false))
-                .andExpect(view().name("checkout"));
+                .andExpect(view().name("checkout"))
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -63,7 +70,10 @@ class CheckoutControllerTest {
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -79,7 +89,10 @@ class CheckoutControllerTest {
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())));
     }
 
 }

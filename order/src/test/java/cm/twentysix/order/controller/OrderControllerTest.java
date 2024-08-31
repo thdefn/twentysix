@@ -23,10 +23,9 @@ import static cm.twentysix.order.exception.Error.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -60,7 +59,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -89,7 +88,7 @@ class OrderControllerTest {
                         jsonPath("$.message.['receiver.name']").value("이름의 형식이 아닙니다."),
                         jsonPath("$.message.['receiver.phone']").value("전화 번호 형식이 아닙니다.")
                 )
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -114,7 +113,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isConflict())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -140,7 +139,7 @@ class OrderControllerTest {
                 .andDo(print())
                 .andExpect(status().is4xxClientError()
                 )
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -156,7 +155,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -174,7 +173,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -192,7 +191,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -208,7 +207,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -227,7 +226,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -246,7 +245,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }
@@ -286,7 +285,7 @@ class OrderControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("{class-name}/{method-name}",
+                .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())));
     }

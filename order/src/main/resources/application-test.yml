@@ -66,3 +66,23 @@ grpc:
 logging:
   level:
     org.springframework.cloud.stream: DEBUG
+
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 50
+        minimumNumberOfCalls: 50
+        failureRateThreshold: 10
+        wait-duration-in-open-state: 30s
+        automatic-transition-from-open-to-half-open-enabled: true
+        permittedNumberOfCallsInHalfOpenState: 3
+        record-exceptions:
+          - java.lang.RuntimeException
+management:
+  health:
+    circuit breakers:
+      enabled: true

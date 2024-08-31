@@ -1,5 +1,6 @@
 package cm.twentysix.order.exception;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import jakarta.validation.ConstraintViolationException;
@@ -63,6 +64,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CircuitBreakerException.class)
     public ResponseEntity<ExceptionResponse<String>> handleCircuitBreakerException(CircuitBreakerException e) {
+        log.info(LOG_FORMAT, e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE.name(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ExceptionResponse<>(HttpStatus.SERVICE_UNAVAILABLE.name(), e.getMessage()));
+    }
+
+    @ExceptionHandler(CallNotPermittedException.class)
+    public ResponseEntity<ExceptionResponse<String>> handleCallNotPermittedException(CallNotPermittedException e) {
         log.info(LOG_FORMAT, e.getClass().getSimpleName(), HttpStatus.SERVICE_UNAVAILABLE.name(), e.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(new ExceptionResponse<>(HttpStatus.SERVICE_UNAVAILABLE.name(), e.getMessage()));

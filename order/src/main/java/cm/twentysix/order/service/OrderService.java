@@ -15,6 +15,7 @@ import cm.twentysix.order.exception.Error;
 import cm.twentysix.order.exception.OrderException;
 import cm.twentysix.order.messaging.MessageSender;
 import cm.twentysix.order.util.IdUtil;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,18 +90,22 @@ public class OrderService {
             Throwable cause = e.getCause();
             if (cause instanceof OrderException) {
                 throw (OrderException) cause;
+            }
+            if (cause instanceof CallNotPermittedException) {
+                throw (CallNotPermittedException) cause;
             } else throw new RuntimeException(e);
         }
     }
+
     private void validProductIsAvailableWithCircuitBreaker(ProductItemResponse product, Integer quantity, LocalDateTime requestedAt) {
         CircuitBreaker circuitBreaker = circuitBreakerService.getOrCreateCircuitBreaker(CircuitBreakerDomain.ORDER, product.getId());
         try {
             CircuitBreaker.decorateCheckedRunnable(circuitBreaker, () -> {
                 validProductIsAvailable(product, quantity, requestedAt);
             }).run();
+        } catch (CallNotPermittedException | OrderException e) {
+            throw e;
         } catch (Throwable e) {
-            if (e instanceof OrderException)
-                throw (OrderException) e;
             throw new RuntimeException(e);
         }
     }
@@ -125,6 +130,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(Error.PROCESSING_ORDER_NOT_FOUND));
 
         order.checkFail();
+        restoreReservedStockIfPresent(order.getProductIdQuantityMap());
     }
 
     @Transactional

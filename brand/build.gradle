@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.3.2'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.google.protobuf' version '0.9.4'
+    id 'com.epages.restdocs-api-spec' version '0.18.2'
 }
 
 group = 'cm.twentysix'
@@ -39,6 +40,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.hibernate:hibernate-validator:8.0.1.Final'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.18.2'
 }
 
 protobuf {
@@ -57,7 +60,16 @@ protobuf {
     }
 }
 
+openapi3 {
+    title = 'Brand API'
+    description = 'API for brand service'
+    server = 'https://localhost:8080'
+    version = 'v1'
+    format = 'yaml'
+}
+
 tasks.named('test') {
+    outputs.dir file('build/generated-snippets')
     useJUnitPlatform()
 }
 

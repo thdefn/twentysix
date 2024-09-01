@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = EmailAuthController.class)
-@AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureRestDocs
 class EmailAuthControllerTest {
     @Autowired

@@ -82,8 +82,6 @@ protobuf {
 
 openapi3 {
 	title = 'Order API'
-	description = 'API for order service'
-	server = 'https://localhost:8080'
 	version = 'v1'
 	format = 'yaml'
 }

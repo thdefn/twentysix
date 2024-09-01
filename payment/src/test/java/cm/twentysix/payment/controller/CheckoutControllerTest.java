@@ -8,12 +8,16 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -44,6 +48,7 @@ class CheckoutControllerTest {
         mockMvc.perform(get("/checkout/{orderId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -55,7 +60,10 @@ class CheckoutControllerTest {
                 .andExpect(view().name("checkout"))
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -68,12 +76,16 @@ class CheckoutControllerTest {
                         .param("message", "Order failed due to insufficient stock")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -87,12 +99,16 @@ class CheckoutControllerTest {
                         .param("amount", "10000")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
 }

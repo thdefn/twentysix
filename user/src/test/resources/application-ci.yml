@@ -1,0 +1,7 @@
+mailgun:
+  url: http://localhost:8080
+  key: test-mailgun-key
+encrypt:
+  key: test-encrypt-key
+jwt:
+  key: abcdefghijklmnopqrstuvwxyzabcdef

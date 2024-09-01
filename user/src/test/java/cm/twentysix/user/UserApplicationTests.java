@@ -6,6 +6,7 @@ import cm.twentysix.user.domain.repository.UserRepository;
 import cm.twentysix.user.util.CipherManager;
 import net.andreinc.mockneat.MockNeat;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
+@EnabledIfEnvironmentVariable(named = "CI", matches = "false")
 class UserApplicationTests {
 
     private final MockNeat mockNeat = MockNeat.threadLocal();

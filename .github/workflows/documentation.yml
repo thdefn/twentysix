@@ -1,0 +1,82 @@
+name: API-Documentation
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Input branch info you want to generate'
+        required: true
+        default: 'develop'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code - ${{github.event.inputs.branch}}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: get order API doc
+        env:
+          CI: true
+        run:  |
+          ./gradlew :order:clean :order:openapi3
+
+      - name: get brand API doc
+        env:
+          CI: true
+        run: |
+          ./gradlew :brand:clean :brand:openapi3
+
+      - name: get product API doc
+        env:
+          CI: true
+        run: |
+          ./gradlew :product:clean :product:openapi3
+
+      - name: get payment API doc
+        env:
+          CI: true
+        run: |
+          ./gradlew :payment:clean :payment:openapi3
+
+      - name: get user API doc
+        env:
+          CI: true
+        run: |
+          ./gradlew :user:clean :user:openapi3
+
+      - name: generate document html
+        run: |
+          cp order/build/api-spec/openapi3.yaml ./order.yaml
+          cp brand/build/api-spec/openapi3.yaml ./brand.yaml
+          cp product/build/api-spec/openapi3.yaml ./product.yaml
+          cp payment/build/api-spec/openapi3.yaml ./payment.yaml
+          cp user/build/api-spec/openapi3.yaml ./user.yaml
+          redocly join order.yaml --prefix-tags-with-filename=true brand.yaml --prefix-tags-with-filename=true product.yaml --prefix-tags-with-filename=true payment.yaml --prefix-tags-with-filename=true user.yaml --prefix-tags-with-filename=true --output join.yaml
+          redocly bundle join.yaml --output api-docs.yaml --ext yaml
+          yq -i '.info.title = "twenty-six API DOCS"' api-docs.yaml
+          yq -i '.info.description = "Please contact twenty-six backend if there are any issues with API"' api-docs.yaml
+          redocly build-docs api-docs.yaml --output api-docs.html
+
+      - name: prepare deployment directory
+        run: |
+          mkdir -p ./api-docs
+          mv api-docs.html ./api-docs/
+
+      - name: deploy to github pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./api-docs
+          keep_files: false
+          
+          

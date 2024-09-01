@@ -57,15 +57,15 @@ GET http://localhost:8083/products
 <> 2024-08-19T203323.200.json
 
 ###
-GET http://localhost:8083/products/66c437d4552c0f20d08e947f/stock
+GET http://localhost:8083/products/66d12353a6b72914dbd2bf1d/stock
 
 ###
-GET http://localhost:8083/products/66c437d4552c0f20d08e947f
+GET http://localhost:8083/products/66d12353a6b72914dbd2bf1d
 
 
 ###
-DELETE http://localhost:8083/products/66cf02164e0ebf23b67ea040
-X-USER-ID: 11
+DELETE http://localhost:8083/products/66c436bb552c0f20d08e947e
+X-USER-ID: 6
 
 ### 주문
 
@@ -78,7 +78,11 @@ X-USER-ID: 11
 {
   "products": [
     {
-      "id" : "66c437d4552c0f20d08e947f",
+      "id" : "66d123dfa6b72914dbd2bf1e",
+      "quantity" : 1
+    },
+    {
+      "id" : "66d12353a6b72914dbd2bf1d",
       "quantity" : 1
     }
   ],

@@ -28,6 +28,7 @@ jobs:
         env:
           CI: true
         run:  |
+          chmod +x ./gradlew 
           ./gradlew :order:clean :order:openapi3
 
       - name: get brand API doc

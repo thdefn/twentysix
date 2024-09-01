@@ -62,7 +62,6 @@ protobuf {
 
 openapi3 {
     title = 'Brand API'
-    server = 'https://localhost:8080'
     version = 'v1'
     format = 'yaml'
 }

@@ -78,7 +78,7 @@ jobs:
       - name: update document info
         uses: devorbitus/yq-action-output@v1.1
         with:
-          cmd: yq eval -i '.info.title = "twenty-six API DOCS" | .info.description = "Please contact twenty-six backend if there are any issues with API"' api-docs.yaml
+          cmd: yq eval -i '.info.title = "twenty-six API DOCS" | .info.description = "Please contact twenty-six backend if there are any issues with API" | .servers[0].url = "http://localhost:8080"' api-docs.yaml
 
       - name: redoc build
         uses: DeltaLaboratory/redocly-cli-action@v1.0.0

@@ -1,3 +1,6 @@
+### API-DOCS
+[**📝 click me**](https://thdefn.github.io/twentysix/api-docs.html)
+
 ### Infrastructure Setup
 `docker-compose -f ./infra/docker-compose-infra.yml up -d`
 

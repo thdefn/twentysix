@@ -60,7 +60,6 @@ dependencyManagement {
 
 openapi3 {
 	title = 'User API'
-	server = 'https://localhost:8080'
 	version = 'v1'
 	format = 'yaml'
 }

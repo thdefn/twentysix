@@ -84,6 +84,7 @@ openapi3 {
 tasks.named('test') {
     outputs.dir file('build/generated-snippets')
     useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
 }
 
 tasks.register("prepareKotlinBuildScriptModel") {}

@@ -26,32 +26,32 @@ jobs:
 
       - name: get order API doc
         env:
-          CI: true
+          SPRING_PROFILES_ACTIVE: ci
         run:  |
           chmod +x ./gradlew 
           ./gradlew :order:clean :order:openapi3
 
       - name: get brand API doc
         env:
-          CI: true
+          SPRING_PROFILES_ACTIVE: ci
         run: |
           ./gradlew :brand:clean :brand:openapi3
 
       - name: get product API doc
         env:
-          CI: true
+          SPRING_PROFILES_ACTIVE: ci
         run: |
           ./gradlew :product:clean :product:openapi3
 
       - name: get payment API doc
         env:
-          CI: true
+          SPRING_PROFILES_ACTIVE: ci
         run: |
           ./gradlew :payment:clean :payment:openapi3
 
       - name: get user API doc
         env:
-          CI: true
+          SPRING_PROFILES_ACTIVE: ci
         run: |
           ./gradlew :user:clean :user:openapi3
 

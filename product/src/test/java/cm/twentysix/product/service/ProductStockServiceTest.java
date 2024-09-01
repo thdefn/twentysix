@@ -1,13 +1,11 @@
 package cm.twentysix.product.service;
 
-import cm.twentysix.product.cache.global.ProductItemResponseGlobalCacheRepository;
 import cm.twentysix.product.domain.model.Product;
 import cm.twentysix.product.domain.model.ProductBrand;
 import cm.twentysix.product.domain.repository.ProductRepository;
 import cm.twentysix.product.dto.ProductStockResponse;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
-import cm.twentysix.product.messaging.MessageSender;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

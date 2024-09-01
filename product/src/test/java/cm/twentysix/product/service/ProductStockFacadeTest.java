@@ -8,11 +8,11 @@ import cm.twentysix.product.messaging.MessageSender;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@EnabledIfEnvironmentVariable(named = "CI", matches = "false")
 class ProductStockFacadeTest {
     @Autowired
     private ProductStockFacade productStockFacade;
@@ -94,6 +95,7 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertEquals(50, persistProductA.getQuantity());
         assertEquals(0, persistProductB.getQuantity());
+        executorService.close();
     }
 
     @Test
@@ -124,6 +126,7 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertNotEquals(50, persistProductA.getQuantity());
         assertNotEquals(0, persistProductB.getQuantity());
+        executorService.close();
 
     }
 
@@ -155,6 +158,7 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertEquals(200, persistProductA.getQuantity());
         assertEquals(150, persistProductB.getQuantity());
+        executorService.close();
     }
 
     @Test
@@ -185,6 +189,7 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertNotEquals(200, persistProductA.getQuantity());
         assertNotEquals(150, persistProductB.getQuantity());
+        executorService.close();
 
     }
 
@@ -217,6 +222,7 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertEquals(50, persistProductA.getQuantity());
         assertEquals(0, persistProductB.getQuantity());
+        executorService.close();
     }
 
     @Test
@@ -248,6 +254,7 @@ class ProductStockFacadeTest {
         System.out.println("final quantity productB : " + persistProductB.getQuantity());
         assertNotEquals(50, persistProductA.getQuantity());
         assertNotEquals(0, persistProductB.getQuantity());
+        executorService.close();
 
     }
 

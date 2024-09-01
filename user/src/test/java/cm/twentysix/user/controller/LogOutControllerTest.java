@@ -19,8 +19,13 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.relaxedQueryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,6 +48,7 @@ class LogOutControllerTest {
         //when
         //then
         mockMvc.perform(get("/users/logout")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .cookie(cookie)
                         .param("type", "ALL")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -50,24 +56,40 @@ class LogOutControllerTest {
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization")),
+                        relaxedQueryParameters(
+                                parameterWithName("type").optional().description("logout type is ALL or SINGLE")
+                        )
+
+                ));
     }
 
     @Test
-    @DisplayName("로그아웃 성공-타입을 명시하지 않을 경우")
-    void logout_success_hasNoType() throws Exception {
+    @DisplayName("로그아웃 성공")
+    void logout_success_WhenSingleType() throws Exception {
         //given
         Cookie cookie = new Cookie("refreshToken", "anytoken");
         //when
         //then
         mockMvc.perform(get("/users/logout")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .cookie(cookie)
+                        .param("type", "SINGLE")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization")),
+                        relaxedQueryParameters(
+                                parameterWithName("type").optional().description("logout type is ALL or SINGLE")
+                        )
+
+                ));
     }
 
     @Test
@@ -78,6 +100,7 @@ class LogOutControllerTest {
         //when
         //then
         mockMvc.perform(get("/users/logout")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .cookie(cookie)
                         .param("type", "ALLL")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -85,7 +108,11 @@ class LogOutControllerTest {
                 .andExpect(status().isBadRequest())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        relaxedQueryParameters(
+                                parameterWithName("type").optional().description("login type is ALL or SINGLE")
+                        )
+                ));
     }
 
     @Test
@@ -99,13 +126,18 @@ class LogOutControllerTest {
         //then
         mockMvc.perform(get("/users/logout")
                         .cookie(cookie)
-                        .param("type", "ALLL")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                        .param("type", "ALL")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        relaxedQueryParameters(
+                                parameterWithName("type").optional().description("logout type is ALL or SINGLE")
+                        )
+                ));
     }
 
 }

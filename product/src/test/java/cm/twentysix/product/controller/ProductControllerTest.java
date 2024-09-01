@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,8 +24,13 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.relaxedQueryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,12 +62,17 @@ class ProductControllerTest {
                         .file(new MockMultipartFile("descriptionImage", "image.jpg",
                                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -79,7 +90,9 @@ class ProductControllerTest {
                         .file(new MockMultipartFile("descriptionImage", "image.jpg",
                                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpectAll(status().isBadRequest(),
                         jsonPath("$.message.brandId").value("브랜드 id는 비어 있을 수 없습니다."),
@@ -96,7 +109,10 @@ class ProductControllerTest {
                 )
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -116,12 +132,17 @@ class ProductControllerTest {
                         .file(new MockMultipartFile("descriptionImage", "image.jpg",
                                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -143,12 +164,17 @@ class ProductControllerTest {
                             return request;
                         })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -170,7 +196,9 @@ class ProductControllerTest {
                             return request;
                         })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpectAll(status().isBadRequest(),
                         jsonPath("$.message.categoryId").value("카테고리 id는 비어 있을 수 없습니다."),
@@ -186,7 +214,10 @@ class ProductControllerTest {
                 )
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                        ));
     }
 
     @Test
@@ -210,12 +241,17 @@ class ProductControllerTest {
                             return request;
                         })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -239,12 +275,17 @@ class ProductControllerTest {
                             return request;
                         })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -268,12 +309,17 @@ class ProductControllerTest {
                             return request;
                         })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
 
@@ -284,7 +330,9 @@ class ProductControllerTest {
         //then
         mockMvc.perform(delete("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -298,12 +346,17 @@ class ProductControllerTest {
         //then
         mockMvc.perform(delete("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer token")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
 
@@ -316,12 +369,17 @@ class ProductControllerTest {
         //then
         mockMvc.perform(delete("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -333,12 +391,17 @@ class ProductControllerTest {
         //then
         mockMvc.perform(delete("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-USER-ID", 1L))
+                        .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
+                )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -380,12 +443,17 @@ class ProductControllerTest {
         mockMvc.perform(get("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .optional()
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -398,6 +466,7 @@ class ProductControllerTest {
         mockMvc.perform(get("/products/{productId}", "abcdefkghaskfldlm123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
@@ -444,12 +513,21 @@ class ProductControllerTest {
                         .param("page", "0")
                         .param("size", "26")
                         .header("X-USER-ID", 1L)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .optional()
+                                .description("Bearer token for authorization")),
+                        relaxedQueryParameters(
+                                parameterWithName("page").optional().description("number of index"),
+                                parameterWithName("size").optional().description("number of items per page")
+                        )
+                ));
     }
 
 

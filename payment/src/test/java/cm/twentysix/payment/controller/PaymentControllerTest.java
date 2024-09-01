@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,6 +21,9 @@ import static cm.twentysix.payment.exception.Error.*;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -46,14 +50,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -64,7 +71,7 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
@@ -74,7 +81,10 @@ class PaymentControllerTest {
                         jsonPath("$.message.paymentKey").value("payment key 는 비어있을 수 없습니다.")
                 ).andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
 
@@ -89,14 +99,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -110,14 +123,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -131,14 +147,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -152,14 +171,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -173,11 +195,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -191,14 +219,17 @@ class PaymentControllerTest {
         //then
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("SESSION_ID", "hihihiih")
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
 

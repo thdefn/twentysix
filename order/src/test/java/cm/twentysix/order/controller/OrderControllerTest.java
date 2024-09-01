@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,8 +25,13 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.relaxedQueryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,6 +82,7 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8))
                         .header("X-USER-ID", 1L)
@@ -90,7 +97,10 @@ class OrderControllerTest {
                 )
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -107,6 +117,7 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8))
                         .header("X-USER-ID", 1L)
@@ -115,7 +126,10 @@ class OrderControllerTest {
                 .andExpect(status().isConflict())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -132,6 +146,7 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .content(objectMapper.writeValueAsString(form)
                                 .getBytes(StandardCharsets.UTF_8))
                         .header("X-USER-ID", 1L)
@@ -141,7 +156,10 @@ class OrderControllerTest {
                 )
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -151,13 +169,17 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders/{orderId}/cancel", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -169,13 +191,17 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders/{orderId}/cancel", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -187,13 +213,17 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders/{orderId}/cancel", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -203,13 +233,17 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders/{orderId}/return", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -222,13 +256,17 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders/{orderId}/return", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -241,13 +279,17 @@ class OrderControllerTest {
         //then
         mockMvc.perform(post("/orders/{orderId}/return", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test
@@ -281,13 +323,23 @@ class OrderControllerTest {
         //then
         mockMvc.perform(get("/orders/me")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                         .header("X-USER-ID", 1L)
+                        .param("page", "0")
+                        .param("size", "20")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION)
+                                .description("Bearer token for authorization")),
+                        relaxedQueryParameters(
+                                parameterWithName("page").optional().description("number of index"),
+                                parameterWithName("size").optional().description("number of items per page")
+                        )
+                ));
     }
 
 

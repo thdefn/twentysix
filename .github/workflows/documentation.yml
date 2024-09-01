@@ -9,7 +9,7 @@ on:
         default: 'develop'
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -90,11 +90,28 @@ jobs:
           mkdir -p ./api-docs
           mv api-docs.html ./api-docs/
 
-      - name: deploy to github pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: configure github page
+        uses: actions/configure-pages@v3
+
+      - name: upload github page
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./api-docs
-          keep_files: false
+          path:  './api-docs'
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy to github page
+        id: deployment
+        uses: actions/deploy-pages@v1
           
           

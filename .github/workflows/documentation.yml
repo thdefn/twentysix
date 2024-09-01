@@ -69,10 +69,9 @@ jobs:
           args: 'join *.yaml -output join.yaml && bundle join.yaml --output api-docs.yaml --ext yaml'
 
       - name: update document info
-        uses: mikefarah/yq@master
-        run: | 
-          yq -i '.info.title = "twenty-six API DOCS"' api-docs.yaml
-          yq -i '.info.description = "Please contact twenty-six backend if there are any issues with API"' api-docs.yaml
+        uses: devorbitus/yq-action-output@v1.1
+        with:
+          cmd: yq eval -i '.info.title = "twenty-six API DOCS" | .info.description = "Please contact twenty-six backend if there are any issues with API"' api-docs.yaml
 
       - name: redoc build
         uses: DeltaLaboratory/redocly-cli-action@v1.0.0

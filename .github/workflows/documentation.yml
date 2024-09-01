@@ -9,7 +9,7 @@ on:
         default: 'develop'
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -63,16 +63,22 @@ jobs:
           cp payment/build/api-spec/openapi3.yaml ./payment.yaml
           cp user/build/api-spec/openapi3.yaml ./user.yaml
 
-      - name: redoc join
+      - name: redoc Join API Docs
         uses: DeltaLaboratory/redocly-cli-action@v1.0.0
         with:
-          args: 'join *.yaml -output join.yaml && bundle join.yaml --output api-docs.yaml --ext yaml'
+          args: |
+            join order.yaml --prefix-tags-with-filename=true brand.yaml --prefix-tags-with-filename=true product.yaml --prefix-tags-with-filename=true payment.yaml --prefix-tags-with-filename=true user.yaml --prefix-tags-with-filename=true --output join.yaml
+
+      - name: redoc Bundle API Docs
+        uses: DeltaLaboratory/redocly-cli-action@v1.0.0
+        with:
+          args: |
+            bundle join.yaml --output api-docs.yaml --ext yaml
 
       - name: update document info
-        uses: mikefarah/yq@master
-        run: | 
-          yq -i '.info.title = "twenty-six API DOCS"' api-docs.yaml
-          yq -i '.info.description = "Please contact twenty-six backend if there are any issues with API"' api-docs.yaml
+        uses: devorbitus/yq-action-output@v1.1
+        with:
+          cmd: yq eval -i '.info.title = "twenty-six API DOCS" | .info.description = "Please contact twenty-six backend if there are any issues with API"' api-docs.yaml
 
       - name: redoc build
         uses: DeltaLaboratory/redocly-cli-action@v1.0.0
@@ -84,11 +90,28 @@ jobs:
           mkdir -p ./api-docs
           mv api-docs.html ./api-docs/
 
-      - name: deploy to github pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: configure github page
+        uses: actions/configure-pages@v3
+
+      - name: upload github page
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./api-docs
-          keep_files: false
+          path:  './api-docs'
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy to github page
+        id: deployment
+        uses: actions/deploy-pages@v1
           
           

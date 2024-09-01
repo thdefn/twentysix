@@ -63,10 +63,17 @@ jobs:
           cp payment/build/api-spec/openapi3.yaml ./payment.yaml
           cp user/build/api-spec/openapi3.yaml ./user.yaml
 
-      - name: redoc join
+      - name: redoc Join API Docs
         uses: DeltaLaboratory/redocly-cli-action@v1.0.0
         with:
-          args: 'join *.yaml -output join.yaml && bundle join.yaml --output api-docs.yaml --ext yaml'
+          args: |
+            join order.yaml --prefix-tags-with-filename=true brand.yaml --prefix-tags-with-filename=true product.yaml --prefix-tags-with-filename=true payment.yaml --prefix-tags-with-filename=true user.yaml --prefix-tags-with-filename=true --output join.yaml
+
+      - name: redoc Bundle API Docs
+        uses: DeltaLaboratory/redocly-cli-action@v1.0.0
+        with:
+          args: |
+            bundle join.yaml --output api-docs.yaml --ext yaml
 
       - name: update document info
         uses: devorbitus/yq-action-output@v1.1

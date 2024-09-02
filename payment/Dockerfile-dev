@@ -1,0 +1,15 @@
+FROM openjdk:22
+ARG JAR_FILE=payment/build/libs/payment-0.0.1-SNAPSHOT.jar
+
+ARG DB_URL
+ARG DB_PASSWORD
+ARG KAFKA_BROKERS
+ARG TOSS_PAYMENT_SECRET
+
+ENV DB_URL=${DB_URL}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV KAFKA_BROKERS=${KAFKA_BROKERS}
+ENV TOSS_PAYMENT_SECRET=${TOSS_PAYMENT_SECRET}
+
+COPY ${JAR_FILE} /app.jar
+ENTRYPOINT ["java","-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=dev","-jar","/app.jar"]

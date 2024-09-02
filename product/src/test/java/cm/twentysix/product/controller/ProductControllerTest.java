@@ -334,7 +334,13 @@ class ProductControllerTest {
                         .header(AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.")
                 )
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("{methodName}",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName(AUTHORIZATION)
+                                .description("Bearer token for authorization"))
+                ));
     }
 
     @Test

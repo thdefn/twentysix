@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: shipping-job
+spec:
+  schedule: "0 16 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: shipping
+              image: 26cm/shipping-job:latest
+          restartPolicy: OnFailure

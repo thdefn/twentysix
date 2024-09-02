@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  order-cancel-job:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: ./order-cancel/Dockerfile
+    image: 26cm/order-cancel-job:latest
+    environment:
+      - DB_URL=${ORDER_DB_URL}
+      - DB_PASSWORD=${DB_PASSWORD}
+  order-return-job:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: ./order-return/Dockerfile
+    image: 26cm/order-return-job:latest
+    environment:
+      - DB_URL=${ORDER_DB_URL}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+  shipping-job:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: ./shipping/Dockerfile
+    image: 26cm/shipping-job:latest
+    environment:
+      - DB_URL=${ORDER_DB_URL}
+      - DB_PASSWORD=${DB_PASSWORD}

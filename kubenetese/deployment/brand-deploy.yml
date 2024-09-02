@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brand-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brand-app
+  template:
+    metadata:
+      labels:
+        app: brand-app
+    spec:
+      containers:
+        - name: brand-container
+          image: 26cm/brand:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+
+
+
+  

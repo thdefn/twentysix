@@ -1,0 +1,60 @@
+server:
+  port: 8083
+spring:
+  data:
+    mongodb:
+      uri: ${DB_URL}
+    redis:
+      password: ${REDIS_PASSWORD}
+      timeout: 600ms
+      host: ${REDIS_HOST}
+  cloud:
+    function:
+      definition: order;order-failed;order-cancelled
+    stream:
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS}
+      bindings:
+        order-in-0:
+          destination: order-events
+          group: product-group
+          content-type: application/json
+        stock-check-failed-out-0:
+          destination: stock-check-failed-events
+          content-type: application/json
+        order-failed-in-0:
+          destination: order-failed-events
+          group: product-group
+          content-type: application/json
+        order-cancelled-in-0:
+          destination: order-cancelled-events
+          group: product-group
+          content-type: application/json
+  cache:
+    type: caffeine
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET_NAME}
+    region:
+      static: ap-northeast-2
+      auto: false
+    credentials:
+      accessKey: ${S3_ACCESS_KEY}
+      secretKey: ${S3_SECRET_KEY}
+    stack:
+      auto: false
+grpc:
+  server:
+    port: 9001
+  client:
+    brand:
+      host: brand-service
+      port: 9002
+
+logging:
+  level:
+    org.springframework.cloud.stream: DEBUG
+
+

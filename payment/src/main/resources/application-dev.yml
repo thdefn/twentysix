@@ -1,0 +1,56 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: root
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+    function:
+      definition: order-cancelled
+    stream:
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS}
+      bindings:
+        payment-finalized-out-0:
+          destination: payment-finalized-events
+          content-type: application/json
+        order-cancelled-in-0:
+          destination: order-cancelled-events
+          group: payment-group
+          content-type: application/json
+        order-failed-out-0:
+          destination: order-failed-events
+          content-type: application/json
+server:
+  port: 8085
+
+payment:
+  url: https://api.tosspayments.com/v1/payments
+  secret: ${TOSS_PAYMENT_SECRET}
+
+grpc:
+  client:
+    order:
+      host: order-service
+      port: 9005
+    product:
+      host: product-service
+      port: 9001
+
+logging:
+  level:
+    feign: DEBUG
+    com.twentysix.payment: DEBUG

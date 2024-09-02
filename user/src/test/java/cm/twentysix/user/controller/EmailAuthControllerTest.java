@@ -118,13 +118,13 @@ class EmailAuthControllerTest {
     @DisplayName("메일 인증 실패_NOT_VALID_EMAIL")
     void verifyEmail_fail_NOT_VALID_EMAIL() throws Exception {
         doThrow(new EmailAuthException(Error.NOT_VALID_EMAIL))
-                .when(emailAuthService).sendAuthEmail(any(), anyString());
+                .when(emailAuthService).verifyEmail(anyString(), anyString());
         mockMvc.perform(get("/users/email-auths/verify")
                         .contentType(MediaType.APPLICATION_JSON)
                         .queryParam("email", "abcde@naver.com")
                         .queryParam("code", "veryverylonglongcode"))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -139,13 +139,13 @@ class EmailAuthControllerTest {
     @DisplayName("메일 인증 실패_EMAIL_VERIFY_CODE_UNMATCHED")
     void verifyEmail_fail_EMAIL_VERIFY_CODE_UNMATCHED() throws Exception {
         doThrow(new EmailAuthException(Error.EMAIL_VERIFY_CODE_UNMATCHED))
-                .when(emailAuthService).sendAuthEmail(any(), anyString());
+                .when(emailAuthService).verifyEmail(anyString(), anyString());
         mockMvc.perform(get("/users/email-auths/verify")
                         .contentType(MediaType.APPLICATION_JSON)
                         .queryParam("email", "abcde@naver.com")
                         .queryParam("code", "veryverylonglongcode"))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -160,13 +160,13 @@ class EmailAuthControllerTest {
     @DisplayName("메일 인증 실패_ALREADY_VERIFIED")
     void verifyEmail_fail_ALREADY_VERIFIED() throws Exception {
         doThrow(new EmailAuthException(Error.ALREADY_VERIFIED))
-                .when(emailAuthService).sendAuthEmail(any(), anyString());
+                .when(emailAuthService).verifyEmail(anyString(), anyString());
         mockMvc.perform(get("/users/email-auths/verify")
                         .contentType(MediaType.APPLICATION_JSON)
                         .queryParam("email", "abcde@naver.com")
                         .queryParam("code", "veryverylonglongcode"))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().is4xxClientError())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

@@ -106,7 +106,12 @@ class EmailAuthControllerTest {
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        relaxedQueryParameters(
+                                parameterWithName("email").description("verification email"),
+                                parameterWithName("code").description("verification code")
+                        )
+                ));
     }
 
     @Test
@@ -122,7 +127,12 @@ class EmailAuthControllerTest {
                 .andExpect(status().isOk())
                 .andDo(document("{methodName}",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())));
+                        preprocessResponse(prettyPrint()),
+                        relaxedQueryParameters(
+                                parameterWithName("email").description("verification email"),
+                                parameterWithName("code").description("verification code")
+                        )
+                ));
     }
 
     @Test

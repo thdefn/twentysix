@@ -14,7 +14,7 @@ import cm.twentysix.product.dto.ProductResponse;
 import cm.twentysix.product.dto.UpdateProductForm;
 import cm.twentysix.product.exception.Error;
 import cm.twentysix.product.exception.ProductException;
-import cm.twentysix.product.service.dto.CategoryInfoDto;
+import cm.twentysix.product.dto.CategoryInfoDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

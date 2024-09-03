@@ -1,4 +1,4 @@
-package cm.twentysix.product.service.dto;
+package cm.twentysix.product.dto;
 
 import cm.twentysix.product.domain.repository.vo.CategoryVo;
 import lombok.Builder;

@@ -27,6 +27,7 @@ repositories {
 
 ext {
 	set('springCloudVersion', "2023.0.3")
+	generatedSnippetsDir = file('build/generated-snippets')
 }
 
 dependencies {
@@ -84,13 +85,6 @@ openapi3 {
 	title = 'Order API'
 	version = 'v1'
 	format = 'yaml'
-}
-
-
-
-tasks.named('test') {
-	outputs.dir file('build/generated-snippets')
-	useJUnitPlatform()
 }
 
 tasks.register("prepareKotlinBuildScriptModel") {}

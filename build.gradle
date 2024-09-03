@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(22)
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+
+    tasks.named('test') {
+        useJUnitPlatform()
+        finalizedBy(jacocoTestReport)
+    }
+
+}
+
+
+jacocoTestReport {
+    dependsOn(subprojects.collect { it.tasks.named('test') })
+
+    executionData(subprojects.collect { project ->
+        fileTree(dir: project.layout.buildDirectory.dir("jacoco").get().asFile, includes: ["test.exec"])
+    })
+
+    classDirectories.setFrom(
+            files(subprojects.sourceSets.main.output.classesDirs).collect { dir ->
+                fileTree(dir: dir, include: [
+                        '**/controller/**',
+                        '**/service/**'
+                ], exclude: [
+                        '**/gateway/**',
+                        '**/*Proto$*.class',
+                        '**/proto/**'
+                ])
+            }
+    )
+
+    reports {
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml").get().asFile
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html").get().asFile
+    }
+
+    doLast {
+        println "Execution data files:"
+        executionData.files.each { file ->
+            println "  - ${file.absolutePath}"
+        }
+    }
+}

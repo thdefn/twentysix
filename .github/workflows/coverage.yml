@@ -1,12 +1,10 @@
-name: API-Documentation
+name: report coverage
 
 on:
   push:
     branches:
       - 'develop'
-  pull_request:
-    branches:
-      - '*'
+
 jobs:
   build:
     runs-on: ubuntu-latest

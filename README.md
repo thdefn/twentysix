@@ -7,19 +7,36 @@
 
 <img src="https://github.com/user-attachments/assets/5838f7d5-acb6-459b-8181-6a4c95e50211" width="500">
 
-### 선착순 주문은 _RUNRUN_ 에서❕
+## 선착순 주문은 _RUNRUN_ 에서❕
 
 RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입니다.<br/>
-**높은 트래픽 상황에서도 유저에게 원활한 구매 경험을 제공**하는 것을 목표로 하고 있습니다.
+저희 서비스는 **높은 트래픽 상황에서도 유저에게 원활한 구매 경험을 제공**하는 것을 목표로 하고 있습니다.
+
+#### 1️⃣ 대규모 주문 요청 상황에서 시스템 안정성 확보 
+
+ [**#92: product specific circuit breaker**](https://github.com/thdefn/twentysix/pull/92) <br>
+주문 요청이 폭주되는 상황에서, 시스템의 안정성을 확보하기 위해 상품에 대해 서킷 브레이커를 적용했습니다. <br>
+이를 통해 시스템의 신뢰성과 가용성을 유지하고, 대규모 트래픽 상황에서도 안정적으로 서비스를 제공할 수 있습니다.
+
+
+#### 2️⃣ 주문 서버의 자동 확장을 통한 유연한 대응 
+
+ [**#111: auto scaling using k8s**](https://github.com/thdefn/twentysix/pull/111)  <br>
+대규모 트래픽 상황에 적절히 대응하기 위해 주문 서버에 오토 스케일링을 적용했습니다. <br>
+이를 통해 트래픽이 급증할 때 서버 리소스를 자동으로 확장하여 서비스 중단 없이 안정적인 주문 처리가 가능하도록 했습니다.
+
+
+#### 3️⃣ 동시성 제어를 통한 데이터 무결성 보장
+
+ [**#70: apply distributed lock for inventory update**](https://github.com/thdefn/twentysix/pull/70)  <br>
+다수의 사용자가 동시에 주문을 시도하는 상황에서 데이터의 무결성을 보장하기 위해 분산 락을 적용했습니다. <br>
+이를 통해 경쟁 조건을 방지하고, 정확한 재고 관리와 안정적인 주문 처리가 가능하도록 했습니다.
 
 
 
-### Setup
-`docker-compose -f ./infra/docker-compose-infra.yml up -d`
 
 
-
-### Documents
+## Documents
 
 [**🔗 API Document**](https://thdefn.github.io/twentysix/api-docs.html)
 
@@ -28,7 +45,8 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 [**🔗 Coverage Report**](https://codecov.io/github/thdefn/twentysix)
 
 
-### Technologies Used
+
+## Technologies Used
 
 **Deploy** &nbsp; **|** &nbsp;
 <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-social&logo=kubernetes&logoColor=white">
@@ -79,29 +97,34 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 </details>
 
 
-### User Flow
+## User Flow
 
-<details>
-  <summary><strong>Order Process</strong></summary>
+### Order Flow
 
-<img src="https://github.com/user-attachments/assets/35400f7e-778f-4864-a981-7a82f4972571" alt="order flow" height="650">
+<div style="display: flex; align-items: flex-start; gap: 20px;">
+    <img src="https://github.com/user-attachments/assets/35400f7e-778f-4864-a981-7a82f4972571" alt="order flow" height="400" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <div style="max-width: 500px;">
+        <p style="margin: 0; font-size: 1.1em; line-height: 1.6;">
+            <strong>주문 실패</strong><br>
+            1. 주문 시, 상품에 대한 재고를 체크합니다.<br>
+            2. 재고가 부족하다면 유저는 주문 실패 응답을 받습니다.<br><br>
+            <strong>결제 실패</strong><br>
+            1. 결제 시, 상품에 대한 재고를 체크합니다.<br>
+            2. 재고가 부족하다면 유저는 결제 실패 응답을 받습니다.<br>
+            3. PG사에 결제를 요청합니다.<br>
+            4. 잔액 부족 등 고객 귀책으로 인한 최종 결제 실패 시 유저는 결제 실패 응답을 받습니다. <br>
+        </p>
+    </div>
+</div>
 
-<strong>주문 실패</strong>
-- 유저는 주문 단계에서, 상품의 재고가 부족하다면 주문 실패 응답을 받습니다.
-</br>
-
-<strong>결제 실패</strong>
-- 유저는 결제 단계에서, 상품의 재고가 부족하다면 결제 실패 응답을 받습니다.
-- 유저는 결제 단계에서, PG 사에 결제 요청 이후 잔액 부족 등으로 인한 결제 실패 응답을 받습니다.
-
-</details>
 
 
 
 
 
-### Convention
-#### Branch Strategy
+
+## Convention
+### Branch Strategy
 ```
 main
 ├─hotfix
@@ -109,15 +132,15 @@ main
     └─ DOMAIN/이슈번호
 ```
 
-#### Commit Convention
-**Commit Message**
+### Commit Convention
+#### Commit Message
 ```javascript
 <type>: <description>
 
 [optional body]
 ```
 
-**Commit Type**
+#### Commit Type
 
 | type      | 설명                                               |
 |-----------|--------------------------------------------------|

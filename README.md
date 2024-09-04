@@ -93,6 +93,13 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 ## Architecture
 
+### Kubernetese Architecture Diagram
+
+![k8s-architecture](https://github.com/user-attachments/assets/880d3dab-2f4a-4481-b90e-c83fe6b5a48c)
+
+### Infra Structure Diagram
+
+
 ### Directory Structure
 ```
  ┣ 📂 .github
@@ -142,8 +149,6 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 - `📜 settings.gradle` : 하위 모듈을 선언합니다.
 - `📜 .gitignore` : git 에 올라가지 않아야 할 파일을 정의합니다.
 - `📜 docker-compose-load-test.yml` : 부하 테스트 환경을 위한 서버 컨테이너와 모니터링 도구 등을 정의합니다.
-
-### Infra Structure
 
 
 ## User Flow

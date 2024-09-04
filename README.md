@@ -4,7 +4,7 @@
 ![pass the coverage](https://github.com/thdefn/twentysix/actions/workflows/coverage.yml/badge.svg)
 [![codecov](https://codecov.io/github/thdefn/twentysix/branch/DEVELOP/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
 
----
+
 <img src="https://github.com/user-attachments/assets/5838f7d5-acb6-459b-8181-6a4c95e50211" width="500">
 
 ### 선착순 주문은 _RUNRUN_ 에서❕
@@ -14,12 +14,10 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 
 
-
 ### Setup
 `docker-compose -f ./infra/docker-compose-infra.yml up -d`
 
 
----
 
 ### Documents
 
@@ -29,7 +27,6 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 [**🔗 Coverage Report**](https://codecov.io/github/thdefn/twentysix)
 
----
 
 ### Technologies Used
 
@@ -81,7 +78,6 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 </details>
 
----
 
 ### User Flow
 
@@ -101,7 +97,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 </details>
 
 
----
+
 
 
 ### Convention

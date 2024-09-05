@@ -99,7 +99,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 
 ### Kubernetese Architecture Diagram
-<img width="1030" alt="k8s-architecture" src="https://github.com/user-attachments/assets/a7a22d29-fc87-4e2a-b043-eae31287565d">
+<img width="1030" alt="k8s-architecture" src="https://github.com/user-attachments/assets/23c8fa7b-d87d-4ac5-ac09-f9997e4c96b4">
 
 ### Directory Structure
 ```
@@ -177,6 +177,12 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 </table>
 
 
+<details>
+  <summary><strong>Sequence Diagram</strong></summary>
+
+![sequence-diagram](https://github.com/user-attachments/assets/cad0d746-3eaa-4f6f-a051-94fd8d002bc5)
+
+</details>
 
 
 

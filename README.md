@@ -77,7 +77,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 
 <details>
-  <summary><strong>Version Detail</strong> as of 2024.09.04 </summary>
+  <summary><strong>Version Detail</strong></summary>
 
 - Java `22`
 - Python `3.9`
@@ -184,10 +184,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 
 
-![sequence-diagram](https://github.com/user-attachments/assets/72cc2725-1c74-4abc-b8fd-aa7a36cef08e)
-
-
-
+![sequence-diagram](https://github.com/user-attachments/assets/62dc0123-e472-4d12-8264-67f79c737528)
 
 ## Convention
 ### Branch Strategy

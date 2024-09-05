@@ -156,6 +156,8 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 ### Order Flow
 
+#### Flow Chart
+
 <table>
   <tr>
     <td>
@@ -176,14 +178,11 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
   </tr>
 </table>
 
+#### Sequence Diagram
 
-<details>
-  <summary><strong>Sequence Diagram</strong></summary>
+<br>
 
-![sequence-diagram](https://github.com/user-attachments/assets/cad0d746-3eaa-4f6f-a051-94fd8d002bc5)
-
-</details>
-
+![sequence-diagram](https://github.com/user-attachments/assets/18d7b8a7-3261-4535-9a9c-ee4c6aeb5410)
 
 
 

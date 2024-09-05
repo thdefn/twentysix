@@ -2,7 +2,7 @@
 
 &nbsp;&nbsp;
 ![pass the coverage](https://github.com/thdefn/twentysix/actions/workflows/coverage.yml/badge.svg)
-[![codecov](https://codecov.io/github/thdefn/twentysix/branch/DEVELOP/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
+[![codecov](https://codecov.io/github/thdefn/twentysix/branch/README%2F112/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
 
 
 <img src="https://github.com/user-attachments/assets/5838f7d5-acb6-459b-8181-6a4c95e50211" width="500">
@@ -95,9 +95,12 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 ### Kubernetese Architecture Diagram
 
-![k8s-architecture](https://github.com/user-attachments/assets/880d3dab-2f4a-4481-b90e-c83fe6b5a48c)
+<img width="936" alt="kube-structure" src="https://github.com/user-attachments/assets/b43c9b9a-da55-473f-a440-119502aee6dd">
+
 
 ### Infra Structure Diagram
+
+<img width="1030" alt="infra-structure" src="https://github.com/user-attachments/assets/d3e48aa7-b5d0-415a-8e6a-6346acfb3b8c">
 
 
 ### Directory Structure
@@ -117,7 +120,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
  ┣ 📂 product
  ┣ 📂 cron-jobs
  ┣ 📂 kubernetese
- ┃ ┃ 📂 autosacler
+ ┃ ┃ 📂 autoscaler
  ┃ ┣ 📂 cronjob
  ┃ ┣ 📂 deployment
  ┃ ┣ 📂 ingress

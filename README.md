@@ -161,7 +161,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 <table>
   <tr>
     <td>
-      <img src="https://github.com/user-attachments/assets/35400f7e-778f-4864-a981-7a82f4972571" alt="order flow" height="550" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+       <img src="https://github.com/user-attachments/assets/e5311023-dffd-49b7-bc0c-bd68d4989dca" alt="order flow" height="550" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
     </td>
     <td>
       <p style="margin: 0; font-size: 1.1em; line-height: 1.6;">
@@ -178,11 +178,13 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
   </tr>
 </table>
 
-#### Sequence Diagram
-
 <br>
 
-![sequence-diagram](https://github.com/user-attachments/assets/18d7b8a7-3261-4535-9a9c-ee4c6aeb5410)
+#### Sequence Diagram
+
+
+
+![sequence-diagram](https://github.com/user-attachments/assets/72cc2725-1c74-4abc-b8fd-aa7a36cef08e)
 
 
 
@@ -206,7 +208,7 @@ main
 
 #### Commit Type
 
-| type      | 설명                                               |
+| type      | description                                               |
 |-----------|--------------------------------------------------|
 | `feat`    | A new feature                                    |
 | `test`    | Adding new test or making changes to existing test |

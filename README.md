@@ -29,8 +29,6 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 
 
-
-
 ## Documents
 
 [**🔗 API Document**](https://thdefn.github.io/twentysix/api-docs.html)
@@ -90,6 +88,17 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 - gRPC `1.66.0`
 
 </details>
+
+
+## Technical Decision
+
+### Circuit Breaker
+
+#### Before Applying Circuit Breaker
+<img width="670" alt="before-circuit" src="https://github.com/user-attachments/assets/f0de403b-4ed9-4358-8c73-411e9b8b4475">
+
+#### After Applying Circuit Breaker
+<img width="670" alt="after-circuit" src="https://github.com/user-attachments/assets/3885dc07-496e-445e-98c0-9724fb8cb016">
 
 ## Architecture
 
@@ -181,7 +190,6 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 <br>
 
 #### Sequence Diagram
-
 
 
 ![sequence-diagram](https://github.com/user-attachments/assets/62dc0123-e472-4d12-8264-67f79c737528)

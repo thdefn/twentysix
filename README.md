@@ -4,7 +4,7 @@
 ![Last commit](https://img.shields.io/github/last-commit/thdefn/twentysix?color=9437FF)
 ![pass the coverage](https://github.com/thdefn/twentysix/actions/workflows/coverage.yml/badge.svg)
 [![codecov](https://codecov.io/github/thdefn/twentysix/branch/README%2F112/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
-![README Updated At](https://img.shields.io/badge/README%20updated%20at-09%2006%2C%202024-black)
+![README Updated At](https://img.shields.io/badge/README%20updated%20at-2024%2009%2006-black)
 
 
 <img src="https://github.com/user-attachments/assets/5838f7d5-acb6-459b-8181-6a4c95e50211" width="500">
@@ -92,15 +92,38 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 </details>
 
 
-## Technical Decision
+## Performance Optimization
 
 ### Circuit Breaker
 
+서킷 브레이커를 도입해 시스템의 안정성을 향상시키고 서버 리소스를 절약했습니다.
+
+<img alt="test-case" src="https://github.com/user-attachments/assets/b22ac07d-570d-4e0f-a9f7-d121bc2188cc">
+
+- 10,000명의 사용자와 초당 300명의 유저를 가정한 고부하 환경에서 성능 테스트를 진행했습니다.
+- 테스트는 주문 요청, 결제 페이지 진입, 결제 요청의 순서로 수행되었습니다.
+
 #### Before Applying Circuit Breaker
-<img alt="before-circuit" src="https://github.com/user-attachments/assets/dea4e49c-c30c-47f1-bdbd-524e13b55692">
+
+<img alt="before-circuit" src="https://github.com/user-attachments/assets/63c97bb4-44fc-4316-9688-b53b4f359f44">
+
+- 서킷 브레이커 도입 전에는 대규모 사용자가 몰릴수록 주문 서버에서 커넥션 에러가 빈번하게 발생했습니다.
+  - 전체 에러 중 67%가 처리되지 않은 커넥션 에러였으며, 최대 응답 시간은 약 70초에 달했습니다.
+  - 주문 서버의 병목 현상으로 인해, 주문 서버와 연동된 결제 API의 응답 시간도 지연되었습니다.
+
 
 #### After Applying Circuit Breaker
-<img alt="after-circuit" src="https://github.com/user-attachments/assets/553aab57-96ad-4e8b-86de-0a629bdca5f1">
+<img alt="after-circuit" src="https://github.com/user-attachments/assets/63f1438f-c106-4065-9cc6-650713174f70">
+
+- 상품별 서킷 브레이커를 도입하여, 특정 상품 주문에서 10%의 에러가 발생하면 30초 동안 해당 상품을 포함한 주문에 대해 즉시 에러 응답을 하도록 설정했습니다. 
+  - 메인 주문 로직 이전에 서킷 브레이커가 작동해 빠르게 오류를 감지하고, 불필요한 서버 자원 소모를 줄였습니다.
+- 그 결과 커넥션 에러는 1% 이하로 감소했으며, 최대 응답 시간도 30초 이내로 줄어 서킷 브레이커 도입 전보다 50% 향상되었습니다.
+
+## Technical Decision
+
+### Distributed Lock
+
+### Caching
 
 ## Architecture
 

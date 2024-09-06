@@ -1,8 +1,10 @@
 # &nbsp; _RUNRUN_ <a><img src="https://github.com/user-attachments/assets/6fc35551-08c0-4e7e-a76c-d18145f9d214" align="left" width="100"></a>
 
 &nbsp;&nbsp;
+![Last commit](https://img.shields.io/github/last-commit/thdefn/twentysix?color=9437FF)
 ![pass the coverage](https://github.com/thdefn/twentysix/actions/workflows/coverage.yml/badge.svg)
 [![codecov](https://codecov.io/github/thdefn/twentysix/branch/README%2F112/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
+![README Updated At](https://img.shields.io/badge/README%20updated%20at-09%2006%2C%202024-black)
 
 
 <img src="https://github.com/user-attachments/assets/5838f7d5-acb6-459b-8181-6a4c95e50211" width="500">
@@ -95,10 +97,10 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 ### Circuit Breaker
 
 #### Before Applying Circuit Breaker
-<img width="670" alt="before-circuit" src="https://github.com/user-attachments/assets/f0de403b-4ed9-4358-8c73-411e9b8b4475">
+<img alt="before-circuit" src="https://github.com/user-attachments/assets/dea4e49c-c30c-47f1-bdbd-524e13b55692">
 
 #### After Applying Circuit Breaker
-<img width="670" alt="after-circuit" src="https://github.com/user-attachments/assets/3885dc07-496e-445e-98c0-9724fb8cb016">
+<img alt="after-circuit" src="https://github.com/user-attachments/assets/553aab57-96ad-4e8b-86de-0a629bdca5f1">
 
 ## Architecture
 

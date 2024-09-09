@@ -1,6 +1,6 @@
 package cm.twentysix.product.domain.model;
 
-import cm.twentysix.product.service.dto.CategoryInfoDto;
+import cm.twentysix.product.dto.CategoryInfoDto;
 import lombok.Builder;
 import lombok.Getter;
 

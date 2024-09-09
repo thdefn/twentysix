@@ -2,7 +2,7 @@ package cm.twentysix.product.service;
 
 import cm.twentysix.product.domain.repository.CategoryAggregationRepository;
 import cm.twentysix.product.domain.repository.vo.CategoryVo;
-import cm.twentysix.product.service.dto.CategoryInfoDto;
+import cm.twentysix.product.dto.CategoryInfoDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

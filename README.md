@@ -4,7 +4,7 @@
 ![Last commit](https://img.shields.io/github/last-commit/thdefn/twentysix?color=9437FF)
 ![pass the coverage](https://github.com/thdefn/twentysix/actions/workflows/coverage.yml/badge.svg)
 [![codecov](https://codecov.io/github/thdefn/twentysix/branch/develop/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
-![README Updated At](https://img.shields.io/badge/README%20updated%20at-2024%2009%2006-black)
+![README Updated At](https://img.shields.io/badge/README%20updated%20at-2024%2009%2009-black)
 
 
 <img src="https://github.com/user-attachments/assets/5838f7d5-acb6-459b-8181-6a4c95e50211" width="500">

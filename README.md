@@ -3,7 +3,7 @@
 &nbsp;&nbsp;
 ![Last commit](https://img.shields.io/github/last-commit/thdefn/twentysix?color=9437FF)
 ![pass the coverage](https://github.com/thdefn/twentysix/actions/workflows/coverage.yml/badge.svg)
-[![codecov](https://codecov.io/github/thdefn/twentysix/branch/README%2F112/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
+[![codecov](https://codecov.io/github/thdefn/twentysix/branch/develop/graph/badge.svg?token=HAYBYM0Y4J)](https://codecov.io/github/thdefn/twentysix)
 ![README Updated At](https://img.shields.io/badge/README%20updated%20at-2024%2009%2006-black)
 
 
@@ -98,8 +98,27 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 <img width="1030" alt="infra-structure" src="https://github.com/user-attachments/assets/5112face-6297-4a6d-aae2-5eefb7da43de">
 
 
+#### 서버 간 통신
+- gRPC를 사용하여 서버 간의 직접 통신을 구현했습니다. gRPC는 높은 성능과 낮은 지연 시간을 제공하여, 서비스 간의 데이터 교환을 신속하고 안정적으로 처리할 수 있습니다.
+- kafka를 활용하여 서버 간의 간접 통신을 구현했습니다. 이를 통해 더 유연한 데이터 처리가 가능해 시스템의 전체적인 효율성을 향상시켰습니다.
+
+#### Redis 글로벌 캐시 노드 사용
+- Redis를 글로벌 캐시 노드로 활용하여, 클러스터 내 모든 노드가 공유하는 캐시를 구현합니다. 이 구조는 스케일링에 적합하며, 모든 노드가 공통된 캐시를 사용함으로써 데이터 일관성을 유지할 수 있습니다.
+
 ### Kubernetese Architecture Diagram
 <img width="1030" alt="k8s-architecture" src="https://github.com/user-attachments/assets/23c8fa7b-d87d-4ac5-ac09-f9997e4c96b4">
+
+
+#### 내외부 트래픽 관리 지점 분리
+- Ingress는 외부 트래픽을 관리하고, 모든 외부 요청을 API 게이트웨이로 전달합니다.
+- API 게이트웨이는 내부 트래픽을 관리하고, 인증과 인가를 중앙에서 처리하여 시스템의 보안과 일관성을 강화합니다.
+  - API 게이트웨이의 고가용성을 보장하기 위해 replica 를 설정하여 장애 발생 시에도 시스템의 접근성을 유지합니다.
+
+#### 오토 스케일링
+- HPA를 활용하여 주문 서버와 게이트웨이 서버의 replica 수를 자동으로 조정합니다. 서버의 부하에 따라 적절히 스케일링하여, 높은 트래픽 상황에서도 안정적으로 대응할 수 있습니다.
+
+#### 배치 처리
+- CronJob을 활용하여 정기적인 배치 작업을 자동화했습니다. 설정된 시간과 주기에 따라 자동으로 실행되어 데이터 처리 작업을 효율적으로 관리하고, 시스템 운영의 안정성을 높입니다.
 
 ### Directory Structure
 ```
@@ -183,6 +202,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 ## Technical Decision
 
 ### Distributed Lock : Redisson Lock
+<br>
 
 |               | **Redis Custom Lock**                                                      | **Redisson Lock**                                  | **Redis의 싱글 스레드 특성 활용**                 |
 |---------------|----------------------------------------------------------------------------|----------------------------------------------------|-----------------------------------------|
@@ -195,8 +215,10 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 - MSA 환경에서 노드가 확장될 때, 락 메커니즘을 확장할 수 있어야 합니다.
 - 따라서 네트워크 오버헤드가 적고, 클러스터 환경에서도 안정적으로 동작할 수 있는 Redisson 방식을 선택했습니다.
 
+<br><br>
 
 ### Direct Messaging : gRPC
+<br>
 
 |        | **gRPC**                                      | **HTTP**               |
 |--------|-----------------------------------------------|------------------------|
@@ -208,7 +230,7 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
   - 각 도메인 간 데이터 교환이 빈번하게 이루어지기 때문에, 통신이 느리면 전체 시스템의 응답 시간이 지연될 수 있습니다.
 - 따라서 도입에는 러닝 커브가 있지만, 높은 성능과 낮은 지연 시간을 충족할 수 있는 gRPC를 선택했습니다.
 
-
+<br><br>
 
 ## User Flow
 
@@ -243,32 +265,3 @@ RUNRUN 은 상품에 대한 선착순 구매 기능을 지원하는 서비스입
 
 ![sequence-diagram](https://github.com/user-attachments/assets/62dc0123-e472-4d12-8264-67f79c737528)
 
-## Convention
-### Branch Strategy
-```
-main
-├─hotfix
-└─ develop (default)
-    └─ DOMAIN/이슈번호
-```
-
-### Commit Convention
-#### Commit Message
-```javascript
-<type>: <description>
-
-[optional body]
-```
-
-#### Commit Type
-
-| type      | description                                               |
-|-----------|--------------------------------------------------|
-| `feat`    | A new feature                                    |
-| `test`    | Adding new test or making changes to existing test |
-| `fix`     | A bug fix                                        |
-| `perf`    | A code that improves performance                 |
-| `docs`    | Documentation a related changes                  |
-| `refactor` | Changes for refactoring                      |
-| `build`   | Changes related to building the code             |
-| `chore`   | Changes that do not affect the external user     |

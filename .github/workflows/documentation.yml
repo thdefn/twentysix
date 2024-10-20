@@ -23,6 +23,7 @@ jobs:
         with:
           website: oracle.com
           release: 22
+          version: 22.0.2
 
       - name: get order API doc
         env:
